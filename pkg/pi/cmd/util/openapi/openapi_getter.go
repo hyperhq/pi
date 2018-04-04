@@ -20,6 +20,7 @@ import (
 	"sync"
 
 	"github.com/hyperhq/client-go/discovery"
+	"github.com/googleapis/gnostic/OpenAPIv2"
 )
 
 // synchronizedOpenAPIGetter fetches the openapi schema once and then caches it in memory
@@ -51,12 +52,8 @@ func NewOpenAPIGetter(openAPIClient discovery.OpenAPISchemaInterface) Getter {
 // Resources implements Getter
 func (g *synchronizedOpenAPIGetter) Get() (Resources, error) {
 	g.Do(func() {
-		s, err := g.openAPIClient.OpenAPISchema()
-		if err != nil {
-			g.err = err
-			return
-		}
-
+		//s, err := g.openAPIClient.OpenAPISchema()
+		s := &openapi_v2.Document{}
 		g.openAPISchema, g.err = NewOpenAPIData(s)
 	})
 
