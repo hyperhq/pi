@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/hyperhq/client-go/tools/clientcmd"
+	cmdconfig "github.com/hyperhq/pi/pkg/pi/cmd/config"
 	"github.com/hyperhq/pi/pkg/pi/cmd/resource"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
@@ -254,6 +256,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 	}
 
 	cmds.AddCommand(NewCmdOptions(out))
+	cmds.AddCommand(cmdconfig.NewCmdConfig(clientcmd.NewDefaultPathOptions(), out, err))
 	return cmds
 }
 

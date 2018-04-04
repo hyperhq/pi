@@ -30,18 +30,18 @@ import (
 	"github.com/golang/glog"
 	"github.com/imdario/mergo"
 
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	restclient "github.com/hyperhq/client-go/rest"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
 	clientcmdlatest "github.com/hyperhq/client-go/tools/clientcmd/api/latest"
 	"github.com/hyperhq/client-go/util/homedir"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 )
 
 const (
-	RecommendedConfigPathFlag   = "kubeconfig"
-	RecommendedConfigPathEnvVar = "KUBECONFIG"
+	RecommendedConfigPathFlag   = "piconfig"
+	RecommendedConfigPathEnvVar = "PICONFIG"
 	RecommendedHomeDir          = ".pi"
 	RecommendedFileName         = "config"
 	RecommendedSchemaName       = "schema"
