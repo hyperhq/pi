@@ -3278,7 +3278,7 @@ func autoConvert_core_PersistentVolumeSource_To_v1_PersistentVolumeSource(in *co
 	out.RBD = (*v1.RBDPersistentVolumeSource)(unsafe.Pointer(in.RBD))
 	out.Quobyte = (*v1.QuobyteVolumeSource)(unsafe.Pointer(in.Quobyte))
 	out.ISCSI = (*v1.ISCSIPersistentVolumeSource)(unsafe.Pointer(in.ISCSI))
-	//out.FlexVolume = (*v1.FlexVolumeSource)(unsafe.Pointer(in.FlexVolume))
+	out.FlexVolume = (*v1.FlexVolumeSource)(unsafe.Pointer(in.FlexVolume))
 	out.Cinder = (*v1.CinderVolumeSource)(unsafe.Pointer(in.Cinder))
 	out.CephFS = (*v1.CephFSPersistentVolumeSource)(unsafe.Pointer(in.CephFS))
 	out.FC = (*v1.FCVolumeSource)(unsafe.Pointer(in.FC))
