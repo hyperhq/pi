@@ -26,13 +26,15 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
+	restclientwatch "github.com/hyperhq/client-go/rest/watch"
+	"github.com/hyperhq/client-go/tools/metrics"
+	"github.com/hyperhq/client-go/util/flowcontrol"
 	"github.com/hyperhq/hyper-api/signature"
 
 	"github.com/golang/glog"
@@ -44,9 +46,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer/streaming"
 	"k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/apimachinery/pkg/watch"
-	restclientwatch "github.com/hyperhq/client-go/rest/watch"
-	"github.com/hyperhq/client-go/tools/metrics"
-	"github.com/hyperhq/client-go/util/flowcontrol"
 )
 
 var (
@@ -112,18 +111,23 @@ type Request struct {
 
 	backoffMgr BackoffManager
 	throttle   flowcontrol.RateLimiter
+
+	credential CredentialConfig
 }
 
 // NewRequest creates a new request helper object for accessing runtime.Objects on a server.
-func NewRequest(client HTTPClient, verb string, baseURL *url.URL, versionedAPIPath string, content ContentConfig, serializers Serializers, backoff BackoffManager, throttle flowcontrol.RateLimiter) *Request {
+func NewRequest(client HTTPClient, verb string, baseURL *url.URL, versionedAPIPath string, credential CredentialConfig, content ContentConfig, serializers Serializers, backoff BackoffManager, throttle flowcontrol.RateLimiter) *Request {
 	if backoff == nil {
 		glog.V(2).Infof("Not implementing request backoff strategy.")
 		backoff = &NoBackoff{}
 	}
-
 	pathPrefix := "/"
 	if baseURL != nil {
 		pathPrefix = path.Join(pathPrefix, baseURL.Path)
+	}
+	if strings.Contains(baseURL.Host, DefaultDomain) {
+		baseURL.Host = strings.Replace(baseURL.Host, "*", credential.Region, 1)
+		glog.V(4).Infof("replace default domain to %v", baseURL.Host)
 	}
 	r := &Request{
 		client:      client,
@@ -134,6 +138,8 @@ func NewRequest(client HTTPClient, verb string, baseURL *url.URL, versionedAPIPa
 		serializers: serializers,
 		backoffMgr:  backoff,
 		throttle:    throttle,
+		//for hyper
+		credential: credential,
 	}
 	switch {
 	case len(content.AcceptContentTypes) > 0:
@@ -507,8 +513,8 @@ func (r *Request) Watch() (watch.Interface, error) {
 	req.Header = r.headers
 
 	//patch for hyper: calculate sign4 for apirouter
-	signature.Sign4(os.Getenv("HYPER_ACCESS_KEY"), os.Getenv("HYPER_SECRET_KEY"), req, os.Getenv("HYPER_REGION"))
-	if glog.V(8) {
+	signature.Sign4(r.credential.AccessKey, r.credential.SecretKey, req, r.credential.Region)
+	if glog.V(7) {
 		GenerateCURL(req)
 	}
 
@@ -586,8 +592,8 @@ func (r *Request) Stream() (io.ReadCloser, error) {
 	req.Header = r.headers
 
 	//patch for hyper: calculate sign4 for apirouter
-	signature.Sign4(os.Getenv("HYPER_ACCESS_KEY"), os.Getenv("HYPER_SECRET_KEY"), req, os.Getenv("HYPER_REGION"))
-	if glog.V(8) {
+	signature.Sign4(r.credential.AccessKey, r.credential.SecretKey, req, r.credential.Region)
+	if glog.V(7) {
 		GenerateCURL(req)
 	}
 
@@ -671,8 +677,8 @@ func (r *Request) request(fn func(*http.Request, *http.Response)) error {
 		req.Header = r.headers
 
 		//patch for hyper: calculate sign4 for apirouter
-		signature.Sign4(os.Getenv("HYPER_ACCESS_KEY"), os.Getenv("HYPER_SECRET_KEY"), req, os.Getenv("HYPER_REGION"))
-		if glog.V(8) {
+		signature.Sign4(r.credential.AccessKey, r.credential.SecretKey, req, r.credential.Region)
+		if glog.V(7) {
 			GenerateCURL(req)
 		}
 

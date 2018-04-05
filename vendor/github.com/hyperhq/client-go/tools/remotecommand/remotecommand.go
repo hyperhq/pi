@@ -21,16 +21,14 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 
+	restclient "github.com/hyperhq/client-go/rest"
+	spdy "github.com/hyperhq/client-go/transport/spdy"
 	"github.com/hyperhq/hyper-api/signature"
 
 	"github.com/golang/glog"
-
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/apimachinery/pkg/util/remotecommand"
-	restclient "github.com/hyperhq/client-go/rest"
-	spdy "github.com/hyperhq/client-go/transport/spdy"
 )
 
 // StreamOptions holds information pertaining to the current streaming session: supported stream
@@ -69,6 +67,11 @@ type streamExecutor struct {
 	method    string
 	url       *url.URL
 	protocols []string
+
+	//for hyper
+	region    string
+	accessKey string
+	secretKey string
 }
 
 // NewSPDYExecutor connects to the provided server and upgrades the connection to
@@ -115,8 +118,8 @@ func (e *streamExecutor) Stream(options StreamOptions) error {
 	}
 
 	//patch for hyper: calculate sign4 for apirouter
-	signature.Sign4(os.Getenv("HYPER_ACCESS_KEY"), os.Getenv("HYPER_SECRET_KEY"), req, os.Getenv("HYPER_REGION"))
-	if glog.V(8) {
+	signature.Sign4(e.accessKey, e.secretKey, req, e.region)
+	if glog.V(7) {
 		restclient.GenerateCURL(req)
 	}
 

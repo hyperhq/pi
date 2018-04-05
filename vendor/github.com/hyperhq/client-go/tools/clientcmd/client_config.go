@@ -24,16 +24,21 @@ import (
 	"os"
 	"strings"
 
-	"github.com/golang/glog"
-	"github.com/imdario/mergo"
-
-	"k8s.io/api/core/v1"
 	restclient "github.com/hyperhq/client-go/rest"
 	clientauth "github.com/hyperhq/client-go/tools/auth"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
+
+	"github.com/golang/glog"
+	"github.com/imdario/mergo"
+	"k8s.io/api/core/v1"
 )
 
 var (
+	DefaultServer  = "https://*.hyper.sh:6443"
+	DefaultCluster = "default"
+	DefaultContext = "default"
+	DefaultRegion  = "gcp-us-central1"
+
 	// ClusterDefaults has the same behavior as the old EnvVar and DefaultCluster fields
 	// DEPRECATED will be replaced
 	ClusterDefaults = clientcmdapi.Cluster{Server: getDefaultServer()}
@@ -47,10 +52,11 @@ var (
 // getDefaultServer returns a default setting for DefaultClientConfig
 // DEPRECATED
 func getDefaultServer() string {
-	if server := os.Getenv("KUBERNETES_MASTER"); len(server) > 0 {
+	if server := os.Getenv("HYPER_HOST"); len(server) > 0 {
 		return server
 	}
-	return "http://localhost:8080"
+	//return "http://localhost:8080"
+	return ""
 }
 
 // ClientConfig is used to make it easy to get an api server client
@@ -242,6 +248,19 @@ func (config *DirectClientConfig) getUserIdentificationPartialConfig(configAuthI
 		mergedConfig.AuthConfigPersister = persistAuthConfig
 	}
 
+	//patch for hyper: get credential from config file
+	mergedConfig.TLSClientConfig.Insecure = true
+	if len(configAuthInfo.AccessKey) > 0 || len(configAuthInfo.SecretKey) > 0 {
+		if configAuthInfo.Region == "" {
+			configAuthInfo.Region = DefaultRegion
+		}
+		mergedConfig.CredentialConfig = restclient.CredentialConfig{
+			Region:    configAuthInfo.Region,
+			AccessKey: configAuthInfo.AccessKey,
+			SecretKey: configAuthInfo.SecretKey,
+		}
+	}
+
 	// if there still isn't enough information to authenticate the user, try prompting
 	if !canIdentifyUser(*mergedConfig) && (fallbackReader != nil) {
 		if len(config.promptedCredentials.username) > 0 && len(config.promptedCredentials.password) > 0 {
@@ -274,6 +293,13 @@ func makeUserIdentificationConfig(info clientauth.Info) *restclient.Config {
 	config.CertFile = info.CertFile
 	config.KeyFile = info.KeyFile
 	config.BearerToken = info.BearerToken
+
+	//for hyper
+	config.CredentialConfig = restclient.CredentialConfig{
+		Region:    info.Region,
+		AccessKey: info.AccessKey,
+		SecretKey: info.SecretKey,
+	}
 	return config
 }
 
@@ -291,7 +317,8 @@ func canIdentifyUser(config restclient.Config) bool {
 	return len(config.Username) > 0 ||
 		(len(config.CertFile) > 0 || len(config.CertData) > 0) ||
 		len(config.BearerToken) > 0 ||
-		config.AuthProvider != nil
+		config.AuthProvider != nil ||
+		(len(config.CredentialConfig.AccessKey) > 0 || len(config.CredentialConfig.SecretKey) > 0)
 }
 
 // Namespace implements ClientConfig
@@ -405,7 +432,6 @@ func (config *DirectClientConfig) getContext() (clientcmdapi.Context, error) {
 		return clientcmdapi.Context{}, fmt.Errorf("context %q does not exist", contextName)
 	}
 	mergo.Merge(mergedContext, config.overrides.Context)
-
 	return *mergedContext, nil
 }
 
@@ -415,12 +441,16 @@ func (config *DirectClientConfig) getAuthInfo() (clientcmdapi.AuthInfo, error) {
 	authInfoName, required := config.getAuthInfoName()
 
 	mergedAuthInfo := clientcmdapi.NewAuthInfo()
+
+	//--region, --access-key, --secret-key
+	mergo.Merge(mergedAuthInfo, config.overrides.AuthInfo)
+
+	//config file
 	if configAuthInfo, exists := authInfos[authInfoName]; exists {
 		mergo.Merge(mergedAuthInfo, configAuthInfo)
 	} else if required {
 		return clientcmdapi.AuthInfo{}, fmt.Errorf("auth info %q does not exist", authInfoName)
 	}
-	mergo.Merge(mergedAuthInfo, config.overrides.AuthInfo)
 
 	return *mergedAuthInfo, nil
 }
@@ -431,12 +461,8 @@ func (config *DirectClientConfig) getCluster() (clientcmdapi.Cluster, error) {
 	clusterInfoName, required := config.getClusterName()
 
 	mergedClusterInfo := clientcmdapi.NewCluster()
-	mergo.Merge(mergedClusterInfo, config.overrides.ClusterDefaults)
-	if configClusterInfo, exists := clusterInfos[clusterInfoName]; exists {
-		mergo.Merge(mergedClusterInfo, configClusterInfo)
-	} else if required {
-		return clientcmdapi.Cluster{}, fmt.Errorf("cluster %q does not exist", clusterInfoName)
-	}
+
+	//--server
 	mergo.Merge(mergedClusterInfo, config.overrides.ClusterInfo)
 	// An override of --insecure-skip-tls-verify=true and no accompanying CA/CA data should clear already-set CA/CA data
 	// otherwise, a kubeconfig containing a CA reference would return an error that "CA and insecure-skip-tls-verify couldn't both be set"
@@ -445,6 +471,15 @@ func (config *DirectClientConfig) getCluster() (clientcmdapi.Cluster, error) {
 	if config.overrides.ClusterInfo.InsecureSkipTLSVerify && caLen == 0 && caDataLen == 0 {
 		mergedClusterInfo.CertificateAuthority = ""
 		mergedClusterInfo.CertificateAuthorityData = nil
+	}
+
+	mergo.Merge(mergedClusterInfo, config.overrides.ClusterDefaults)
+
+	//config file
+	if configClusterInfo, exists := clusterInfos[clusterInfoName]; exists {
+		mergo.Merge(mergedClusterInfo, configClusterInfo)
+	} else if required {
+		return clientcmdapi.Cluster{}, fmt.Errorf("cluster %q does not exist", clusterInfoName)
 	}
 
 	return *mergedClusterInfo, nil

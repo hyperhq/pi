@@ -27,21 +27,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/glog"
-
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"github.com/hyperhq/client-go/pkg/version"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
 	certutil "github.com/hyperhq/client-go/util/cert"
 	"github.com/hyperhq/client-go/util/flowcontrol"
+
+	"github.com/golang/glog"
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
 	DefaultQPS   float32 = 5.0
 	DefaultBurst int     = 10
+)
+
+var (
+	DefaultDomain = "*.hyper.sh"
 )
 
 // Config holds the common attributes that can be passed to a Kubernetes client on
@@ -120,6 +124,9 @@ type Config struct {
 	// Version forces a specific version to be used (if registered)
 	// Do we need this?
 	// Version string
+
+	// Server requires Credentials for authentication
+	CredentialConfig
 }
 
 // ImpersonationConfig has all the available impersonation options
@@ -179,6 +186,13 @@ type ContentConfig struct {
 	NegotiatedSerializer runtime.NegotiatedSerializer
 }
 
+//for hyper
+type CredentialConfig struct {
+	Region    string
+	AccessKey string
+	SecretKey string
+}
+
 // RESTClientFor returns a RESTClient that satisfies the requested attributes on a client Config
 // object. Note that a RESTClient may require fields that are optional when initializing a Client.
 // A RESTClient created by this method is generic - it expects to operate on an API that follows
@@ -217,7 +231,7 @@ func RESTClientFor(config *Config) (*RESTClient, error) {
 		}
 	}
 
-	return NewRESTClient(baseURL, versionedAPIPath, config.ContentConfig, qps, burst, config.RateLimiter, httpClient)
+	return NewRESTClient(baseURL, versionedAPIPath, config.CredentialConfig, config.ContentConfig, qps, burst, config.RateLimiter, httpClient)
 }
 
 // UnversionedRESTClientFor is the same as RESTClientFor, except that it allows
@@ -251,7 +265,7 @@ func UnversionedRESTClientFor(config *Config) (*RESTClient, error) {
 		versionConfig.GroupVersion = &v
 	}
 
-	return NewRESTClient(baseURL, versionedAPIPath, versionConfig, config.QPS, config.Burst, config.RateLimiter, httpClient)
+	return NewRESTClient(baseURL, versionedAPIPath, config.CredentialConfig, versionConfig, config.QPS, config.Burst, config.RateLimiter, httpClient)
 }
 
 // SetKubernetesDefaults sets default values on the provided client config for accessing the

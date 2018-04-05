@@ -22,9 +22,9 @@ import (
 
 	"github.com/golang/glog"
 
-	"k8s.io/api/core/v1"
 	restclient "github.com/hyperhq/client-go/rest"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
+	"k8s.io/api/core/v1"
 )
 
 // DeferredLoadingClientConfig is a ClientConfig interface that is backed by a client config loader.
@@ -123,7 +123,6 @@ func (config *DeferredLoadingClientConfig) ClientConfig() (*restclient.Config, e
 		glog.V(4).Infof("Using in-cluster configuration")
 		return config.icc.ClientConfig()
 	}
-
 	// return the result of the merged client config
 	return mergedConfig, err
 }

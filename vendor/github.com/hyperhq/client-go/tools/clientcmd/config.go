@@ -24,10 +24,10 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/golang/glog"
-
 	restclient "github.com/hyperhq/client-go/rest"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
+
+	"github.com/golang/glog"
 )
 
 // ConfigAccess is used by subcommands and methods in this package to load and modify the appropriate config files
@@ -258,7 +258,6 @@ func ModifyConfig(configAccess ConfigAccess, newConfig clientcmdapi.Config, rela
 					return err
 				}
 			}
-
 			if err := WriteToFile(*configToWrite, destinationFile); err != nil {
 				return err
 			}

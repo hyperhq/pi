@@ -29,6 +29,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hyperhq/client-go/discovery"
+	"github.com/hyperhq/client-go/kubernetes"
+	restclient "github.com/hyperhq/client-go/rest"
+	"github.com/hyperhq/client-go/tools/clientcmd"
+	"github.com/hyperhq/client-go/util/homedir"
 	"github.com/hyperhq/pi/pkg/pi"
 	"github.com/hyperhq/pi/pkg/pi/resource"
 
@@ -47,11 +52,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilflag "k8s.io/apiserver/pkg/util/flag"
-	"github.com/hyperhq/client-go/discovery"
-	"github.com/hyperhq/client-go/kubernetes"
-	restclient "github.com/hyperhq/client-go/rest"
-	"github.com/hyperhq/client-go/tools/clientcmd"
-	"github.com/hyperhq/client-go/util/homedir"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 	"k8s.io/kubernetes/pkg/apis/apps"
 	api "k8s.io/kubernetes/pkg/apis/core"
@@ -108,9 +108,6 @@ func (f *discoveryFactory) DiscoveryClient() (discovery.CachedDiscoveryInterface
 	}
 
 	cfg.CacheDir = f.cacheDir
-
-	//patch: InsecureSkipVerify
-	cfg.TLSClientConfig.Insecure = true
 
 	discoveryClient, err := discovery.NewDiscoveryClientForConfig(cfg)
 	if err != nil {

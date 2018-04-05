@@ -81,6 +81,10 @@ type Info struct {
 	KeyFile     string
 	BearerToken string
 	Insecure    *bool
+	//for hyper
+	Region    string
+	AccessKey string
+	SecretKey string
 }
 
 // LoadFromFile parses an Info object from a file path.
@@ -115,11 +119,19 @@ func (info Info) MergeWithConfig(c restclient.Config) (restclient.Config, error)
 	if info.Insecure != nil {
 		config.Insecure = *info.Insecure
 	}
+
+	//for hyper
+	config.CredentialConfig = restclient.CredentialConfig{
+		Region:    info.Region,
+		AccessKey: info.AccessKey,
+		SecretKey: info.SecretKey,
+	}
 	return config, nil
 }
 
 func (info Info) Complete() bool {
 	return len(info.User) > 0 ||
 		len(info.CertFile) > 0 ||
-		len(info.BearerToken) > 0
+		len(info.BearerToken) > 0 ||
+		len(info.AccessKey) > 0 || len(info.SecretKey) > 0
 }

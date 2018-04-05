@@ -58,6 +58,11 @@ type Config struct {
 
 	// Dial specifies the dial function for creating unencrypted TCP connections.
 	Dial func(network, addr string) (net.Conn, error)
+
+	//for hyper
+	Region    string
+	AccessKey string
+	SecretKey string
 }
 
 // ImpersonationConfig has all the available impersonation options
@@ -88,6 +93,10 @@ func (c *Config) HasTokenAuth() bool {
 // HasCertAuth returns whether the configuration has certificate authentication or not.
 func (c *Config) HasCertAuth() bool {
 	return len(c.TLS.CertData) != 0 || len(c.TLS.CertFile) != 0
+}
+
+func (c *Config) HasCredentialAuth() bool {
+	return len(c.AccessKey) != 0 || len(c.SecretKey) != 0
 }
 
 // TLSConfig holds the information needed to set up a TLS transport.

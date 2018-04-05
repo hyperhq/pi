@@ -45,8 +45,10 @@ func HTTPWrappersForConfig(config *Config, rt http.RoundTripper) (http.RoundTrip
 
 	// Set authentication wrappers
 	switch {
-	case config.HasBasicAuth() && config.HasTokenAuth():
-		return nil, fmt.Errorf("username/password or bearer token may be set, but not both")
+	case config.HasBasicAuth() && config.HasTokenAuth() && config.HasCredentialAuth():
+		return nil, fmt.Errorf("accessKey/secretKey, username/password or bearer token may be set, but not both")
+	case config.HasCredentialAuth():
+		rt = NewCredentialAuthRoundTripper(config.Region, config.AccessKey, config.SecretKey, rt)
 	case config.HasTokenAuth():
 		rt = NewBearerAuthRoundTripper(config.BearerToken, rt)
 	case config.HasBasicAuth():
@@ -233,6 +235,37 @@ func (rt *basicAuthRoundTripper) CancelRequest(req *http.Request) {
 }
 
 func (rt *basicAuthRoundTripper) WrappedRoundTripper() http.RoundTripper { return rt.rt }
+
+type credentialAuthRoundTripper struct {
+	region    string
+	accessKey string
+	secretKey string
+	rt        http.RoundTripper
+}
+
+func NewCredentialAuthRoundTripper(region, accessKey, secretKey string, rt http.RoundTripper) http.RoundTripper {
+	return &credentialAuthRoundTripper{region, accessKey, secretKey, rt}
+}
+
+func (rt *credentialAuthRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+
+	if len(req.Header.Get("Authorization")) != 0 {
+		return rt.rt.RoundTrip(req)
+	}
+	req = utilnet.CloneRequest(req)
+
+	return rt.rt.RoundTrip(req)
+}
+
+func (rt *credentialAuthRoundTripper) CancelRequest(req *http.Request) {
+	if canceler, ok := rt.rt.(requestCanceler); ok {
+		canceler.CancelRequest(req)
+	} else {
+		glog.Errorf("CancelRequest not implemented")
+	}
+}
+
+func (rt *credentialAuthRoundTripper) WrappedRoundTripper() http.RoundTripper { return rt.rt }
 
 // These correspond to the headers used in pkg/apis/authentication.  We don't want the package dependency,
 // but you must not change the values.

@@ -122,6 +122,11 @@ type AuthInfo struct {
 	// Extensions holds additional information. This is useful for extenders so that reads and writes don't clobber unknown fields
 	// +optional
 	Extensions map[string]runtime.Object `json:"extensions,omitempty"`
+
+	//patch: extend for hyper
+	Region    string `json:"region,omitempty"`
+	AccessKey string `json:"access-key,omitempty"`
+	SecretKey string `json:"secret-key,omitempty"`
 }
 
 // Context is a tuple of references to a cluster (how do I communicate with a kubernetes cluster), a user (how do I identify myself), and a namespace (what subset of resources do I want to work with)

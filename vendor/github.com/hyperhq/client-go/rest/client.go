@@ -26,10 +26,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hyperhq/client-go/util/flowcontrol"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	"github.com/hyperhq/client-go/util/flowcontrol"
 )
 
 const (
@@ -78,6 +79,9 @@ type RESTClient struct {
 
 	// Set specific behavior of the client.  If not set http.DefaultClient will be used.
 	Client *http.Client
+
+	//for hyper
+	credentialConfig CredentialConfig
 }
 
 type Serializers struct {
@@ -91,7 +95,7 @@ type Serializers struct {
 // NewRESTClient creates a new RESTClient. This client performs generic REST functions
 // such as Get, Put, Post, and Delete on specified paths.  Codec controls encoding and
 // decoding of responses from the server.
-func NewRESTClient(baseURL *url.URL, versionedAPIPath string, config ContentConfig, maxQPS float32, maxBurst int, rateLimiter flowcontrol.RateLimiter, client *http.Client) (*RESTClient, error) {
+func NewRESTClient(baseURL *url.URL, versionedAPIPath string, credentialConfig CredentialConfig, config ContentConfig, maxQPS float32, maxBurst int, rateLimiter flowcontrol.RateLimiter, client *http.Client) (*RESTClient, error) {
 	base := *baseURL
 	if !strings.HasSuffix(base.Path, "/") {
 		base.Path += "/"
@@ -124,6 +128,8 @@ func NewRESTClient(baseURL *url.URL, versionedAPIPath string, config ContentConf
 		createBackoffMgr: readExpBackoffConfig,
 		Throttle:         throttle,
 		Client:           client,
+		//for hyper
+		credentialConfig: credentialConfig,
 	}, nil
 }
 
@@ -222,9 +228,9 @@ func (c *RESTClient) Verb(verb string) *Request {
 	backoff := c.createBackoffMgr()
 
 	if c.Client == nil {
-		return NewRequest(nil, verb, c.base, c.versionedAPIPath, c.contentConfig, c.serializers, backoff, c.Throttle)
+		return NewRequest(nil, verb, c.base, c.versionedAPIPath, c.credentialConfig, c.contentConfig, c.serializers, backoff, c.Throttle)
 	}
-	return NewRequest(c.Client, verb, c.base, c.versionedAPIPath, c.contentConfig, c.serializers, backoff, c.Throttle)
+	return NewRequest(c.Client, verb, c.base, c.versionedAPIPath, c.credentialConfig, c.contentConfig, c.serializers, backoff, c.Throttle)
 }
 
 // Post begins a POST request. Short for c.Verb("POST").

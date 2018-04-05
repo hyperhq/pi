@@ -24,13 +24,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/spf13/cobra"
-
 	"github.com/hyperhq/client-go/tools/clientcmd"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
+
+	"github.com/golang/glog"
+	"github.com/spf13/cobra"
 	"k8s.io/apiserver/pkg/util/flag"
 )
 
@@ -48,12 +49,11 @@ type createAuthInfoOptions struct {
 
 	authProviderArgs         map[string]string
 	authProviderArgsToRemove []string
-}
 
-const (
-	flagAuthProvider    = "auth-provider"
-	flagAuthProviderArg = "auth-provider-arg"
-)
+	region    flag.StringFlag
+	accessKey flag.StringFlag
+	secretKey flag.StringFlag
+}
 
 var (
 	create_authinfo_long = fmt.Sprintf(templates.LongDesc(`
@@ -61,36 +61,17 @@ var (
 
 		Specifying a name that already exists will merge new fields on top of existing values.
 
-		    Client-certificate flags:
-		    --%v=certfile --%v=keyfile
+			Region flags:
+			  --%v=region
 
-		    Bearer token flags:
-			  --%v=bearer_token
+			Credentials flags:
+			  --%v=access_key --%v=secret_key
 
-		    Basic auth flags:
-			  --%v=basic_user --%v=basic_password
-
-		Bearer token and basic auth are mutually exclusive.`), clientcmd.FlagCertFile, clientcmd.FlagKeyFile, clientcmd.FlagBearerToken, clientcmd.FlagUsername, clientcmd.FlagPassword)
+		Bearer token and basic auth are mutually exclusive.`), clientcmd.FlagRegion, clientcmd.FlagAccessKey, clientcmd.FlagSecretKey)
 
 	create_authinfo_example = templates.Examples(`
-		# Set only the "client-key" field on the "cluster-admin"
-		# entry, without touching other values:
-		pi config set-credentials cluster-admin --client-key=~/.pi/admin.key
-
 		# Set basic auth for the "cluster-admin" entry
-		pi config set-credentials cluster-admin --username=admin --password=uXFGweU9l35qcif
-
-		# Embed client certificate data in the "cluster-admin" entry
-		pi config set-credentials cluster-admin --client-certificate=~/.pi/admin.crt --embed-certs=true
-
-		# Enable the Google Compute Platform auth provider for the "cluster-admin" entry
-		pi config set-credentials cluster-admin --auth-provider=gcp
-
-		# Enable the OpenID Connect auth provider for the "cluster-admin" entry with additional args
-		pi config set-credentials cluster-admin --auth-provider=oidc --auth-provider-arg=client-id=foo --auth-provider-arg=client-secret=bar
-
-		# Remove the "client-secret" config value for the OpenID Connect auth provider for the "cluster-admin" entry
-		pi config set-credentials cluster-admin --auth-provider=oidc --auth-provider-arg=client-secret-`)
+		pi config set-credentials user1@test.com --region=gcp-us-central1 --access-key=xxxx --secret-key=xxxxxxxxx`)
 )
 
 func NewCmdConfigSetAuthInfo(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
@@ -100,7 +81,7 @@ func NewCmdConfigSetAuthInfo(out io.Writer, configAccess clientcmd.ConfigAccess)
 
 func newCmdConfigSetAuthInfo(out io.Writer, options *createAuthInfoOptions) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     fmt.Sprintf("set-credentials NAME [--%v=path/to/certfile] [--%v=path/to/keyfile] [--%v=bearer_token] [--%v=basic_user] [--%v=basic_password] [--%v=provider_name] [--%v=key=value]", clientcmd.FlagCertFile, clientcmd.FlagKeyFile, clientcmd.FlagBearerToken, clientcmd.FlagUsername, clientcmd.FlagPassword, flagAuthProvider, flagAuthProviderArg),
+		Use:     fmt.Sprintf("set-credentials NAME [--%v=access_key] [--%v=secret_key] [--%v=region] ", clientcmd.FlagAccessKey, clientcmd.FlagSecretKey, clientcmd.FlagRegion),
 		Short:   i18n.T("Sets a user entry in piconfig"),
 		Long:    create_authinfo_long,
 		Example: create_authinfo_example,
@@ -115,17 +96,9 @@ func newCmdConfigSetAuthInfo(out io.Writer, options *createAuthInfoOptions) *cob
 		},
 	}
 
-	cmd.Flags().Var(&options.clientCertificate, clientcmd.FlagCertFile, "Path to "+clientcmd.FlagCertFile+" file for the user entry in piconfig")
-	cmd.MarkFlagFilename(clientcmd.FlagCertFile)
-	cmd.Flags().Var(&options.clientKey, clientcmd.FlagKeyFile, "Path to "+clientcmd.FlagKeyFile+" file for the user entry in piconfig")
-	cmd.MarkFlagFilename(clientcmd.FlagKeyFile)
-	cmd.Flags().Var(&options.token, clientcmd.FlagBearerToken, clientcmd.FlagBearerToken+" for the user entry in piconfig")
-	cmd.Flags().Var(&options.username, clientcmd.FlagUsername, clientcmd.FlagUsername+" for the user entry in piconfig")
-	cmd.Flags().Var(&options.password, clientcmd.FlagPassword, clientcmd.FlagPassword+" for the user entry in piconfig")
-	cmd.Flags().Var(&options.authProvider, flagAuthProvider, "Auth provider for the user entry in piconfig")
-	cmd.Flags().StringSlice(flagAuthProviderArg, nil, "'key=value' arguments for the auth provider")
-	f := cmd.Flags().VarPF(&options.embedCertData, clientcmd.FlagEmbedCerts, "", "Embed client cert/key for the user entry in piconfig")
-	f.NoOptDefVal = "true"
+	cmd.Flags().Var(&options.accessKey, clientcmd.FlagAccessKey, clientcmd.FlagAccessKey+" for the user entry in piconfig")
+	cmd.Flags().Var(&options.secretKey, clientcmd.FlagSecretKey, clientcmd.FlagSecretKey+" for the user entry in piconfig")
+	cmd.Flags().Var(&options.region, clientcmd.FlagRegion, "region for the user entry in piconfig")
 
 	return cmd
 }
@@ -141,12 +114,33 @@ func (o createAuthInfoOptions) run() error {
 		return err
 	}
 
-	startingStanza, exists := config.AuthInfos[o.name]
+	//default cluster info
+	startingStanzaCluster, exists := config.Clusters[clientcmd.DefaultCluster]
 	if !exists {
-		startingStanza = clientcmdapi.NewAuthInfo()
+		startingStanzaCluster = clientcmdapi.NewCluster()
+		cluster := o.modifyDefaultCluster(*startingStanzaCluster)
+		config.Clusters[clientcmd.DefaultCluster] = &cluster
 	}
-	authInfo := o.modifyAuthInfo(*startingStanza)
+
+	//default context
+	startingStanzaContext, exists := config.Contexts[clientcmd.DefaultContext]
+	if !exists {
+		startingStanzaContext = clientcmdapi.NewContext()
+		context := o.modifyDefaultContext(o.name, *startingStanzaContext)
+		config.Contexts[clientcmd.DefaultContext] = &context
+	}
+
+	//default auth info
+	startingStanzaAuth, exists := config.AuthInfos[o.name]
+	if !exists {
+		startingStanzaAuth = clientcmdapi.NewAuthInfo()
+	}
+	authInfo := o.modifyAuthInfo(*startingStanzaAuth)
 	config.AuthInfos[o.name] = &authInfo
+
+	if config.CurrentContext == "" {
+		config.CurrentContext = "default"
+	}
 
 	if err := clientcmd.ModifyConfig(o.configAccess, *config, true); err != nil {
 		return err
@@ -155,11 +149,35 @@ func (o createAuthInfoOptions) run() error {
 	return nil
 }
 
+// cluster builds a Cluster object from the options
+func (o *createAuthInfoOptions) modifyDefaultCluster(existingCluster clientcmdapi.Cluster) clientcmdapi.Cluster {
+	modifiedCluster := existingCluster
+
+	if modifiedCluster.Server == "" {
+		modifiedCluster.Server = clientcmd.DefaultServer
+	}
+
+	modifiedCluster.InsecureSkipTLSVerify = true
+
+	return modifiedCluster
+}
+
+
+func (o *createAuthInfoOptions) modifyDefaultContext(user string, existingContext clientcmdapi.Context) clientcmdapi.Context {
+	modifiedContext := existingContext
+
+	modifiedContext.Cluster = clientcmd.DefaultCluster
+	modifiedContext.AuthInfo = user
+	modifiedContext.Namespace = "default"
+
+	return modifiedContext
+}
+
 // authInfo builds an AuthInfo object from the options
 func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.AuthInfo) clientcmdapi.AuthInfo {
 	modifiedAuthInfo := existingAuthInfo
 
-	var setToken, setBasic bool
+	var setToken, setBasic, setCredential bool
 
 	if o.clientCertificate.Provided() {
 		certPath := o.clientCertificate.Value()
@@ -212,6 +230,20 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 		}
 	}
 
+	//patch for hyper
+	if o.region.Provided() {
+		modifiedAuthInfo.Region = o.region.Value()
+		setCredential = setCredential || len(modifiedAuthInfo.Region) > 0
+	}
+	if o.accessKey.Provided() {
+		modifiedAuthInfo.AccessKey = o.accessKey.Value()
+		setCredential = setCredential || len(modifiedAuthInfo.AccessKey) > 0
+	}
+	if o.secretKey.Provided() {
+		modifiedAuthInfo.SecretKey = o.secretKey.Value()
+		setCredential = setCredential || len(modifiedAuthInfo.SecretKey) > 0
+	}
+
 	if modifiedAuthInfo.AuthProvider != nil {
 		if modifiedAuthInfo.AuthProvider.Config == nil {
 			modifiedAuthInfo.AuthProvider.Config = make(map[string]string)
@@ -225,7 +257,7 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 	}
 
 	// If any auth info was set, make sure any other existing auth types are cleared
-	if setToken || setBasic {
+	if setToken || setBasic || setCredential {
 		if !setToken {
 			modifiedAuthInfo.Token = ""
 		}
@@ -233,7 +265,17 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 			modifiedAuthInfo.Username = ""
 			modifiedAuthInfo.Password = ""
 		}
+		if !setCredential {
+			modifiedAuthInfo.Region = ""
+			modifiedAuthInfo.AccessKey = ""
+			modifiedAuthInfo.SecretKey = ""
+		}
 	}
+
+	glog.V(4).Infof("new: %v(%v/%v) existingAuthInfo: %v(%v/%v) modifiedAuthInfo: %v(%v/%v)",
+		o.region, o.accessKey, o.secretKey,
+		existingAuthInfo.Region, existingAuthInfo.AccessKey, existingAuthInfo.SecretKey,
+		modifiedAuthInfo.Region, modifiedAuthInfo.AccessKey, modifiedAuthInfo.SecretKey)
 
 	return modifiedAuthInfo
 }
@@ -242,20 +284,6 @@ func (o *createAuthInfoOptions) complete(cmd *cobra.Command, out io.Writer) erro
 	args := cmd.Flags().Args()
 	if len(args) != 1 {
 		return fmt.Errorf("Unexpected args: %v", args)
-	}
-
-	authProviderArgs, err := cmd.Flags().GetStringSlice(flagAuthProviderArg)
-	if err != nil {
-		return fmt.Errorf("Error: %s\n", err)
-	}
-
-	if len(authProviderArgs) > 0 {
-		newPairs, removePairs, err := cmdutil.ParsePairs(authProviderArgs, flagAuthProviderArg, true)
-		if err != nil {
-			return fmt.Errorf("Error: %s\n", err)
-		}
-		o.authProviderArgs = newPairs
-		o.authProviderArgsToRemove = removePairs
 	}
 
 	o.name = args[0]

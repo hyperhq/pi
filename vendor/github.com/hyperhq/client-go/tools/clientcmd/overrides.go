@@ -56,6 +56,9 @@ type AuthOverrideFlags struct {
 	ImpersonateGroups FlagInfo
 	Username          FlagInfo
 	Password          FlagInfo
+	Region            FlagInfo //for hyper
+	AccessKey         FlagInfo
+	SecretKey         FlagInfo
 }
 
 // ContextOverrideFlags holds the flag names to be used for binding command line flags for Cluster objects
@@ -156,6 +159,11 @@ const (
 	FlagUsername         = "username"
 	FlagPassword         = "password"
 	FlagTimeout          = "request-timeout"
+
+	//extend for hyper
+	FlagRegion    = "region"
+	FlagAccessKey = "access-key"
+	FlagSecretKey = "secret-key"
 )
 
 // RecommendedConfigOverrideFlags is a convenience method to return recommended flag names prefixed with a string of your choosing
@@ -180,6 +188,9 @@ func RecommendedAuthOverrideFlags(prefix string) AuthOverrideFlags {
 		ImpersonateGroups: FlagInfo{prefix + FlagImpersonateGroup, "", "", "Group to impersonate for the operation, this flag can be repeated to specify multiple groups."},
 		Username:          FlagInfo{prefix + FlagUsername, "", "", "Username for basic authentication to the API server"},
 		Password:          FlagInfo{prefix + FlagPassword, "", "", "Password for basic authentication to the API server"},
+		Region:            FlagInfo{prefix + FlagRegion, "", DefaultRegion, "Region of the API server"},
+		AccessKey:         FlagInfo{prefix + FlagAccessKey, "", "", "AccessKey authentication to the API server"},
+		SecretKey:         FlagInfo{prefix + FlagSecretKey, "", "", "SecretKey for basic authentication to the API server"},
 	}
 }
 
@@ -212,27 +223,33 @@ func BindOverrideFlags(overrides *ConfigOverrides, flags *pflag.FlagSet, flagNam
 
 // BindAuthInfoFlags is a convenience method to bind the specified flags to their associated variables
 func BindAuthInfoFlags(authInfo *clientcmdapi.AuthInfo, flags *pflag.FlagSet, flagNames AuthOverrideFlags) {
-	flagNames.ClientCertificate.BindStringFlag(flags, &authInfo.ClientCertificate).AddSecretAnnotation(flags)
-	flagNames.ClientKey.BindStringFlag(flags, &authInfo.ClientKey).AddSecretAnnotation(flags)
-	flagNames.Token.BindStringFlag(flags, &authInfo.Token).AddSecretAnnotation(flags)
-	flagNames.Impersonate.BindStringFlag(flags, &authInfo.Impersonate).AddSecretAnnotation(flags)
-	flagNames.ImpersonateGroups.BindStringArrayFlag(flags, &authInfo.ImpersonateGroups).AddSecretAnnotation(flags)
-	flagNames.Username.BindStringFlag(flags, &authInfo.Username).AddSecretAnnotation(flags)
-	flagNames.Password.BindStringFlag(flags, &authInfo.Password).AddSecretAnnotation(flags)
+	//hide in `pi options`
+	//flagNames.ClientCertificate.BindStringFlag(flags, &authInfo.ClientCertificate).AddSecretAnnotation(flags)
+	//flagNames.ClientKey.BindStringFlag(flags, &authInfo.ClientKey).AddSecretAnnotation(flags)
+	//flagNames.Token.BindStringFlag(flags, &authInfo.Token).AddSecretAnnotation(flags)
+	//flagNames.Impersonate.BindStringFlag(flags, &authInfo.Impersonate).AddSecretAnnotation(flags)
+	//flagNames.ImpersonateGroups.BindStringArrayFlag(flags, &authInfo.ImpersonateGroups).AddSecretAnnotation(flags)
+	//flagNames.Username.BindStringFlag(flags, &authInfo.Username).AddSecretAnnotation(flags)
+	//flagNames.Password.BindStringFlag(flags, &authInfo.Password).AddSecretAnnotation(flags)
+
+	//for hyper
+	flagNames.Region.BindStringFlag(flags, &authInfo.Region).AddSecretAnnotation(flags)
+	flagNames.AccessKey.BindStringFlag(flags, &authInfo.AccessKey).AddSecretAnnotation(flags)
+	flagNames.SecretKey.BindStringFlag(flags, &authInfo.SecretKey).AddSecretAnnotation(flags)
 }
 
 // BindClusterFlags is a convenience method to bind the specified flags to their associated variables
 func BindClusterFlags(clusterInfo *clientcmdapi.Cluster, flags *pflag.FlagSet, flagNames ClusterOverrideFlags) {
 	flagNames.APIServer.BindStringFlag(flags, &clusterInfo.Server)
-	flagNames.CertificateAuthority.BindStringFlag(flags, &clusterInfo.CertificateAuthority)
-	flagNames.InsecureSkipTLSVerify.BindBoolFlag(flags, &clusterInfo.InsecureSkipTLSVerify)
+	//flagNames.CertificateAuthority.BindStringFlag(flags, &clusterInfo.CertificateAuthority)
+	//flagNames.InsecureSkipTLSVerify.BindBoolFlag(flags, &clusterInfo.InsecureSkipTLSVerify)
 }
 
 // BindFlags is a convenience method to bind the specified flags to their associated variables
 func BindContextFlags(contextInfo *clientcmdapi.Context, flags *pflag.FlagSet, flagNames ContextOverrideFlags) {
 	flagNames.ClusterName.BindStringFlag(flags, &contextInfo.Cluster)
 	flagNames.AuthInfoName.BindStringFlag(flags, &contextInfo.AuthInfo)
-	flagNames.Namespace.BindTransformingStringFlag(flags, &contextInfo.Namespace, RemoveNamespacesPrefix)
+	//flagNames.Namespace.BindTransformingStringFlag(flags, &contextInfo.Namespace, RemoveNamespacesPrefix)
 }
 
 // RemoveNamespacesPrefix is a transformer that strips "ns/", "namespace/" and "namespaces/" prefixes case-insensitively
