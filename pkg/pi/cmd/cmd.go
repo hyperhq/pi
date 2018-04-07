@@ -193,11 +193,11 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 	// Parent command to which all subcommands are added.
 	cmds := &cobra.Command{
 		Use:   "pi",
-		Short: i18n.T("pi controls the Kubernetes cluster manager"),
+		Short: i18n.T("pi controls the Hyper gcp cluster manager"),
 		Long: templates.LongDesc(`
-      pi controls the Kubernetes cluster manager.
+      pi controls the Hyper gcp cluster manager.
 
-      Find more information at https://github.com/kubernetes/kubernetes.`),
+      Find more information at https://github.com/hyperhq/pi.`),
 		Run: runHelp,
 		BashCompletionFunction: bashCompletionFunc,
 	}
