@@ -23,11 +23,12 @@ import (
 	"path"
 	"strings"
 
+	"github.com/hyperhq/pi/pkg/pi/util"
+	"github.com/hyperhq/pi/pkg/pi/util/hash"
+
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation"
-	"github.com/hyperhq/pi/pkg/pi/util"
-	"github.com/hyperhq/pi/pkg/pi/util/hash"
 )
 
 // SecretGeneratorV1 supports stable generation of an opaque secret

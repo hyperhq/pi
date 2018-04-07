@@ -210,3 +210,36 @@ test-secret-gitlab             kubernetes.io/dockerconfigjson   1         8s
 $ pi delete secrets test-secret-gitlab
 secret "test-secret-gitlab" deleted
 ```
+
+## volume operation example
+
+```
+// create volume
+$ pi create volume vol1 --size=1
+volume vol1(1GB) created in zone gcp-us-central1-b
+
+// list volumes
+$ pi get volumes
++---------------------+-------------------+----------+---------------------------+--------------------+
+|        NAME         |       ZONE        | SIZE(GB) |         CREATEDAT         |        POD         |
++---------------------+-------------------+----------+---------------------------+--------------------+
+| pt-test-performance | gcp-us-central1-b |       50 | 2018-03-26T05:31:05+00:00 | pt-test-flexvolume |
+| vol1                | gcp-us-central1-b |        1 | 2018-04-07T18:26:18+00:00 |                    |
++---------------------+-------------------+----------+---------------------------+--------------------+
+
+// get volume
+$ pi get volumes test-performance -o json
+[
+  {
+    "name": "test-performance",
+    "size": 50,
+    "zone": "gcp-us-central1-b",
+    "pod": "test-flexvolume",
+    "createdAt": "2018-03-26T05:31:05.773Z"
+  }
+
+// delete volume
+$ pi delete volume vol1
+volume vol1 deleted
+
+```

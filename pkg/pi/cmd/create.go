@@ -19,21 +19,21 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"runtime"
 	"strings"
 
-	"github.com/spf13/cobra"
-
-	"net/url"
-
-	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	"github.com/hyperhq/client-go/tools/clientcmd/api/hyper"
 	"github.com/hyperhq/pi/pkg/pi"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/resource"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
+
+	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type CreateOptions struct {
@@ -96,6 +96,10 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	// create subcommands
 	cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
 	cmd.AddCommand(NewCmdCreateService(f, out, errOut))
+
+	// create volume
+	cmd.AddCommand(NewCmdCreateVolume(f, out, errOut))
+
 	return cmd
 }
 
@@ -307,4 +311,26 @@ func RunCreateSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Writer, o
 	}
 
 	return f.PrintObject(cmd, false, mapper, obj, out)
+}
+
+//////////////////////////////////////////////////////
+// create volume subcommand
+func RunCreateVolumeSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Writer, options *CreateSubcommandOptions) error {
+	obj, err := options.StructuredGenerator.StructuredGenerate()
+	if err != nil {
+		return err
+	}
+	opts := obj.(*hyper.VolumeCreateRequest)
+	if cfg, err := f.ClientConfig(); err != nil {
+		return err
+	} else {
+		hyperConn := hyper.NewHyperConn(cfg)
+		volCli := hyper.NewVolumeCli(hyperConn)
+		if _, volCreated, err := volCli.CreateVolume(opts.Name, opts.Zone, fmt.Sprintf("%v", opts.Size)); err != nil {
+			return err
+		} else {
+			fmt.Printf("volume %v(%vGB) created in zone %v\n", volCreated.Name, volCreated.Size, volCreated.Zone)
+		}
+	}
+	return nil
 }

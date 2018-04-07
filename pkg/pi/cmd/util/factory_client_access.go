@@ -497,6 +497,8 @@ const (
 	PodDisruptionBudgetV1GeneratorName      = "poddisruptionbudget/v1beta1"
 	PodDisruptionBudgetV2GeneratorName      = "poddisruptionbudget/v1beta1/v2"
 	PriorityClassV1Alpha1GeneratorName      = "priorityclass/v1alpha1"
+
+	HyperVolumeV1GeneratorName = "hyper-volume/v1"
 )
 
 // DefaultGenerators returns the set of default generators for use in Factory instances
@@ -526,6 +528,10 @@ func DefaultGenerators(cmdName string) map[string]pi.Generator {
 	case "secret-for-tls":
 		generator = map[string]pi.Generator{
 			SecretForTLSV1GeneratorName: pi.SecretForTLSGeneratorV1{},
+		}
+	case "hyper-volume":
+		generator = map[string]pi.Generator{
+			HyperVolumeV1GeneratorName: pi.SecretForTLSGeneratorV1{},
 		}
 	}
 	return generator

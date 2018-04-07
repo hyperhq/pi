@@ -22,9 +22,15 @@ import (
 	"io"
 	"strings"
 
+	"github.com/hyperhq/pi/pkg/pi"
+	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
+	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
+	"github.com/hyperhq/pi/pkg/pi/cmd/util/openapi"
+	"github.com/hyperhq/pi/pkg/pi/resource"
+	"github.com/hyperhq/pi/pkg/pi/util/i18n"
+
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
-
 	kapierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,12 +40,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/watch"
 	api "k8s.io/kubernetes/pkg/apis/core"
-	"github.com/hyperhq/pi/pkg/pi"
-	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
-	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
-	"github.com/hyperhq/pi/pkg/pi/cmd/util/openapi"
-	"github.com/hyperhq/pi/pkg/pi/resource"
-	"github.com/hyperhq/pi/pkg/pi/util/i18n"
 	"k8s.io/kubernetes/pkg/printers"
 	"k8s.io/kubernetes/pkg/util/interrupt"
 )
@@ -168,6 +168,9 @@ func NewCmdGet(f cmdutil.Factory, out io.Writer, errOut io.Writer) *cobra.Comman
 	cmd.Flags().StringSliceVarP(&options.LabelColumns, "label-columns", "L", options.LabelColumns, "Accepts a comma separated list of labels that are going to be presented as columns. Names are case-sensitive. You can also use multiple flag options like -L label1 -L label2...")
 	cmd.Flags().BoolVar(&options.Export, "export", options.Export, "If true, use 'export' for the resources.  Exported resources are stripped of cluster-specific information.")
 	cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, "identifying the resource to get from a server.")
+
+	// get volume
+	cmd.AddCommand(NewCmdGetVolume(f, out, errOut))
 	return cmd
 }
 
