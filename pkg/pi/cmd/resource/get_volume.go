@@ -36,11 +36,11 @@ import (
 // NewCmdGetVolume groups subcommands to get various zones of volumes
 func NewCmdGetVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "volumes NAME [--zone=string]",
+		Use:     "volume NAME [--zone=string]",
 		Short:   i18n.T("list volumes or get a volume"),
 		Long:    volumeLong,
 		Example: volumeExample,
-		Aliases: []string{"volume"},
+		Aliases: []string{"volumes"},
 		Run: func(cmd *cobra.Command, args []string) {
 			err := GetVolumeGeneric(f, cmdOut, cmd, args)
 			cmdutil.CheckErr(err)
@@ -55,22 +55,19 @@ func NewCmdGetVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command
 }
 
 var (
-	volumeLong = templates.LongDesc(i18n.T(`Get a volume.`))
+	volumeLong = templates.LongDesc(i18n.T(`List volumes or get a volume.`))
 
 	volumeExample = templates.Examples(i18n.T(`
-	  # Get a new volume named vol1 with default size and zone
-	  pi get volume vol1
+	  # List volumes
+	  pi get volumes	  
 
-	  # Get a new volume named vol1 with specified size
-	  pi get volume vol1 --size=1
-
-	  # Get a new volume named vol1 with specified size and zone
-	  pi get volume vol1 --size=1 --zone=gcp-us-central1`))
+	  # Get a volume named vol1 with default size and zone
+	  pi get volume vol1`))
 )
 
 // GetVolumeGeneric is the implementation of the get volume generic command
 func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
-	name := NameFromCommandArgs(cmd, args)
+	name := VolNameFromCommandArgs(cmd, args)
 	zone := cmdutil.GetFlagString(cmd, "zone")
 	output := cmdutil.GetFlagString(cmd, "output")
 
@@ -83,20 +80,20 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 			if _, volList, err := volCli.ListVolumes(zone); err != nil {
 				return err
 			} else {
-				PrintResult(output, volList)
+				PrintVolumeResult(output, volList)
 			}
 		} else {
 			if _, vol, err := volCli.GetVolume(name, zone); err != nil {
 				return err
 			} else {
-				PrintResult(output, []hyper.VolumeResponse{*vol})
+				PrintVolumeResult(output, []hyper.VolumeResponse{*vol})
 			}
 		}
 	}
 	return nil
 }
 
-func PrintResult(output string, result []hyper.VolumeResponse) {
+func PrintVolumeResult(output string, result []hyper.VolumeResponse) {
 	if output == "table" || output == "" {
 		data := [][]string{}
 		for _, vol := range result {
@@ -129,7 +126,7 @@ func PrintResult(output string, result []hyper.VolumeResponse) {
 	}
 }
 
-func NameFromCommandArgs(cmd *cobra.Command, args []string) string {
+func VolNameFromCommandArgs(cmd *cobra.Command, args []string) string {
 	if len(args) == 0 {
 		return ""
 	}

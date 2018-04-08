@@ -26,7 +26,6 @@ const (
 	COLUMN  = "|"
 	SPACE   = " "
 	NEWLINE = "\n"
-	BLANK   = ""
 )
 
 const (
@@ -399,8 +398,7 @@ func (t *Table) printHeading() {
 	for x := 0; x < max; x++ {
 		// Check if border is set
 		// Replace with space if not set
-
-		fmt.Fprint(t.out, ConditionString(t.borders.Left, t.pColumn, BLANK))
+		fmt.Fprint(t.out, ConditionString(t.borders.Left, t.pColumn, SPACE))
 
 		for y := 0; y <= end; y++ {
 			v := t.cs[y]
@@ -412,26 +410,15 @@ func (t *Table) printHeading() {
 				h = Title(h)
 			}
 			pad := ConditionString((y == end && !t.borders.Left), SPACE, t.pColumn)
+
 			if is_esc_seq {
-				if y == 0 {
-					fmt.Fprintf(t.out, "%s%s ",
-						format(padFunc(h, SPACE, v), t.headerParams[y]),
-						pad)
-				} else {
-					fmt.Fprintf(t.out, " %s %s",
-						format(padFunc(h, SPACE, v), t.headerParams[y]),
-						pad)
-				}
+				fmt.Fprintf(t.out, " %s %s",
+					format(padFunc(h, SPACE, v),
+						t.headerParams[y]), pad)
 			} else {
-				if y == 0 {
-					fmt.Fprintf(t.out, "%s%s ",
-						padFunc(h, SPACE, v),
-						pad)
-				} else {
-					fmt.Fprintf(t.out, " %s %s",
-						padFunc(h, SPACE, v),
-						pad)
-				}
+				fmt.Fprintf(t.out, " %s %s",
+					padFunc(h, SPACE, v),
+					pad)
 			}
 		}
 		// Next line
@@ -638,15 +625,11 @@ func (t *Table) printRow(columns [][]string, rowIdx int) {
 	//fmt.Println(max, "\n")
 	for x := 0; x < max; x++ {
 		for y := 0; y < total; y++ {
-			pad := SPACE
-			if y == 0 {
-				pad = BLANK
-			}
 
 			// Check if border is set
-			fmt.Fprint(t.out, ConditionString((!t.borders.Left && y == 0), BLANK, t.pColumn))
+			fmt.Fprint(t.out, ConditionString((!t.borders.Left && y == 0), SPACE, t.pColumn))
 
-			fmt.Fprintf(t.out, pad)
+			fmt.Fprintf(t.out, SPACE)
 			str := columns[y][x]
 
 			// Embedding escape sequence with column value
@@ -662,7 +645,7 @@ func (t *Table) printRow(columns [][]string, rowIdx int) {
 			case ALIGN_RIGHT:
 				fmt.Fprintf(t.out, "%s", PadLeft(str, SPACE, t.cs[y]))
 			case ALIGN_LEFT:
-				fmt.Fprintf(t.out, "%s", PadRight(str, pad, t.cs[y]))
+				fmt.Fprintf(t.out, "%s", PadRight(str, SPACE, t.cs[y]))
 			default:
 				if decimal.MatchString(strings.TrimSpace(str)) || percent.MatchString(strings.TrimSpace(str)) {
 					fmt.Fprintf(t.out, "%s", PadLeft(str, SPACE, t.cs[y]))
@@ -682,7 +665,7 @@ func (t *Table) printRow(columns [][]string, rowIdx int) {
 		}
 		// Check if border is set
 		// Replace with space if not set
-		fmt.Fprint(t.out, ConditionString(t.borders.Left, t.pColumn, ""))
+		fmt.Fprint(t.out, ConditionString(t.borders.Left, t.pColumn, SPACE))
 		fmt.Fprint(t.out, t.newLine)
 	}
 

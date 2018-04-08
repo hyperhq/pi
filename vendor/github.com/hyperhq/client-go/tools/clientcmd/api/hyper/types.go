@@ -17,7 +17,6 @@ type VolumeCreateRequest struct {
 func (v *VolumeCreateRequest) GetObjectKind() schema.ObjectKind {
 	return nil
 }
-
 func (v *VolumeCreateRequest) DeepCopyObject() runtime.Object {
 	return nil
 }
@@ -44,8 +43,26 @@ type VolumeResponse struct {
 }
 
 //fip
+type FipAllocateRequest struct {
+	Count int `json:"count"`
+}
+
+func (fa *FipAllocateRequest) GetObjectKind() schema.ObjectKind {
+	return nil
+}
+func (fa *FipAllocateRequest) DeepCopyObject() runtime.Object {
+	return nil
+}
+
 type FipRenameRequest struct {
 	Name string `json:"name"`
+}
+
+func (fn *FipRenameRequest) GetObjectKind() schema.ObjectKind {
+	return nil
+}
+func (fn *FipRenameRequest) DeepCopyObject() runtime.Object {
+	return nil
 }
 
 type FipListResponse struct {

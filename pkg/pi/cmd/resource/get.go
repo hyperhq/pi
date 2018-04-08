@@ -169,8 +169,9 @@ func NewCmdGet(f cmdutil.Factory, out io.Writer, errOut io.Writer) *cobra.Comman
 	cmd.Flags().BoolVar(&options.Export, "export", options.Export, "If true, use 'export' for the resources.  Exported resources are stripped of cluster-specific information.")
 	cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, "identifying the resource to get from a server.")
 
-	// get volume
+	// get volume, fip
 	cmd.AddCommand(NewCmdGetVolume(f, out, errOut))
+	cmd.AddCommand(NewCmdGetFip(f, out, errOut))
 	return cmd
 }
 

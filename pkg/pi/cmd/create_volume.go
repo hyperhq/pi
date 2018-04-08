@@ -30,7 +30,7 @@ import (
 // NewCmdCreateVolume groups subcommands to create various zones of volumes
 func NewCmdCreateVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "volume NAME [--zone=string] [--size=string] [--dry-run]",
+		Use:     "volume NAME [--zone=string] [--size=int]",
 		Short:   i18n.T("Create a volume"),
 		Long:    volumeLong,
 		Example: volumeExample,

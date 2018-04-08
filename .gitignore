@@ -1,3 +1,5 @@
 .idea
 /kubectl
 /pi
+*.tar.gz
+*.zip

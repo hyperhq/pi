@@ -227,6 +227,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 			Commands: []*cobra.Command{
 				resource.NewCmdGet(f, out, err),
 				NewCmdDelete(f, out, err),
+				NewCmdName(f, out, err),
 			},
 		},
 		{

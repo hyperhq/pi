@@ -90,51 +90,75 @@ gcp-us-central1   Ready     <none>    6d                  availabilityZone=gcp-u
 ```
 // create pod via yaml
 $ pi create -f examples/pod/pod-nginx.yaml
-pod "nginx" created
+pod/nginx
 
 
 // list pods
 $ pi get pods
 NAME      READY     STATUS    RESTARTS   AGE
-nginx     0/1       Pending   0          11m
+nginx     1/1       Running   0          12s
 
 
 // get pod
 $ pi get pods nginx -o yaml
 apiVersion: v1
-kind: Pod
-metadata:
-  annotations:
-    id: cb318305b1ad941ea957f65503d222c0139635c28f5c2d0aeae78f853d1c72b3
-    sh_hyper_instancetype: s4
-    zone: gcp-us-central1-b
-  creationTimestamp: 2018-04-07T13:32:57Z
-  labels:
-    app: nginx
-  name: nginx
-  namespace: default
-  uid: 2f062ac9-3a68-11e8-b8a4-42010a000032
-spec:
-  containers:
-  - image: nginx
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      id: a0eabb46fccd616f4a22cbeec8547c344c3a85b7a1b95c1f88c17bb4d27b1267
+      sh_hyper_instancetype: s4
+      zone: gcp-us-central1-b
+    creationTimestamp: 2018-04-08T14:39:52Z
+    labels:
+      app: nginx
     name: nginx
-    resources: {}
-  nodeName: gcp-us-central1
-status:
-  conditions:
-  - lastProbeTime: null
-    lastTransitionTime: 2018-04-07T13:32:57Z
-    message: '0/2 nodes are available: 1 MatchNodeSelector, 1 PodToleratesNodeTaints,
-      2 NodeNotReady.'
-    reason: Unschedulable
-    status: "False"
-    type: PodScheduled
-  phase: Pending
-  qosClass: Burstable
+    namespace: default
+    uid: b2aa75df-3b3a-11e8-b8a4-42010a000032
+  spec:
+    containers:
+    - image: nginx
+      name: nginx
+      resources: {}
+    nodeName: gcp-us-central1
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: 2018-04-08T14:39:52Z
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: 2018-04-08T14:39:56Z
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: 2018-04-08T14:39:52Z
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: hyper://2a077fec7051be72cb9435a7114c66c0d43cf66e7f6667cb34b28eeeea374a54
+      image: sha256:c5c4e8fa2cf7d87545ed017b60a4b71e047e26c4ebc71eb1709d9e5289f9176f
+      imageID: sha256:c5c4e8fa2cf7d87545ed017b60a4b71e047e26c4ebc71eb1709d9e5289f9176f
+      lastState: {}
+      name: nginx
+      ready: true
+      restartCount: 0
+      state:
+        running:
+          startedAt: 2018-04-08T14:39:56Z
+    phase: Running
+    podIP: 10.244.58.203
+    qosClass: Burstable
+    startTime: 2018-04-08T14:39:52Z
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
 
 
 // delete pod
-$ pi delete pod nginx
+$ pi delete pod nginx --now
 pod "nginx" deleted
 ```
 
@@ -143,42 +167,36 @@ pod "nginx" deleted
 ```
 // create service via yaml
 $ pi create -f examples/service/service-clusterip-default.yaml
-service "test-clusterip-default" created
+service/test-clusterip-default
 
 
 // list services
 $ pi get service
 NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
-test-clusterip-default   ClusterIP   10.105.151.85   <none>        8080/     10m
+test-clusterip-default   ClusterIP   10.105.34.132   <none>        8080/     15s
 
 
 // get service
-$ pi get service -o yaml
+$ pi get service clusterip -o yaml
 apiVersion: v1
-items:
-- apiVersion: v1
-  kind: Service
-  metadata:
-    annotations:
-      id: c6bb728fb586a8301c96b6cf7ef01c41698ccd09a1f7d469a653792d8b76227a
-    creationTimestamp: 2018-04-07T13:24:52Z
-    name: test-clusterip-default
-    namespace: default
-    uid: 0e2828f7-3a67-11e8-b8a4-42010a000032
-  spec:
-    clusterIP: 10.105.151.85
-    ports:
-    - port: 8080
-      targetPort: 80
-    selector:
-      app: nginx
-    type: ClusterIP
-  status:
-    loadBalancer: {}
-kind: List
+kind: Service
 metadata:
-  resourceVersion: ""
-  selfLink: ""
+  annotations:
+    id: 60de055bc7027e49bcad66fa336e6313e3acd322a0836caecda039610eaf20bd
+  creationTimestamp: 2018-04-08T14:43:37Z
+  name: test-clusterip-default
+  namespace: default
+  uid: 3871f7a5-3b3b-11e8-b8a4-42010a000032
+spec:
+  clusterIP: 10.105.34.132
+  ports:
+  - port: 8080
+    targetPort: 80
+  selector:
+    app: nginx
+  type: ClusterIP
+status:
+  loadBalancer: {}
 
 
 // delete service
@@ -238,4 +256,37 @@ $ pi get volumes test-performance -o json
 $ pi delete volume vol1
 volume vol1 deleted
 
+```
+
+# fip operation example
+
+```
+$ pi create fip
+35.192.x.x
+
+$ pi create fip --count=2
+35.188.x.x
+35.189.x.x
+
+
+$ pi get fips
+FIP             NAME  CREATEDAT
+35.192.x.x            2018-04-08T15:27:49+00:00
+35.188.x.x            2018-04-08T15:31:08+00:00
+
+$ pi name fip 35.192.x.x --name=test
+fip 35.192.x.x renamed to test
+
+
+$ pi get fips 35.192.x.x -o json
+{
+  "fip": "35.192.x.x",
+  "name": "test",
+  "createdAt": "2018-04-08T15:27:49.862Z",
+  "pods": []
+}
+
+
+$ pi delete fips 35.188.x.x
+fip "35.188.x.x" deleted
 ```

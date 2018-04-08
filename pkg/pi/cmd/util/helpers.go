@@ -27,10 +27,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hyperhq/client-go/tools/clientcmd"
+	"github.com/hyperhq/pi/pkg/pi"
+	"github.com/hyperhq/pi/pkg/pi/resource"
+
 	"github.com/evanphx/json-patch"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
-
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,10 +45,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/apimachinery/pkg/util/yaml"
-	"github.com/hyperhq/client-go/tools/clientcmd"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
-	"github.com/hyperhq/pi/pkg/pi"
-	"github.com/hyperhq/pi/pkg/pi/resource"
 	"k8s.io/kubernetes/pkg/printers"
 	utilexec "k8s.io/utils/exec"
 )
@@ -406,7 +406,7 @@ func AddValidateOptionFlags(cmd *cobra.Command, options *ValidateOptions) {
 
 func AddFilenameOptionFlags(cmd *cobra.Command, options *resource.FilenameOptions, usage string) {
 	pi.AddJsonFilenameFlag(cmd, &options.Filenames, "Filename, directory, or URL to files "+usage)
-	cmd.Flags().BoolVarP(&options.Recursive, "recursive", "R", options.Recursive, "Process the directory used in -f, --filename recursively. Useful when you want to manage related manifests organized within the same directory.")
+	//cmd.Flags().BoolVarP(&options.Recursive, "recursive", "R", options.Recursive, "Process the directory used in -f, --filename recursively. Useful when you want to manage related manifests organized within the same directory.")
 }
 
 // AddDryRunFlag adds dry-run flag to a command. Usually used by mutations.

@@ -19,10 +19,9 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"net/url"
+	//"net/url"
 	"os"
-	"runtime"
-	"strings"
+	//"strings"
 
 	"github.com/hyperhq/client-go/tools/clientcmd/api/hyper"
 	"github.com/hyperhq/pi/pkg/pi"
@@ -51,13 +50,7 @@ var (
 
 	createExample = templates.Examples(i18n.T(`
 		# Create a pod using the data in pod.json.
-		pi create -f ./pod.json
-
-		# Create a pod based on the JSON passed into stdin.
-		cat pod.json | pi create -f -
-
-		# Edit the data in docker-registry.yaml in JSON using the v1 API format then create the resource using the edited data.
-		pi create -f docker-registry.yaml --edit --output-version=v1 -o json`))
+		pi create -f ./pod.json`))
 )
 
 func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
@@ -83,23 +76,23 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, usage)
 	cmd.MarkFlagRequired("filename")
 	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmd.Flags().BoolVar(&options.EditBeforeCreate, "edit", false, "Edit the API resource before creating")
-	cmd.Flags().Bool("windows-line-endings", runtime.GOOS == "windows",
-		"Only relevant if --edit=true. Defaults to the line ending native to your platform.")
-	cmdutil.AddApplyAnnotationFlags(cmd)
+	//cmdutil.AddPrinterFlags(cmd)
+	//cmd.Flags().BoolVar(&options.EditBeforeCreate, "edit", false, "Edit the API resource before creating")
+	//cmd.Flags().Bool("windows-line-endings", runtime.GOOS == "windows",
+	//	"Only relevant if --edit=true. Defaults to the line ending native to your platform.")
+	//cmdutil.AddApplyAnnotationFlags(cmd)
 	cmdutil.AddRecordFlag(cmd)
-	cmdutil.AddDryRunFlag(cmd)
-	cmd.Flags().StringVarP(&options.Selector, "selector", "l", "", "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
-	cmd.Flags().StringVar(&options.Raw, "raw", options.Raw, "Raw URI to POST to the server.  Uses the transport specified by the kubeconfig file.")
+	//cmdutil.AddDryRunFlag(cmd)
+	//cmd.Flags().StringVarP(&options.Selector, "selector", "l", "", "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
+	//cmd.Flags().StringVar(&options.Raw, "raw", options.Raw, "Raw URI to POST to the server.  Uses the transport specified by the kubeconfig file.")
 
 	// create subcommands
 	cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
 	cmd.AddCommand(NewCmdCreateService(f, out, errOut))
 
-	// create volume
+	// create volume, fip
 	cmd.AddCommand(NewCmdCreateVolume(f, out, errOut))
-
+	cmd.AddCommand(NewCmdCreateFip(f, out, errOut))
 	return cmd
 }
 
@@ -107,29 +100,29 @@ func (o *CreateOptions) ValidateArgs(cmd *cobra.Command, args []string) error {
 	if len(args) != 0 {
 		return cmdutil.UsageErrorf(cmd, "Unexpected args: %v", args)
 	}
-	if len(o.Raw) > 0 {
-		if o.EditBeforeCreate {
-			return cmdutil.UsageErrorf(cmd, "--raw and --edit are mutually exclusive")
-		}
-		if len(o.FilenameOptions.Filenames) != 1 {
-			return cmdutil.UsageErrorf(cmd, "--raw can only use a single local file or stdin")
-		}
-		if strings.HasPrefix(o.FilenameOptions.Filenames[0], "http") {
-			return cmdutil.UsageErrorf(cmd, "--raw cannot read from a url")
-		}
-		if o.FilenameOptions.Recursive {
-			return cmdutil.UsageErrorf(cmd, "--raw and --recursive are mutually exclusive")
-		}
-		if len(o.Selector) > 0 {
-			return cmdutil.UsageErrorf(cmd, "--raw and --selector (-l) are mutually exclusive")
-		}
-		if len(cmdutil.GetFlagString(cmd, "output")) > 0 {
-			return cmdutil.UsageErrorf(cmd, "--raw and --output are mutually exclusive")
-		}
-		if _, err := url.ParseRequestURI(o.Raw); err != nil {
-			return cmdutil.UsageErrorf(cmd, "--raw must be a valid URL path: %v", err)
-		}
-	}
+	//if len(o.Raw) > 0 {
+	//	if o.EditBeforeCreate {
+	//		return cmdutil.UsageErrorf(cmd, "--raw and --edit are mutually exclusive")
+	//	}
+	//	if len(o.FilenameOptions.Filenames) != 1 {
+	//		return cmdutil.UsageErrorf(cmd, "--raw can only use a single local file or stdin")
+	//	}
+	//	if strings.HasPrefix(o.FilenameOptions.Filenames[0], "http") {
+	//		return cmdutil.UsageErrorf(cmd, "--raw cannot read from a url")
+	//	}
+	//	if o.FilenameOptions.Recursive {
+	//		return cmdutil.UsageErrorf(cmd, "--raw and --recursive are mutually exclusive")
+	//	}
+	//	if len(o.Selector) > 0 {
+	//		return cmdutil.UsageErrorf(cmd, "--raw and --selector (-l) are mutually exclusive")
+	//	}
+	//	if len(cmdutil.GetFlagString(cmd, "output")) > 0 {
+	//		return cmdutil.UsageErrorf(cmd, "--raw and --output are mutually exclusive")
+	//	}
+	//	if _, err := url.ParseRequestURI(o.Raw); err != nil {
+	//		return cmdutil.UsageErrorf(cmd, "--raw must be a valid URL path: %v", err)
+	//	}
+	//}
 
 	return nil
 }
@@ -186,8 +179,11 @@ func RunCreate(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, opt
 		return err
 	}
 
-	dryRun := cmdutil.GetFlagBool(cmd, "dry-run")
-	output := cmdutil.GetFlagString(cmd, "output")
+	//dryRun := cmdutil.GetFlagBool(cmd, "dry-run")
+	//output := cmdutil.GetFlagString(cmd, "output")
+	dryRun := false
+	output := "name"
+
 	mapper := r.Mapper().RESTMapper
 
 	count := 0
@@ -330,6 +326,30 @@ func RunCreateVolumeSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Wri
 			return err
 		} else {
 			fmt.Printf("volume %v(%vGB) created in zone %v\n", volCreated.Name, volCreated.Size, volCreated.Zone)
+		}
+	}
+	return nil
+}
+
+// create Fip subcommand
+func RunCreateFipSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Writer, options *CreateSubcommandOptions) error {
+	obj, err := options.StructuredGenerator.StructuredGenerate()
+	if err != nil {
+		return err
+	}
+	opts := obj.(*hyper.FipAllocateRequest)
+	if cfg, err := f.ClientConfig(); err != nil {
+		return err
+	} else {
+		hyperConn := hyper.NewHyperConn(cfg)
+		fipCli := hyper.NewFipCli(hyperConn)
+		protocol := []string{"TCP"}
+		if _, fipList, err := fipCli.AllocateFip(protocol, opts.Count); err != nil {
+			return err
+		} else {
+			for _, fip := range fipList {
+				fmt.Println(fip.Fip)
+			}
 		}
 	}
 	return nil

@@ -29,38 +29,38 @@ import (
 	"net/http"
 )
 
-// NewCmdDeleteVolume groups subcommands to delete various zones of volumes
-func NewCmdDeleteVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
+// NewCmdDeleteFip groups subcommands to delete various zones of fips
+func NewCmdDeleteFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "volume NAME",
-		Short:   i18n.T("Delete a volume"),
-		Aliases: []string{"volumes"},
-		Long:    delVolumeLong,
-		Example: delVolumeExample,
+		Use:     "fip IP",
+		Short:   i18n.T("Delete a fip"),
+		Aliases: []string{"fips"},
+		Long:    delFipLong,
+		Example: delFipExample,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := DeleteVolumeGeneric(f, cmdOut, cmd, args)
+			err := DeleteFipGeneric(f, cmdOut, cmd, args)
 			cmdutil.CheckErr(err)
 		},
 	}
 	cmdutil.AddApplyAnnotationFlags(cmd)
 	cmdutil.AddValidateFlags(cmd)
 	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperVolumeV1GeneratorName)
+	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1GeneratorName)
 
 	return cmd
 }
 
 var (
-	delVolumeLong = templates.LongDesc(i18n.T(`Delete a volume.`))
+	delFipLong = templates.LongDesc(i18n.T(`Delete a fip.`))
 
-	delVolumeExample = templates.Examples(i18n.T(`
-	  # Delete a volume named vol1
-	  pi delete volume vol1`))
+	delFipExample = templates.Examples(i18n.T(`
+	  # Delete a fip
+	  pi delete fip x.x.x.x`))
 )
 
-// DeleteVolumeGeneric is the implementation of the delete volume generic command
-func DeleteVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
-	name, err := NameFromCommandArgs(cmd, args)
+// DeleteFipGeneric is the implementation of the delete fip generic command
+func DeleteFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
+	ip, err := IPFromCommandArgs(cmd, args)
 	if err != nil {
 		return err
 	}
@@ -69,13 +69,20 @@ func DeleteVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command
 		return err
 	} else {
 		hyperConn := hyper.NewHyperConn(cfg)
-		volCli := hyper.NewVolumeCli(hyperConn)
-		httpStatus, result := volCli.DeleteVolume(name, "")
+		fipCli := hyper.NewFipCli(hyperConn)
+		httpStatus, result := fipCli.ReleaseFip(ip)
 		if httpStatus == http.StatusNoContent {
-			fmt.Printf("volume \"%v\" deleted\n", name)
+			fmt.Printf("fip \"%v\" deleted\n", ip)
 		} else {
 			fmt.Println(result)
 		}
 	}
 	return nil
+}
+
+func IPFromCommandArgs(cmd *cobra.Command, args []string) (string, error) {
+	if len(args) == 0 {
+		return "", cmdutil.UsageErrorf(cmd, "IP is required")
+	}
+	return args[0], nil
 }

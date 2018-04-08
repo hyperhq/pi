@@ -499,6 +499,8 @@ const (
 	PriorityClassV1Alpha1GeneratorName      = "priorityclass/v1alpha1"
 
 	HyperVolumeV1GeneratorName = "hyper-volume/v1"
+	HyperFipV1GeneratorName    = "hyper-fip/v1"
+	HyperFipV1RenameName       = "hyper-rename-fip/v1"
 )
 
 // DefaultGenerators returns the set of default generators for use in Factory instances
@@ -531,7 +533,15 @@ func DefaultGenerators(cmdName string) map[string]pi.Generator {
 		}
 	case "hyper-volume":
 		generator = map[string]pi.Generator{
-			HyperVolumeV1GeneratorName: pi.SecretForTLSGeneratorV1{},
+			HyperVolumeV1GeneratorName: pi.VolumeGeneratorV1{},
+		}
+	case "hyper-fip":
+		generator = map[string]pi.Generator{
+			HyperFipV1GeneratorName: pi.FipGeneratorV1{},
+		}
+	case "hyper-rename-fip":
+		generator = map[string]pi.Generator{
+			HyperFipV1RenameName: pi.FipNameV1{},
 		}
 	}
 	return generator

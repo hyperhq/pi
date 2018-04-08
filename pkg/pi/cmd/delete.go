@@ -160,8 +160,9 @@ func NewCmdDelete(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	cmdutil.AddOutputVarFlagsForMutation(cmd, &options.Output)
 	cmdutil.AddIncludeUninitializedFlag(cmd)
 
-	// delete volume
+	// delete volume, fip
 	cmd.AddCommand(NewCmdDeleteVolume(f, out, errOut))
+	cmd.AddCommand(NewCmdDeleteFip(f, out, errOut))
 	return cmd
 }
 
