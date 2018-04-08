@@ -106,6 +106,14 @@ func PrintResult(output string, result []hyper.VolumeResponse) {
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Zone", "Size(GB)", "CreatedAt", "Pod"})
 
+		//set table style
+		table.SetBorder(false)
+		table.SetHeaderLine(false)
+		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+		table.SetRowLine(false)
+		table.SetColumnSeparator("")
+		table.SetAlignment(tablewriter.ALIGN_LEFT)
+
 		for _, vol := range data {
 			table.Append(vol)
 		}

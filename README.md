@@ -220,12 +220,8 @@ volume vol1(1GB) created in zone gcp-us-central1-b
 
 // list volumes
 $ pi get volumes
-+---------------------+-------------------+----------+---------------------------+--------------------+
-|        NAME         |       ZONE        | SIZE(GB) |         CREATEDAT         |        POD         |
-+---------------------+-------------------+----------+---------------------------+--------------------+
-| pt-test-performance | gcp-us-central1-b |       50 | 2018-03-26T05:31:05+00:00 | pt-test-flexvolume |
-| vol1                | gcp-us-central1-b |        1 | 2018-04-07T18:26:18+00:00 |                    |
-+---------------------+-------------------+----------+---------------------------+--------------------+
+NAME              ZONE               SIZE(GB)  CREATEDAT                  POD
+test-performance  gcp-us-central1-b  50        2018-03-26T05:31:05+00:00  test-flexvolume
 
 // get volume
 $ pi get volumes test-performance -o json
