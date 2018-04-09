@@ -192,11 +192,11 @@ func RunCreate(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, opt
 			return err
 		}
 
-		if cmdutil.ShouldRecord(cmd, info) {
-			if err := cmdutil.RecordChangeCause(info.Object, f.Command(cmd, false)); err != nil {
-				return cmdutil.AddSourceToErr("creating", info.Source, err)
-			}
-		}
+		//if cmdutil.ShouldRecord(cmd, info) {
+		//	if err := cmdutil.RecordChangeCause(info.Object, f.Command(cmd, false)); err != nil {
+		//		return cmdutil.AddSourceToErr("creating", info.Source, err)
+		//	}
+		//}
 
 		if !dryRun {
 			if err := createAndRefresh(info); err != nil {

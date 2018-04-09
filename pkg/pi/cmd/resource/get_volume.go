@@ -115,10 +115,11 @@ func PrintVolumeResult(output string, result []hyper.VolumeResponse) {
 		//set table style
 		table.SetBorder(false)
 		table.SetHeaderLine(false)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 		table.SetRowLine(false)
 		table.SetColumnSeparator("")
+		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 		table.SetAlignment(tablewriter.ALIGN_LEFT)
+		table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT})
 
 		for _, vol := range data {
 			table.Append(vol)

@@ -26,6 +26,7 @@ const (
 	COLUMN  = "|"
 	SPACE   = " "
 	NEWLINE = "\n"
+	BLANK   = ""
 )
 
 const (
@@ -398,7 +399,7 @@ func (t *Table) printHeading() {
 	for x := 0; x < max; x++ {
 		// Check if border is set
 		// Replace with space if not set
-		fmt.Fprint(t.out, ConditionString(t.borders.Left, t.pColumn, SPACE))
+		fmt.Fprint(t.out, ConditionString(t.borders.Left, t.pColumn, BLANK))
 
 		for y := 0; y <= end; y++ {
 			v := t.cs[y]
@@ -412,11 +413,11 @@ func (t *Table) printHeading() {
 			pad := ConditionString((y == end && !t.borders.Left), SPACE, t.pColumn)
 
 			if is_esc_seq {
-				fmt.Fprintf(t.out, " %s %s",
+				fmt.Fprintf(t.out, "%s %s ",
 					format(padFunc(h, SPACE, v),
 						t.headerParams[y]), pad)
 			} else {
-				fmt.Fprintf(t.out, " %s %s",
+				fmt.Fprintf(t.out, "%s %s ",
 					padFunc(h, SPACE, v),
 					pad)
 			}
@@ -627,9 +628,11 @@ func (t *Table) printRow(columns [][]string, rowIdx int) {
 		for y := 0; y < total; y++ {
 
 			// Check if border is set
-			fmt.Fprint(t.out, ConditionString((!t.borders.Left && y == 0), SPACE, t.pColumn))
+			fmt.Fprint(t.out, ConditionString((!t.borders.Left && y == 0), BLANK, t.pColumn))
 
-			fmt.Fprintf(t.out, SPACE)
+			if !(!t.borders.Left && y == 0) {
+				fmt.Fprintf(t.out, SPACE)
+			}
 			str := columns[y][x]
 
 			// Embedding escape sequence with column value
@@ -721,9 +724,11 @@ func (t *Table) printRowMergeCells(writer io.Writer, columns [][]string, rowIdx 
 		for y := 0; y < total; y++ {
 
 			// Check if border is set
-			fmt.Fprint(writer, ConditionString((!t.borders.Left && y == 0), SPACE, t.pColumn))
+			fmt.Fprint(writer, ConditionString((!t.borders.Left && y == 0), BLANK, t.pColumn))
 
-			fmt.Fprintf(writer, SPACE)
+			if !(!t.borders.Left && y == 0) {
+				fmt.Fprintf(writer, SPACE)
+			}
 
 			str := columns[y][x]
 
