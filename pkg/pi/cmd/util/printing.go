@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/hyperhq/pi/pkg/pi"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/kubernetes/pkg/printers"
 	printersinternal "k8s.io/kubernetes/pkg/printers/internalversion"
 
@@ -187,6 +187,20 @@ func ValidResourceTypeList(f ClientAccessFactory) string {
 			* pods (aka 'po')
 			* secrets
 			* services (aka 'svc')
-	
+			* volumes
+			* fips
+	`)
+}
+
+func ValidDeleteResourceTypeList(f ClientAccessFactory) string {
+	// TODO: Should attempt to use the cached discovery list or fallback to a static list
+	// that is calculated from code compiled into the factory.
+	return templates.LongDesc(`Valid resource types include:
+
+			* pods (aka 'po')
+			* secrets
+			* services (aka 'svc')
+			* volumes
+			* fips
 	`)
 }

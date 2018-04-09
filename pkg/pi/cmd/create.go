@@ -44,7 +44,7 @@ type CreateOptions struct {
 
 var (
 	createLong = templates.LongDesc(i18n.T(`
-		Create a resource from a file or from stdin.
+		Create a resource.
 
 		JSON and YAML formats are accepted.`))
 
@@ -58,7 +58,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "create -f FILENAME",
-		Short:   i18n.T("Create a resource from a file or from stdin."),
+		Short:   i18n.T("Create a resource."),
 		Long:    createLong,
 		Example: createExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -81,7 +81,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	//cmd.Flags().Bool("windows-line-endings", runtime.GOOS == "windows",
 	//	"Only relevant if --edit=true. Defaults to the line ending native to your platform.")
 	//cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddRecordFlag(cmd)
+	//cmdutil.AddRecordFlag(cmd)
 	//cmdutil.AddDryRunFlag(cmd)
 	//cmd.Flags().StringVarP(&options.Selector, "selector", "l", "", "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
 	//cmd.Flags().StringVar(&options.Raw, "raw", options.Raw, "Raw URI to POST to the server.  Uses the transport specified by the kubeconfig file.")
@@ -250,9 +250,6 @@ type CreateSubcommandOptions struct {
 	Name string
 	// StructuredGenerator is the resource generator for the object being created
 	StructuredGenerator pi.StructuredGenerator
-	// DryRun is true if the command should be simulated but not run against the server
-	DryRun       bool
-	OutputFormat string
 }
 
 // RunCreateSubcommand executes a create subcommand using the specified options
@@ -290,7 +287,10 @@ func RunCreateSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Writer, o
 	}
 	obj = info.Object
 
-	if !options.DryRun {
+	dryRun := false
+	outputFormat := "name"
+
+	if !dryRun {
 		obj, err = resource.NewHelper(client, mapping).Create(namespace, false, info.Object)
 		if err != nil {
 			return err
@@ -301,8 +301,8 @@ func RunCreateSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Writer, o
 		}
 	}
 
-	if useShortOutput := options.OutputFormat == "name"; useShortOutput || len(options.OutputFormat) == 0 {
-		f.PrintSuccess(mapper, useShortOutput, out, mapping.Resource, info.Name, options.DryRun, "created")
+	if useShortOutput := outputFormat == "name"; useShortOutput || len(outputFormat) == 0 {
+		f.PrintSuccess(mapper, useShortOutput, out, mapping.Resource, info.Name, dryRun, "created")
 		return nil
 	}
 

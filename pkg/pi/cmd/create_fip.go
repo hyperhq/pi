@@ -31,7 +31,7 @@ import (
 func NewCmdCreateFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "fip [--count=int]",
-		Short:   i18n.T("Create a fip"),
+		Short:   i18n.T("Create one or more fip(s) using specified subcommand"),
 		Long:    fipLong,
 		Aliases: []string{"fips"},
 		Example: fipExample,
@@ -40,13 +40,13 @@ func NewCmdCreateFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1GeneratorName)
+	//cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1GeneratorName)
 	cmd.Flags().Int("count", 1, "Specify the count of fip to allocate, default is 1")
 	return cmd
 }
 
 var (
-	fipLong = templates.LongDesc(i18n.T(`Create a fip.`))
+	fipLong = templates.LongDesc(i18n.T(`Create one or more fip(s) using specified subcommand`))
 
 	fipExample = templates.Examples(i18n.T(`
 	  # Create one new fip
@@ -59,7 +59,7 @@ var (
 // CreateFipGeneric is the implementation of the create fip generic command
 func CreateFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
 	var generator pi.StructuredGenerator
-	switch generatorName := cmdutil.GetFlagString(cmd, "generator"); generatorName {
+	switch generatorName := cmdutil.HyperFipV1GeneratorName; generatorName {
 	case cmdutil.HyperFipV1GeneratorName:
 		generator = &pi.FipGeneratorV1{
 			Count: cmdutil.GetFlagInt(cmd, "count"),
@@ -69,7 +69,5 @@ func CreateFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 	}
 	return RunCreateFipSubcommand(f, cmd, cmdOut, &CreateSubcommandOptions{
 		StructuredGenerator: generator,
-		//DryRun:              cmdutil.GetDryRunFlag(cmd),
-		//OutputFormat:        cmdutil.GetFlagString(cmd, "output"),
 	})
 }

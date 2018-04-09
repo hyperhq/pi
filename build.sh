@@ -6,6 +6,6 @@
 #########################################################
 
 export GOPATH=`pwd`/vendor:$GOPATH
-go build cmd/pi/pi.go
+go build -ldflags "-w" cmd/pi/pi.go
 
 [ $? -eq 0 ] && echo "build pi done" || echo "build pi error"

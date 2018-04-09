@@ -120,7 +120,6 @@ func (v *VolumeCli) DeleteAllVolumes(zone string) {
 		log.Fatalf("failed to parse volume list in zone %v, error:%v", zone, err)
 	}
 	for _, vol := range volumeList {
-		log.Printf("delete volume %v in zone %v", vol.Name, vol.Zone)
 		v.DeleteVolume(vol.Name, vol.Zone)
 	}
 }

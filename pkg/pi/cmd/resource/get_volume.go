@@ -31,6 +31,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"net/http"
 )
 
 // NewCmdGetVolume groups subcommands to get various zones of volumes
@@ -80,13 +81,21 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 			if _, volList, err := volCli.ListVolumes(zone); err != nil {
 				return err
 			} else {
-				PrintVolumeResult(output, volList)
+				if len(volList) == 0 {
+					fmt.Println("No resources found.")
+				} else {
+					PrintVolumeResult(output, volList)
+				}
 			}
 		} else {
-			if _, vol, err := volCli.GetVolume(name, zone); err != nil {
+			if httpStatus, vol, err := volCli.GetVolume(name, zone); err != nil {
 				return err
 			} else {
-				PrintVolumeResult(output, []hyper.VolumeResponse{*vol})
+				if httpStatus == http.StatusNotFound {
+					fmt.Println("No resources found.")
+				} else {
+					PrintVolumeResult(output, []hyper.VolumeResponse{*vol})
+				}
 			}
 		}
 	}
@@ -119,7 +128,7 @@ func PrintVolumeResult(output string, result []hyper.VolumeResponse) {
 		if buf, err := json.MarshalIndent(result, "", "  "); err != nil {
 			log.Fatal(err)
 		} else {
-			fmt.Print(string(buf))
+			fmt.Println(string(buf))
 		}
 	} else {
 		glog.Warningf("--output support table,json")

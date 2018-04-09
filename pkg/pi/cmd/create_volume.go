@@ -31,7 +31,7 @@ import (
 func NewCmdCreateVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "volume NAME [--zone=string] [--size=int]",
-		Short:   i18n.T("Create a volume"),
+		Short:   i18n.T("Create a volume using specified subcommand"),
 		Long:    volumeLong,
 		Example: volumeExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -39,17 +39,18 @@ func NewCmdCreateVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Comm
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperVolumeV1GeneratorName)
+	//cmdutil.AddApplyAnnotationFlags(cmd)
+	//cmdutil.AddValidateFlags(cmd)
+	//cmdutil.AddPrinterFlags(cmd)
+	//cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperVolumeV1GeneratorName)
+
 	cmd.Flags().String("size", "", "Specify the volume size, default 10(GB), min 1, max 1024")
 	cmd.Flags().String("zone", "", i18n.T("The zone of volume to create"))
 	return cmd
 }
 
 var (
-	volumeLong = templates.LongDesc(i18n.T(`Create a volume.`))
+	volumeLong = templates.LongDesc(i18n.T(`Create a secret using specified subcommand`))
 
 	volumeExample = templates.Examples(i18n.T(`
 	  # Create a new volume named vol1 with default size and zone
@@ -69,7 +70,7 @@ func CreateVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command
 		return err
 	}
 	var generator pi.StructuredGenerator
-	switch generatorName := cmdutil.GetFlagString(cmd, "generator"); generatorName {
+	switch generatorName := cmdutil.HyperVolumeV1GeneratorName; generatorName {
 	case cmdutil.HyperVolumeV1GeneratorName:
 		generator = &pi.VolumeGeneratorV1{
 			Name: name,
@@ -82,7 +83,5 @@ func CreateVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command
 	return RunCreateVolumeSubcommand(f, cmd, cmdOut, &CreateSubcommandOptions{
 		Name:                name,
 		StructuredGenerator: generator,
-		DryRun:              cmdutil.GetDryRunFlag(cmd),
-		OutputFormat:        cmdutil.GetFlagString(cmd, "output"),
 	})
 }

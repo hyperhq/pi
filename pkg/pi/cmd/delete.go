@@ -37,10 +37,7 @@ import (
 
 var (
 	delete_long = templates.LongDesc(i18n.T(`
-		Delete resources by filenames, stdin, resources and names, or by resources and label selector.
-
-		JSON and YAML formats are accepted. Only one type of the arguments may be specified: filenames,
-		resources and names, or resources and label selector.
+		Delete resources by resources and names.
 
 		Some resources, such as pods, support graceful deletion. These resources define a default period
 		before they are forcibly terminated (the grace period) but you may override that value with
@@ -65,17 +62,8 @@ var (
 		rest of the resource.`))
 
 	delete_example = templates.Examples(i18n.T(`
-		# Delete a pod using the type and name specified in pod.json.
-		pi delete -f ./pod.json
-
-		# Delete a pod based on the type and name in the JSON passed into stdin.
-		cat pod.json | pi delete -f -
-
 		# Delete pods and services with same names "baz" and "foo"
 		pi delete pod,service baz foo
-
-		# Delete pods and services with label name=myLabel.
-		pi delete pods,services -l name=myLabel
 
 		# Delete a pod with minimal delay
 		pi delete pod foo --now
@@ -127,8 +115,8 @@ func NewCmdDelete(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:     "delete ([-f FILENAME] | TYPE [(NAME | -l label | --all)])",
-		Short:   i18n.T("Delete resources by filenames, stdin, resources and names, or by resources and label selector"),
+		Use:     "delete (TYPE [(NAME | --all)])",
+		Short:   i18n.T("Delete resources by resources and names"),
 		Long:    delete_long,
 		Example: delete_example,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -147,18 +135,18 @@ func NewCmdDelete(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 		ValidArgs:  validArgs,
 		ArgAliases: argAliases,
 	}
-	usage := "containing the resource to delete."
-	cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, usage)
-	cmd.Flags().StringVarP(&options.Selector, "selector", "l", "", "Selector (label query) to filter on, not including uninitialized ones.")
+	//usage := "containing the resource to delete."
+	//cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, usage)
+	//cmd.Flags().StringVarP(&options.Selector, "selector", "l", "", "Selector (label query) to filter on, not including uninitialized ones.")
 	cmd.Flags().BoolVar(&options.DeleteAll, "all", false, "Delete all resources, including uninitialized ones, in the namespace of the specified resource types.")
 	cmd.Flags().BoolVar(&options.IgnoreNotFound, "ignore-not-found", false, "Treat \"resource not found\" as a successful delete. Defaults to \"true\" when --all is specified.")
-	cmd.Flags().BoolVar(&options.Cascade, "cascade", true, "If true, cascade the deletion of the resources managed by this resource (e.g. Pods created by a ReplicationController).  Default true.")
+	//cmd.Flags().BoolVar(&options.Cascade, "cascade", true, "If true, cascade the deletion of the resources managed by this resource (e.g. Pods created by a ReplicationController).  Default true.")
 	cmd.Flags().IntVar(&options.GracePeriod, "grace-period", -1, "Period of time in seconds given to the resource to terminate gracefully. Ignored if negative.")
 	cmd.Flags().BoolVar(&options.DeleteNow, "now", false, "If true, resources are signaled for immediate shutdown (same as --grace-period=1).")
 	cmd.Flags().BoolVar(&options.ForceDeletion, "force", false, "Immediate deletion of some resources may result in inconsistency or data loss and requires confirmation.")
 	cmd.Flags().DurationVar(&options.Timeout, "timeout", 0, "The length of time to wait before giving up on a delete, zero means determine a timeout from the size of the object")
 	cmdutil.AddOutputVarFlagsForMutation(cmd, &options.Output)
-	cmdutil.AddIncludeUninitializedFlag(cmd)
+	//cmdutil.AddIncludeUninitializedFlag(cmd)
 
 	// delete volume, fip
 	cmd.AddCommand(NewCmdDeleteVolume(f, out, errOut))
@@ -172,14 +160,20 @@ func (o *DeleteOptions) Complete(f cmdutil.Factory, out, errOut io.Writer, args 
 		return err
 	}
 
-	includeUninitialized := cmdutil.ShouldIncludeUninitialized(cmd, false)
+	if len(args) == 0 {
+		usageString := fmt.Sprint("You must specify the type of resource to delete. ",
+			cmdutil.ValidDeleteResourceTypeList(f), "\nerror: Required resource not specified.")
+		return cmdutil.UsageErrorf(cmd, usageString)
+	}
+
+	//includeUninitialized := cmdutil.ShouldIncludeUninitialized(cmd, false)
 	r := f.NewBuilder().
 		Unstructured().
 		ContinueOnError().
 		NamespaceParam(cmdNamespace).DefaultNamespace().
 		FilenameParam(enforceNamespace, &o.FilenameOptions).
-		LabelSelectorParam(o.Selector).
-		IncludeUninitialized(includeUninitialized).
+		//LabelSelectorParam(o.Selector).
+		//IncludeUninitialized(includeUninitialized).
 		SelectAllParam(o.DeleteAll).
 		ResourceTypeOrNameArgs(false, args...).RequireObject(false).
 		Flatten().
@@ -234,9 +228,9 @@ func (o *DeleteOptions) Validate(cmd *cobra.Command) error {
 func (o *DeleteOptions) RunDelete() error {
 	shortOutput := o.Output == "name"
 	// By default use a reaper to delete all related resources.
-	if o.Cascade {
-		return ReapResult(o.Result, o.f, o.Out, true, o.IgnoreNotFound, o.Timeout, o.GracePeriod, o.WaitForDeletion, shortOutput, o.Mapper, false)
-	}
+	//if o.Cascade {
+	//	return ReapResult(o.Result, o.f, o.Out, true, o.IgnoreNotFound, o.Timeout, o.GracePeriod, o.WaitForDeletion, shortOutput, o.Mapper, false)
+	//}
 	return DeleteResult(o.Result, o.f, o.Out, o.IgnoreNotFound, o.GracePeriod, shortOutput, o.Mapper)
 }
 

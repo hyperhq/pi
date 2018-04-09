@@ -4,7 +4,11 @@
 ./build.sh
 ```
 
-# set credential
+# config
+
+**priority**:  command line arguments > config file parameters
+
+## use config file parameter
 
 ```
 //set user1
@@ -12,33 +16,9 @@ $ pi config set-credentials user1 --region=gcp-us-central1 --access-key="xxx" --
 
 //set user2
 $ pi config set-credentials user2 --region=gcp-us-central1 --access-key="xxx" --secret-key="xxxxxx"
-```
 
-# use credential
-
-```
-$ pi --user=user1 get nodes
-or
-$ pi --user=user2 get nodes
-or
-$ pi --access-key=xxx --secret-key=xxxxxx get nodes
-or
-$ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxxxx get nodes
-or
-$ pi --region=gcp-us-central1 --access-key=xxx --secret-key=xxxxxx get nodes
-```
-
-# config
-
-**priority**:  command line arguments > config file parameters
-
-
-```
-// argument:
---host
---region
---access-key
---secret-key
+//select default user
+$ pi config set-context default --user=user1
 
 
 // config file:
@@ -71,7 +51,65 @@ users:
     secret-key: xxxxxx
 ```
 
+## use command line arguments
+
+```
+// argument:
+--server
+--region
+--access-key
+--secret-key
+
+
+//user default user
+$ pi get nodes
+
+//use specified user
+$ pi --user=user2 get nodes
+
+//specify credential
+$ pi --access-key=xxx --secret-key=xxxxxx get nodes
+
+//specify region
+$ pi --region=gcp-us-central1 --access-key=xxx --secret-key=xxxxxx get nodes
+
+//specify server
+$ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxxxx get nodes
+```
+
+
 # usage
+
+```
+$ pi                                                                                                                               17:12:51
+pi controls the resources on Hyper GCP cluster.
+
+Find more information at https://github.com/hyperhq/pi.
+
+Basic Commands (Beginner):
+  create      Create a resource.
+
+Basic Commands (Intermediate):
+  get         Display one or many resources
+  delete      Delete resources by resources and names
+  name        Name a resource
+
+Troubleshooting and Debugging Commands:
+  exec        Execute a command in a container
+
+Other Commands:
+  config      Modify piconfig files
+  help        Help about any command
+
+Usage:
+  pi [flags] [options]
+
+Use "pi <command> --help" for more information about a given command.
+Use "pi options" for a list of global command-line options (applies to all commands).
+```
+
+
+# example
 
 ## nodes operation example
 
@@ -80,9 +118,42 @@ $ pi get nodes
 NAME              STATUS    ROLES     AGE       VERSION
 gcp-us-central1   Ready     <none>    4d
 
+
 $ pi get nodes --show-labels
 NAME              STATUS    ROLES     AGE       VERSION   LABELS
 gcp-us-central1   Ready     <none>    6d                  availabilityZone=gcp-us-central1-b|UP,defaultZone=gcp-us-central1-b,email=testuser3@test.com,resources=pod:3/20,volume:6/40,fip:0/5,service:1/5,secret:1/3,serviceClusterIPRange=10.96.0.0/12,tenantID=00a54ebcc0444bb384e48f6fd7b5597b
+
+
+$ pi get nodes -o yaml
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Node
+  metadata:
+    creationTimestamp: 2018-04-01T00:00:00Z
+    labels:
+      availabilityZone: gcp-us-central1-b|UP
+      defaultZone: gcp-us-central1-b
+      email: zewenzhang+gce1@gmail.com
+      resources: pod:2/20,volume:1/40,fip:2/5,service:1/5,secret:1/3
+      serviceClusterIPRange: 10.96.0.0/12
+      tenantID: 5a91a867043f4ff18e18c4a4ed8f85a2
+    name: gcp-us-central1
+    namespace: ""
+  spec:
+    podCIDR: 10.244.0.0/16
+  status:
+    addresses:
+    - address: 10.244.0.1
+      type: Internal Gateway
+    conditions:
+    - lastHeartbeatTime: 2018-04-09T02:47:23Z
+      lastTransitionTime: 2018-04-09T02:47:23Z
+      message: kubelet is posting ready status
+      reason: KubeletReady
+      status: "True"
+      type: Ready
+  ...    
 ```
 
 ## pod operation example
@@ -236,10 +307,12 @@ secret "test-secret-gitlab" deleted
 $ pi create volume vol1 --size=1
 volume vol1(1GB) created in zone gcp-us-central1-b
 
+
 // list volumes
 $ pi get volumes
 NAME              ZONE               SIZE(GB)  CREATEDAT                  POD
 test-performance  gcp-us-central1-b  50        2018-03-26T05:31:05+00:00  test-flexvolume
+
 
 // get volume
 $ pi get volumes test-performance -o json
@@ -251,6 +324,7 @@ $ pi get volumes test-performance -o json
     "pod": "test-flexvolume",
     "createdAt": "2018-03-26T05:31:05.773Z"
   }
+]
 
 // delete volume
 $ pi delete volume vol1

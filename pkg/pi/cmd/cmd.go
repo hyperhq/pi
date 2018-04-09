@@ -193,9 +193,9 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 	// Parent command to which all subcommands are added.
 	cmds := &cobra.Command{
 		Use:   "pi",
-		Short: i18n.T("pi controls the Hyper gcp cluster manager"),
+		Short: i18n.T("pi controls the resources on Hyper GCP cluster"),
 		Long: templates.LongDesc(`
-      pi controls the Hyper gcp cluster manager.
+      pi controls the resources on Hyper GCP cluster.
 
       Find more information at https://github.com/hyperhq/pi.`),
 		Run: runHelp,
@@ -233,7 +233,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 		{
 			Message: "Troubleshooting and Debugging Commands:",
 			Commands: []*cobra.Command{
-				NewCmdDescribe(f, out, err),
+				//NewCmdDescribe(f, out, err),
 				NewCmdExec(f, in, out, err),
 			},
 		},

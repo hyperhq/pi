@@ -57,9 +57,6 @@ func (f *FipCli) ListFips() (int, []FipListResponse, error) {
 	}
 	var fipList []FipListResponse
 	json.Unmarshal([]byte(result), &fipList)
-	if len(fipList) == 0 {
-		log.Println(result)
-	}
 	return httpStatus, fipList, nil
 }
 
@@ -138,7 +135,6 @@ func (f *FipCli) ReleaseAllFips() {
 		log.Fatalf("failed to parse fip list:%v", err)
 	}
 	for _, i := range fipList {
-		log.Printf("delete fip:%v", i.Fip)
 		f.ReleaseFip(i.Fip)
 	}
 }

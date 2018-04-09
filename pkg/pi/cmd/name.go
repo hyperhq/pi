@@ -67,11 +67,6 @@ func RunName(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, optio
 	// raw only makes sense for a single file resource multiple objects aren't likely to do what you want.
 	// the validator enforces this, so
 
-	schema, err := f.Validator(cmdutil.GetFlagBool(cmd, "validate"))
-	if err != nil {
-		return err
-	}
-
 	cmdNamespace, enforceNamespace, err := f.DefaultNamespace()
 	if err != nil {
 		return err
@@ -79,7 +74,6 @@ func RunName(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, optio
 
 	r := f.NewBuilder().
 		Unstructured().
-		Schema(schema).
 		ContinueOnError().
 		NamespaceParam(cmdNamespace).DefaultNamespace().
 		FilenameParam(enforceNamespace, &options.FilenameOptions).

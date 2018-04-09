@@ -32,6 +32,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"net/http"
 )
 
 // NewCmdGetFip groups subcommands to get various zones of fips
@@ -79,13 +80,21 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 			if _, fipList, err := fipCli.ListFips(); err != nil {
 				return err
 			} else {
-				PrintFipListResult(output, fipList)
+				if len(fipList) == 0 {
+					fmt.Println("No resources found.")
+				} else {
+					PrintFipListResult(output, fipList)
+				}
 			}
 		} else {
-			if _, fip, err := fipCli.GetFip(ip); err != nil {
+			if httpStatus, fip, err := fipCli.GetFip(ip); err != nil {
 				return err
 			} else {
-				PrintFipGetResult(output, *fip)
+				if httpStatus == http.StatusNotFound {
+					fmt.Println("No resources found.")
+				} else {
+					PrintFipGetResult(output, *fip)
+				}
 			}
 		}
 	}
