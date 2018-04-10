@@ -11,10 +11,10 @@
 ## use config file parameter
 
 ```
-//set user1
+//set user1(alias)
 $ pi config set-credentials user1 --region=gcp-us-central1 --access-key="xxx" --secret-key="xxxxxx"
 
-//set user2
+//set user2(alias)
 $ pi config set-credentials user2 --region=gcp-us-central1 --access-key="xxx" --secret-key="xxxxxx"
 
 //select default user
@@ -106,6 +106,16 @@ Usage:
 
 Use "pi <command> --help" for more information about a given command.
 Use "pi options" for a list of global command-line options (applies to all commands).
+
+
+// global options 
+$ pi options                                                                                                                        14:39:32
+The following options can be passed to any command:
+
+      --access-key='': AccessKey authentication to the API server
+      --region='': Region of the API server
+      --secret-key='': SecretKey for basic authentication to the API server
+      --user='': The name of the config user to use
 ```
 
 
