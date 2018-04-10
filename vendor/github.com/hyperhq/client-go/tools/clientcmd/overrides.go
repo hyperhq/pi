@@ -188,7 +188,7 @@ func RecommendedAuthOverrideFlags(prefix string) AuthOverrideFlags {
 		ImpersonateGroups: FlagInfo{prefix + FlagImpersonateGroup, "", "", "Group to impersonate for the operation, this flag can be repeated to specify multiple groups."},
 		Username:          FlagInfo{prefix + FlagUsername, "", "", "Username for basic authentication to the API server"},
 		Password:          FlagInfo{prefix + FlagPassword, "", "", "Password for basic authentication to the API server"},
-		Region:            FlagInfo{prefix + FlagRegion, "", DefaultRegion, "Region of the API server"},
+		Region:            FlagInfo{prefix + FlagRegion, "", "", "Region of the API server"},
 		AccessKey:         FlagInfo{prefix + FlagAccessKey, "", "", "AccessKey authentication to the API server"},
 		SecretKey:         FlagInfo{prefix + FlagSecretKey, "", "", "SecretKey for basic authentication to the API server"},
 	}

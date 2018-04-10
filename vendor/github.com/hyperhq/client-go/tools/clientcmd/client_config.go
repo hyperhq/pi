@@ -448,6 +448,7 @@ func (config *DirectClientConfig) getAuthInfo() (clientcmdapi.AuthInfo, error) {
 	//config file
 	if configAuthInfo, exists := authInfos[authInfoName]; exists {
 		mergo.Merge(mergedAuthInfo, configAuthInfo)
+		glog.V(4).Infof("[getAuthInfo] name:%v region:%v accessKey:%v", authInfoName, configAuthInfo.Region, configAuthInfo.AccessKey)
 	} else if required {
 		return clientcmdapi.AuthInfo{}, fmt.Errorf("auth info %q does not exist", authInfoName)
 	}

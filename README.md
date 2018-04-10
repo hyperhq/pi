@@ -347,10 +347,16 @@ $ pi get fips
 FIP             NAME  CREATEDAT
 35.192.x.x            2018-04-08T15:27:49+00:00
 35.188.x.x            2018-04-08T15:31:08+00:00
+35.189.x.x            2018-04-08T15:31:10+00:00
+
 
 $ pi name fip 35.192.x.x --name=test
 fip 35.192.x.x renamed to test
 
+
+$ pi get fips 35.192.x.x
+FIP         NAME  CREATEDAT                  PODS
+35.192.x.x        2018-04-08T15:27:49+00:00
 
 $ pi get fips 35.192.x.x -o json
 {
