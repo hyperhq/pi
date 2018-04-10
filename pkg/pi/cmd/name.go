@@ -30,10 +30,6 @@ import (
 )
 
 type NameOptions struct {
-	FilenameOptions resource.FilenameOptions
-	Selector        string
-	EditBeforeName  bool
-	Raw             string
 }
 
 var (
@@ -54,6 +50,9 @@ func NewCmdName(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 		Long:    nameLong,
 		Example: nameExample,
 		Run: func(cmd *cobra.Command, args []string) {
+			if err := options.Complete(f, out, errOut, args, cmd); err != nil {
+				cmdutil.CheckErr(err)
+			}
 			cmdutil.CheckErr(RunName(f, cmd, out, errOut, &options))
 		},
 	}
@@ -63,11 +62,20 @@ func NewCmdName(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	return cmd
 }
 
+func (o *NameOptions) Complete(f cmdutil.Factory, out, errOut io.Writer, args []string, cmd *cobra.Command) error {
+	if len(args) == 0 {
+		usageString := fmt.Sprint("You must specify the type of resource to rename. ",
+			cmdutil.ValidNameResourceTypeList(f), "\nerror: Required resource not specified.")
+		return cmdutil.UsageErrorf(cmd, usageString)
+	}
+	return nil
+}
+
 func RunName(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, options *NameOptions) error {
 	// raw only makes sense for a single file resource multiple objects aren't likely to do what you want.
 	// the validator enforces this, so
 
-	cmdNamespace, enforceNamespace, err := f.DefaultNamespace()
+	cmdNamespace, _, err := f.DefaultNamespace()
 	if err != nil {
 		return err
 	}
@@ -76,8 +84,6 @@ func RunName(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, optio
 		Unstructured().
 		ContinueOnError().
 		NamespaceParam(cmdNamespace).DefaultNamespace().
-		FilenameParam(enforceNamespace, &options.FilenameOptions).
-		LabelSelectorParam(options.Selector).
 		Flatten().
 		Do()
 	err = r.Err()

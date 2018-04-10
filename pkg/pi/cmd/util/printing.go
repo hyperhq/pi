@@ -204,3 +204,12 @@ func ValidDeleteResourceTypeList(f ClientAccessFactory) string {
 			* fips
 	`)
 }
+
+func ValidNameResourceTypeList(f ClientAccessFactory) string {
+	// TODO: Should attempt to use the cached discovery list or fallback to a static list
+	// that is calculated from code compiled into the factory.
+	return templates.LongDesc(`Valid resource types include:
+
+			* fip
+	`)
+}

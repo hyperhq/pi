@@ -338,7 +338,7 @@ $ pi get volumes test-performance -o json
 
 // delete volume
 $ pi delete volume vol1
-volume vol1 deleted
+volume "vol1" deleted
 
 ```
 
