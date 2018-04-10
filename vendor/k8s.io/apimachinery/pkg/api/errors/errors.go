@@ -344,7 +344,8 @@ func NewGenericServerResponse(code int, verb string, qualifiedResource schema.Gr
 		message = "the server could not find the requested resource"
 	case http.StatusBadRequest:
 		reason = metav1.StatusReasonBadRequest
-		message = "the server rejected our request for an unknown reason"
+		//message = "the server rejected our request for an unknown reason"
+		message = serverMessage
 	case http.StatusUnauthorized:
 		reason = metav1.StatusReasonUnauthorized
 		message = "the server has asked for the client to provide credentials"

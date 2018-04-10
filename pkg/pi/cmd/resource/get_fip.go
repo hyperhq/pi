@@ -83,7 +83,7 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 				if len(fipList) == 0 {
 					fmt.Println("No resources found.")
 				} else {
-					PrintFipListResult(output, fipList)
+					PrintFipResult(output, fipList)
 				}
 			}
 		} else {
@@ -93,7 +93,7 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 				if httpStatus == http.StatusNotFound {
 					fmt.Println("No resources found.")
 				} else {
-					PrintFipGetResult(output, *fip)
+					PrintFipResult(output, []hyper.FipResponse{*fip})
 				}
 			}
 		}
@@ -101,15 +101,15 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 	return nil
 }
 
-func PrintFipListResult(output string, result []hyper.FipListResponse) {
+func PrintFipResult(output string, result []hyper.FipResponse) {
 	if output == "table" || output == "" {
 		data := [][]string{}
 		for _, fip := range result {
-			item := []string{fip.Fip, fip.Name, fip.CreatedAt.Format("2006-01-02T15:04:05-07:00")}
+			item := []string{fip.Fip, fip.Name, fip.CreatedAt.Format("2006-01-02T15:04:05-07:00"), strings.Join(fip.Services, ",")}
 			data = append(data, item)
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Fip", "Name", "CreatedAt"})
+		table.SetHeader([]string{"Fip", "Name", "CreatedAt", "Services"})
 
 		//set table style
 		table.SetBorder(false)
@@ -125,39 +125,6 @@ func PrintFipListResult(output string, result []hyper.FipListResponse) {
 		table.Render()
 	} else if output == "json" {
 		if buf, err := json.MarshalIndent(result, "", "  "); err != nil {
-			log.Fatal(err)
-		} else {
-			fmt.Print(string(buf))
-		}
-	} else {
-		glog.Warningf("--output support table,json")
-	}
-}
-
-func PrintFipGetResult(output string, fip hyper.FipGetResponse) {
-	if output == "table" || output == "" {
-		data := [][]string{}
-
-		item := []string{fip.Fip, fip.Name, fip.CreatedAt.Format("2006-01-02T15:04:05-07:00"), strings.Join(fip.Pods, ",")}
-		data = append(data, item)
-
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Fip", "Name", "CreatedAt", "Pods"})
-
-		//set table style
-		table.SetBorder(false)
-		table.SetHeaderLine(false)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-		table.SetRowLine(false)
-		table.SetColumnSeparator("")
-		table.SetAlignment(tablewriter.ALIGN_LEFT)
-
-		for _, fip := range data {
-			table.Append(fip)
-		}
-		table.Render()
-	} else if output == "json" {
-		if buf, err := json.MarshalIndent(fip, "", "  "); err != nil {
 			log.Fatal(err)
 		} else {
 			fmt.Print(string(buf))

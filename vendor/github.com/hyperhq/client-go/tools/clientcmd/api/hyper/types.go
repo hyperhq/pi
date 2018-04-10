@@ -65,17 +65,9 @@ func (fn *FipRenameRequest) DeepCopyObject() runtime.Object {
 	return nil
 }
 
-type FipListResponse struct {
+type FipResponse struct {
 	Fip       string    `json:"fip"`
 	Name      string    `json:"name"`
-	Protocols []string  `json:"protocols"`
 	CreatedAt time.Time `json:"createdAt"`
-}
-
-type FipGetResponse struct {
-	Fip       string    `json:"fip"`
-	Name      string    `json:"name"`
-	Protocols []string  `json:"protocols"`
-	CreatedAt time.Time `json:"createdAt"`
-	Pods      []string  `json:"pods"`
+	Services  []string  `json:"services"`
 }

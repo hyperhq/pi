@@ -356,8 +356,7 @@ func RunCreateFipSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Writer
 	} else {
 		hyperConn := hyper.NewHyperConn(cfg)
 		fipCli := hyper.NewFipCli(hyperConn)
-		protocol := []string{"TCP"}
-		if _, fipList, err := fipCli.AllocateFip(protocol, opts.Count); err != nil {
+		if _, fipList, err := fipCli.AllocateFip(opts.Count); err != nil {
 			return err
 		} else {
 			for _, fip := range fipList {
