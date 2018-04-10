@@ -167,7 +167,7 @@ func DefaultClientConfig(flags *pflag.FlagSet) clientcmd.ClientConfig {
 	// DEPRECATED: remove and replace with something more accurate
 	loadingRules.DefaultClientConfig = &clientcmd.DefaultClientConfig
 
-	flags.StringVar(&loadingRules.ExplicitPath, "kubeconfig", "", "Path to the kubeconfig file to use for CLI requests.")
+	//flags.StringVar(&loadingRules.ExplicitPath, "kubeconfig", "", "Path to the kubeconfig file to use for CLI requests.")
 
 	overrides := &clientcmd.ConfigOverrides{ClusterDefaults: clientcmd.ClusterDefaults}
 
@@ -396,7 +396,7 @@ func (f *ring0Factory) BindFlags(flags *pflag.FlagSet) {
 	// TODO Change flag names to consts to allow safer lookup from subcommands.
 	// TODO Add a verbose flag that turns on glog logging. Probably need a way
 	// to do that automatically for every subcommand.
-	flags.BoolVar(&f.clientCache.matchVersion, FlagMatchBinaryVersion, false, "Require server version to match client version")
+	//flags.BoolVar(&f.clientCache.matchVersion, FlagMatchBinaryVersion, false, "Require server version to match client version")
 
 	f.discoveryFactory.BindFlags(flags)
 

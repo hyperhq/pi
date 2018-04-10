@@ -173,7 +173,7 @@ func RecommendedConfigOverrideFlags(prefix string) ConfigOverrideFlags {
 		ClusterOverrideFlags: RecommendedClusterOverrideFlags(prefix),
 		ContextOverrideFlags: RecommendedContextOverrideFlags(prefix),
 
-		CurrentContext: FlagInfo{prefix + FlagContext, "", "", "The name of the kubeconfig context to use"},
+		CurrentContext: FlagInfo{prefix + FlagContext, "", "", "The name of the config context to use"},
 		Timeout:        FlagInfo{prefix + FlagTimeout, "", "0", "The length of time to wait before giving up on a single server request. Non-zero values should contain a corresponding time unit (e.g. 1s, 2m, 3h). A value of zero means don't timeout requests."},
 	}
 }
@@ -206,8 +206,8 @@ func RecommendedClusterOverrideFlags(prefix string) ClusterOverrideFlags {
 // RecommendedContextOverrideFlags is a convenience method to return recommended flag names prefixed with a string of your choosing
 func RecommendedContextOverrideFlags(prefix string) ContextOverrideFlags {
 	return ContextOverrideFlags{
-		ClusterName:  FlagInfo{prefix + FlagClusterName, "", "", "The name of the kubeconfig cluster to use"},
-		AuthInfoName: FlagInfo{prefix + FlagAuthInfoName, "", "", "The name of the kubeconfig user to use"},
+		ClusterName:  FlagInfo{prefix + FlagClusterName, "", "", "The name of the config cluster to use"},
+		AuthInfoName: FlagInfo{prefix + FlagAuthInfoName, "", "", "The name of the config user to use"},
 		Namespace:    FlagInfo{prefix + FlagNamespace, "n", "", "If present, the namespace scope for this CLI request"},
 	}
 }
@@ -247,7 +247,7 @@ func BindClusterFlags(clusterInfo *clientcmdapi.Cluster, flags *pflag.FlagSet, f
 
 // BindFlags is a convenience method to bind the specified flags to their associated variables
 func BindContextFlags(contextInfo *clientcmdapi.Context, flags *pflag.FlagSet, flagNames ContextOverrideFlags) {
-	flagNames.ClusterName.BindStringFlag(flags, &contextInfo.Cluster)
+	//flagNames.ClusterName.BindStringFlag(flags, &contextInfo.Cluster)
 	flagNames.AuthInfoName.BindStringFlag(flags, &contextInfo.AuthInfo)
 	//flagNames.Namespace.BindTransformingStringFlag(flags, &contextInfo.Namespace, RemoveNamespacesPrefix)
 }

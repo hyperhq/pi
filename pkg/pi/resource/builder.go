@@ -24,14 +24,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hyperhq/pi/pkg/pi/categories"
+	"github.com/hyperhq/pi/pkg/pi/validation"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/sets"
-	"github.com/hyperhq/pi/pkg/pi/categories"
-	"github.com/hyperhq/pi/pkg/pi/validation"
 )
 
 var FileExtensions = []string{".json", ".yaml", ".yml"}
@@ -682,7 +683,7 @@ func (b *Builder) visitorResult() *Result {
 	}
 
 	if len(b.resources) != 0 {
-		return &Result{err: fmt.Errorf("resource(s) were provided, but no name, label selector, or --all flag specified")}
+		return &Result{err: fmt.Errorf("resource(s) were provided, but no name or --all flag specified")}
 	}
 	return &Result{err: missingResourceError}
 }

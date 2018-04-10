@@ -34,7 +34,7 @@ import (
 
 const (
 	bashCompletionFunc = `# call pi get $1,
-__pi_override_flag_list=(--kubeconfig --cluster --user --context --namespace --server -n -s)
+__pi_override_flag_list=(--user --context --server -n -s)
 __pi_override_flags()
 {
     local ${__pi_override_flag_list[*]##*-} two_word_of of var
@@ -54,9 +54,6 @@ __pi_override_flags()
                     ;;
             esac
         done
-        if [ "${w}" == "--all-namespaces" ]; then
-            namespace="--all-namespaces"
-        fi
     done
     for var in "${__pi_override_flag_list[@]##*-}"; do
         if eval "test -n \"\$${var}\""; then
