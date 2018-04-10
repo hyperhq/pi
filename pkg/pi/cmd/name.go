@@ -34,10 +34,10 @@ type NameOptions struct {
 
 var (
 	nameLong = templates.LongDesc(i18n.T(`
-		Name a resource.`))
+		Name a resource(support fip only).`))
 
 	nameExample = templates.Examples(i18n.T(`
-		# Name a resource.
+		# Name a fip.
 		pi name fip x.x.x.x --name=test`))
 )
 
@@ -137,6 +137,4 @@ type NameSubcommandOptions struct {
 	// StructuredGenerator is the resource generator for the object being named
 	StructuredGenerator pi.StructuredGenerator
 	// DryRun is true if the command should be simulated but not run against the server
-	DryRun       bool
-	OutputFormat string
 }

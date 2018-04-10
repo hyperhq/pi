@@ -49,8 +49,15 @@ var (
 		JSON and YAML formats are accepted.`))
 
 	createExample = templates.Examples(i18n.T(`
-		# Create a pod using the data in pod.json.
-		pi create -f ./pod.json`))
+		# Create a pod using the data in yaml.
+		pi create -f examples/pod/pod-nginx.yaml
+
+		# Create a service using the data in yaml.
+		pi create -f examples/service/service-nginx.yaml
+
+		# Create a secret using the data in yaml.
+		pi create -f examples/secret/secret-dockerconfigjson.yaml
+`))
 )
 
 func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {

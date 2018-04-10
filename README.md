@@ -80,6 +80,8 @@ $ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxx
 
 # usage
 
+## subcommand
+
 ```
 $ pi                                                                                                                               17:12:51
 pi controls the resources on Hyper GCP cluster.
@@ -106,9 +108,12 @@ Usage:
 
 Use "pi <command> --help" for more information about a given command.
 Use "pi options" for a list of global command-line options (applies to all commands).
+```
 
 
-// global options 
+## global options
+
+``` 
 $ pi options                                                                                                                        14:39:32
 The following options can be passed to any command:
 
@@ -116,6 +121,171 @@ The following options can be passed to any command:
       --region='': Region of the API server
       --secret-key='': SecretKey for basic authentication to the API server
       --user='': The name of the config user to use
+```
+
+## create flags
+
+```
+$ pi create -h
+Create a resource.
+
+JSON and YAML formats are accepted.
+
+Examples:
+  # Create a pod using the data in pod.json.
+  pi create -f ./pod.json
+
+Available Commands:
+  fip         Create one or more fip(s) using specified subcommand
+  secret      Create a secret using specified subcommand
+  service     Create a service using specified subcommand
+  volume      Create a volume using specified subcommand
+
+Options:
+  -f, --filename=[]: Filename, directory, or URL to files to use to create the resource
+      --validate=true: If true, use a schema to validate the input before sending it
+
+Usage:
+  pi create -f FILENAME [flags] [options]
+```
+
+### create service
+
+```
+$ pi create service -h                                                                                                                                                 16:21:58
+Create a service using specified subcommand
+
+Aliases:
+service, svc
+
+Available Commands:
+  clusterip    Create a ClusterIP service.
+  loadbalancer Create a LoadBalancer service.
+
+Usage:
+  pi create service [flags] [options]
+```
+
+### create secret
+
+```
+$ pi create secret -h
+Create a secret using specified subcommand
+
+Available Commands:
+  docker-registry Create a secret for use with a Docker registry
+  generic         Create a secret from a local file, directory or literal value
+
+Usage:
+  pi create secret [flags] [options]
+```
+
+
+## get flags
+
+```
+$ pi get -h
+Display one or many resources
+
+Valid resource types include:
+
+  * nodes (aka 'no')
+  * pods (aka 'po')
+  * secrets
+  * services (aka 'svc')
+  * volumes
+  * fips
+
+Examples:
+  # List all pods in ps output format.
+  pi get pods
+
+  # List all pods in ps output format with more information (such as node name).
+  pi get pods -o wide
+
+  # List a single pod in JSON output format.
+  pi get -o json pod web-pod-13je7
+
+  # List all replication controllers and services together in ps output format.
+  pi get pods,services
+
+  # List one or more resources by their type and names.
+  pi get services/nginx pods/nginx
+
+Available Commands:
+  fip         list fips or get a fip
+  volume      list volumes or get a volume
+
+Options:
+      --no-headers=false: When using the default output format, don't print headers (default print headers).
+  -o, --output='': Output format. One of: json|yaml|wide|name
+  -l, --selector='': Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)
+  -a, --show-all=false: When printing, show all resources (default hide terminated pods.)
+      --show-labels=false: When printing, show all labels as the last column (default hide labels column)
+      --sort-by='': If non-empty, sort list types using this field specification.  The field specification is expressed
+as a JSONPath expression (e.g. '{.metadata.name}'). The field in the API resource specified by this JSONPath expression
+must be an integer or a string.
+
+Usage:
+  pi get [(-o|--output=)json|yaml|wide (TYPE [NAME | -l label] | TYPE/NAME ...) [flags] [options]
+```
+
+## delete flag
+
+```
+$ pi delete -h
+Delete resources by resources and names.
+
+...
+
+Examples:
+  # Delete pods and services with same names "baz" and "foo"
+  pi delete pod,service baz foo
+
+  # Delete a pod with minimal delay
+  pi delete pod foo --now
+
+  # Force delete a pod on a dead node
+  pi delete pod foo --grace-period=0 --force
+
+  # Delete all pods
+  pi delete pods --all
+
+Available Commands:
+  fip         Delete a fip
+  volume      Delete a volume
+
+Options:
+      --all=false: Delete all resources, including uninitialized ones, in the namespace of the specified resource types.
+      --force=false: Immediate deletion of some resources may result in inconsistency or data loss and requires
+confirmation.
+      --grace-period=-1: Period of time in seconds given to the resource to terminate gracefully. Ignored if negative.
+      --ignore-not-found=false: Treat "resource not found" as a successful delete. Defaults to "true" when --all is
+specified.
+      --now=false: If true, resources are signaled for immediate shutdown (same as --grace-period=1).
+  -o, --output='': Output mode. Use "-o name" for shorter output (resource/name).
+      --timeout=0s: The length of time to wait before giving up on a delete, zero means determine a timeout from the
+size of the object
+
+Usage:
+  pi delete (TYPE [(NAME | --all)]) [flags] [options]
+```
+
+## name flag
+
+```
+$ pip name -h
+Name a resource(support fip only).
+
+Examples:
+  # Name a fip.
+  pi name fip x.x.x.x --name=test
+
+Available Commands:
+  fip         Name a fip
+
+Usage:
+  pi name [flags] [options]
 ```
 
 
@@ -165,6 +335,7 @@ items:
       type: Ready
   ...    
 ```
+
 
 ## pod operation example
 
@@ -354,7 +525,7 @@ $ pi create fip --count=2
 
 
 $ pi get fips
-FIP             NAME  CREATEDAT
+FIP             NAME  CREATEDAT                  SERVICES
 35.192.x.x            2018-04-08T15:27:49+00:00
 35.188.x.x            2018-04-08T15:31:08+00:00
 35.189.x.x            2018-04-08T15:31:10+00:00
@@ -365,7 +536,7 @@ fip 35.192.x.x renamed to test
 
 
 $ pi get fips 35.192.x.x
-FIP         NAME  CREATEDAT                  PODS
+FIP         NAME  CREATEDAT                  SERVICES
 35.192.x.x        2018-04-08T15:27:49+00:00
 
 $ pi get fips 35.192.x.x -o json
@@ -373,7 +544,7 @@ $ pi get fips 35.192.x.x -o json
   "fip": "35.192.x.x",
   "name": "test",
   "createdAt": "2018-04-08T15:27:49.862Z",
-  "pods": []
+  "services": []
 }
 
 

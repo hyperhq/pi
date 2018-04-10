@@ -42,7 +42,7 @@ func NewCmdNameFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1RenameName)
+	//cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1RenameName)
 	cmd.Flags().String("name", "", "Specify the name of ip to rename")
 	return cmd
 }

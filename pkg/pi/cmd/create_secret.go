@@ -36,7 +36,7 @@ func NewCmdCreateSecret(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Comm
 		Run:   cmdutil.DefaultSubCommandRun(errOut),
 	}
 	cmd.AddCommand(NewCmdCreateSecretDockerRegistry(f, cmdOut))
-	cmd.AddCommand(NewCmdCreateSecretTLS(f, cmdOut))
+	//cmd.AddCommand(NewCmdCreateSecretTLS(f, cmdOut))
 	cmd.AddCommand(NewCmdCreateSecretGeneric(f, cmdOut))
 
 	return cmd

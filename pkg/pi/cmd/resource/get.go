@@ -69,20 +69,7 @@ type GetOptions struct {
 
 var (
 	getLong = templates.LongDesc(`
-		Display one or many resources
-
-		Prints a table of the most important information about the specified resources.
-		You can filter the list using a label selector and the --selector flag. If the
-		desired resource type is namespaced you will only see results in your current
-		namespace unless you pass --all-namespaces.
-
-		This command will hide resources that have completed, such as pods that are
-		in the Succeeded or Failed phases. You can see the full results for any
-		resource by providing the --show-all flag. Uninitialized objects are not
-		shown unless --include-uninitialized is passed.
-
-		By specifying the output as 'template' and providing a Go template as the value
-		of the --template flag, you can filter the attributes of the fetched resources.`)
+		Display one or many resources`)
 
 	getExample = templates.Examples(i18n.T(`
 		# List all pods in ps output format.
@@ -91,26 +78,14 @@ var (
 		# List all pods in ps output format with more information (such as node name).
 		pi get pods -o wide
 
-		# List a single replication controller with specified NAME in ps output format.
-		pi get replicationcontroller web
-
 		# List a single pod in JSON output format.
 		pi get -o json pod web-pod-13je7
 
-		# List a pod identified by type and name specified in "pod.yaml" in JSON output format.
-		pi get -f pod.yaml -o json
-
-		# Return only the phase value of the specified pod.
-		pi get -o template pod/web-pod-13je7 --template={{.status.phase}}
-
 		# List all replication controllers and services together in ps output format.
-		pi get rc,services
+		pi get pods,services
 
 		# List one or more resources by their type and names.
-		pi get rc/web service/frontend pods/web-pod-13je7
-
-		# List all resources with different types.
-		pi get all`))
+		pi get services/nginx pods/nginx`))
 )
 
 const (
@@ -139,7 +114,7 @@ func NewCmdGet(f cmdutil.Factory, out io.Writer, errOut io.Writer) *cobra.Comman
 	}
 
 	cmd := &cobra.Command{
-		Use:     "get [(-o|--output=)json|yaml|wide|custom-columns=...|custom-columns-file=...|go-template=...|go-template-file=...|jsonpath=...|jsonpath-file=...] (TYPE [NAME | -l label] | TYPE/NAME ...) [flags]",
+		Use:     "get [(-o|--output=)json|yaml|wide (TYPE [NAME | -l label] | TYPE/NAME ...) [flags]",
 		Short:   i18n.T("Display one or many resources"),
 		Long:    getLong + "\n\n" + cmdutil.ValidResourceTypeList(f),
 		Example: getExample,
@@ -153,21 +128,21 @@ func NewCmdGet(f cmdutil.Factory, out io.Writer, errOut io.Writer) *cobra.Comman
 		ArgAliases: argAliases,
 	}
 
-	cmd.Flags().StringVar(&options.Raw, "raw", options.Raw, "Raw URI to request from the server.  Uses the transport specified by the config file.")
-	cmd.Flags().BoolVarP(&options.Watch, "watch", "w", options.Watch, "After listing/getting the requested object, watch for changes. Uninitialized objects are excluded if no object name is provided.")
-	cmd.Flags().BoolVar(&options.WatchOnly, "watch-only", options.WatchOnly, "Watch for changes to the requested object(s), without listing/getting first.")
-	cmd.Flags().Int64Var(&options.ChunkSize, "chunk-size", 500, "Return large lists in chunks rather than all at once. Pass 0 to disable. This flag is beta and may change in the future.")
-	cmd.Flags().BoolVar(&options.IgnoreNotFound, "ignore-not-found", options.IgnoreNotFound, "If the requested object does not exist the command will return exit code 0.")
+	//cmd.Flags().StringVar(&options.Raw, "raw", options.Raw, "Raw URI to request from the server.  Uses the transport specified by the config file.")
+	//cmd.Flags().BoolVarP(&options.Watch, "watch", "w", options.Watch, "After listing/getting the requested object, watch for changes. Uninitialized objects are excluded if no object name is provided.")
+	//cmd.Flags().BoolVar(&options.WatchOnly, "watch-only", options.WatchOnly, "Watch for changes to the requested object(s), without listing/getting first.")
+	//cmd.Flags().Int64Var(&options.ChunkSize, "chunk-size", 500, "Return large lists in chunks rather than all at once. Pass 0 to disable. This flag is beta and may change in the future.")
+	//cmd.Flags().BoolVar(&options.IgnoreNotFound, "ignore-not-found", options.IgnoreNotFound, "If the requested object does not exist the command will return exit code 0.")
 	cmd.Flags().StringVarP(&options.LabelSelector, "selector", "l", options.LabelSelector, "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
-	cmd.Flags().StringVar(&options.FieldSelector, "field-selector", options.FieldSelector, "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type.")
-	cmd.Flags().BoolVar(&options.AllNamespaces, "all-namespaces", options.AllNamespaces, "If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
-	cmdutil.AddIncludeUninitializedFlag(cmd)
+	//cmd.Flags().StringVar(&options.FieldSelector, "field-selector", options.FieldSelector, "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type.")
+	//cmd.Flags().BoolVar(&options.AllNamespaces, "all-namespaces", options.AllNamespaces, "If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
+	//cmdutil.AddIncludeUninitializedFlag(cmd)
 	cmdutil.AddPrinterFlags(cmd)
-	addOpenAPIPrintColumnFlags(cmd)
-	cmd.Flags().BoolVar(&options.ShowKind, "show-kind", options.ShowKind, "If present, list the resource type for the requested object(s).")
-	cmd.Flags().StringSliceVarP(&options.LabelColumns, "label-columns", "L", options.LabelColumns, "Accepts a comma separated list of labels that are going to be presented as columns. Names are case-sensitive. You can also use multiple flag options like -L label1 -L label2...")
-	cmd.Flags().BoolVar(&options.Export, "export", options.Export, "If true, use 'export' for the resources.  Exported resources are stripped of cluster-specific information.")
-	cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, "identifying the resource to get from a server.")
+	//addOpenAPIPrintColumnFlags(cmd)
+	//cmd.Flags().BoolVar(&options.ShowKind, "show-kind", options.ShowKind, "If present, list the resource type for the requested object(s).")
+	//cmd.Flags().StringSliceVarP(&options.LabelColumns, "label-columns", "L", options.LabelColumns, "Accepts a comma separated list of labels that are going to be presented as columns. Names are case-sensitive. You can also use multiple flag options like -L label1 -L label2...")
+	//cmd.Flags().BoolVar(&options.Export, "export", options.Export, "If true, use 'export' for the resources.  Exported resources are stripped of cluster-specific information.")
+	//cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, "identifying the resource to get from a server.")
 
 	// get volume, fip
 	cmd.AddCommand(NewCmdGetVolume(f, out, errOut))
@@ -177,21 +152,21 @@ func NewCmdGet(f cmdutil.Factory, out io.Writer, errOut io.Writer) *cobra.Comman
 
 // Complete takes the command arguments and factory and infers any remaining options.
 func (options *GetOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args []string) error {
-	if len(options.Raw) > 0 {
-		if len(args) > 0 {
-			return fmt.Errorf("arguments may not be passed when --raw is specified")
-		}
-		return nil
-	}
+	//if len(options.Raw) > 0 {
+	//	if len(args) > 0 {
+	//		return fmt.Errorf("arguments may not be passed when --raw is specified")
+	//	}
+	//	return nil
+	//}
 
 	var err error
 	options.Namespace, options.ExplicitNamespace, err = f.DefaultNamespace()
 	if err != nil {
 		return err
 	}
-	if options.AllNamespaces {
-		options.ExplicitNamespace = false
-	}
+	//if options.AllNamespaces {
+	//	options.ExplicitNamespace = false
+	//}
 
 	switch {
 	case options.Watch || options.WatchOnly:
@@ -213,9 +188,9 @@ func (options *GetOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, args 
 
 // Validate checks the set of flags provided by the user.
 func (options *GetOptions) Validate(cmd *cobra.Command) error {
-	if len(options.Raw) > 0 && (options.Watch || options.WatchOnly || len(options.LabelSelector) > 0 || options.Export) {
-		return fmt.Errorf("--raw may not be specified with other flags that filter the server request or alter the output")
-	}
+	//if len(options.Raw) > 0 && (options.Watch || options.WatchOnly || len(options.LabelSelector) > 0 || options.Export) {
+	//	return fmt.Errorf("--raw may not be specified with other flags that filter the server request or alter the output")
+	//}
 	if cmdutil.GetFlagBool(cmd, "show-labels") {
 		outputOption := cmd.Flags().Lookup("output").Value.String()
 		if outputOption != "" && outputOption != "wide" {
@@ -302,7 +277,8 @@ func (options *GetOptions) Run(f cmdutil.Factory, cmd *cobra.Command, args []str
 	var lastMapping *meta.RESTMapping
 	w := printers.GetNewTabWriter(options.Out)
 
-	useOpenAPIPrintColumns := cmdutil.GetFlagBool(cmd, useOpenAPIPrintColumnFlagLabel)
+	//useOpenAPIPrintColumns := cmdutil.GetFlagBool(cmd, useOpenAPIPrintColumnFlagLabel)
+	useOpenAPIPrintColumns := false
 
 	showKind := options.ShowKind
 	// TODO: abstract more cleanly
@@ -654,7 +630,7 @@ func (options *GetOptions) printGeneric(printer printers.ResourcePrinter, r *res
 }
 
 func addOpenAPIPrintColumnFlags(cmd *cobra.Command) {
-	cmd.Flags().Bool(useOpenAPIPrintColumnFlagLabel, true, "If true, use x-kubernetes-print-column metadata (if present) from the OpenAPI schema for displaying a resource.")
+	//cmd.Flags().Bool(useOpenAPIPrintColumnFlagLabel, true, "If true, use x-kubernetes-print-column metadata (if present) from the OpenAPI schema for displaying a resource.")
 }
 
 func shouldGetNewPrinterForMapping(printer printers.ResourcePrinter, lastMapping, mapping *meta.RESTMapping) bool {

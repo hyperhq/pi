@@ -38,9 +38,9 @@ func NewCmdCreateService(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Com
 		Run:     cmdutil.DefaultSubCommandRun(errOut),
 	}
 	cmd.AddCommand(NewCmdCreateServiceClusterIP(f, cmdOut))
-	cmd.AddCommand(NewCmdCreateServiceNodePort(f, cmdOut))
+	//cmd.AddCommand(NewCmdCreateServiceNodePort(f, cmdOut))
 	cmd.AddCommand(NewCmdCreateServiceLoadBalancer(f, cmdOut))
-	cmd.AddCommand(NewCmdCreateServiceExternalName(f, cmdOut))
+	//cmd.AddCommand(NewCmdCreateServiceExternalName(f, cmdOut))
 
 	return cmd
 }
