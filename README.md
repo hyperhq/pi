@@ -1,10 +1,10 @@
-# build
+# Build
 
 ```
 ./build.sh
 ```
 
-# config
+# Config
 
 **priority**:  command line arguments > config file parameters
 
@@ -78,7 +78,7 @@ $ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxx
 ```
 
 
-# usage
+# Usage
 
 ## subcommand
 
@@ -132,8 +132,20 @@ Create a resource.
 JSON and YAML formats are accepted.
 
 Examples:
-  # Create a pod using the data in pod.json.
-  pi create -f ./pod.json
+  # Create a pod using the data in yaml.
+  pi create -f examples/pod/pod-nginx.yaml
+
+  # Create a service using the data in yaml.
+  pi create -f examples/service/service-nginx.yaml
+
+  # Create a secret using the data in yaml.
+  pi create -f examples/secret/secret-dockerconfigjson.yaml
+
+  # Create a volume
+  pi create volume vol1 --size=1 --zone=gcp-us-central1-b
+
+  # Create a fip
+  pi create fip --count=1
 
 Available Commands:
   fip         Create one or more fip(s) using specified subcommand
@@ -212,6 +224,12 @@ Examples:
   # List one or more resources by their type and names.
   pi get services/nginx pods/nginx
 
+  # List volumes
+  pi get volumes
+
+  # List fips
+  pi get fips
+
 Available Commands:
   fip         list fips or get a fip
   volume      list volumes or get a volume
@@ -235,9 +253,7 @@ Usage:
 ```
 $ pi delete -h
 Delete resources by resources and names.
-
 ...
-
 Examples:
   # Delete pods and services with same names "baz" and "foo"
   pi delete pod,service baz foo
@@ -250,6 +266,12 @@ Examples:
 
   # Delete all pods
   pi delete pods --all
+
+  # Delete a volume
+  pi delete volume vol1
+
+  # Delete a fip
+  pi delete fip x.x.x.x
 
 Available Commands:
   fip         Delete a fip
@@ -269,12 +291,14 @@ size of the object
 
 Usage:
   pi delete (TYPE [(NAME | --all)]) [flags] [options]
+
 ```
+
 
 ## name flag
 
 ```
-$ pip name -h
+$ pi name -h
 Name a resource(support fip only).
 
 Examples:
@@ -289,7 +313,7 @@ Usage:
 ```
 
 
-# example
+# Example
 
 ## nodes operation example
 

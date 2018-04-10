@@ -42,11 +42,6 @@ func NewCmdDeleteVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Comm
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperVolumeV1GeneratorName)
-
 	return cmd
 }
 

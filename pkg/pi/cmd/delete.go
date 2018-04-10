@@ -72,7 +72,13 @@ var (
 		pi delete pod foo --grace-period=0 --force
 
 		# Delete all pods
-		pi delete pods --all`))
+		pi delete pods --all
+
+		# Delete a volume
+		pi delete volume vol1
+
+		# Delete a fip
+		pi delete fip x.x.x.x`))
 )
 
 type DeleteOptions struct {

@@ -85,7 +85,13 @@ var (
 		pi get pods,services
 
 		# List one or more resources by their type and names.
-		pi get services/nginx pods/nginx`))
+		pi get services/nginx pods/nginx
+		
+		# List volumes
+		pi get volumes
+
+		# List fips
+		pi get fips`))
 )
 
 const (

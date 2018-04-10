@@ -42,11 +42,6 @@ func NewCmdDeleteFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1GeneratorName)
-
 	return cmd
 }
 

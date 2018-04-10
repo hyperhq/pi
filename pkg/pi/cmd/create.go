@@ -57,6 +57,12 @@ var (
 
 		# Create a secret using the data in yaml.
 		pi create -f examples/secret/secret-dockerconfigjson.yaml
+
+		# Create a volume
+		pi create volume vol1 --size=1 --zone=gcp-us-central1-b
+
+		# Create a fip
+		pi create fip --count=1
 `))
 )
 
