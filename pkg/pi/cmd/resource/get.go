@@ -78,6 +78,9 @@ var (
 		# List all pods in ps output format with more information (such as node name).
 		pi get pods -o wide
 
+		# List pods by lable
+		pi get pods -l app=nginx 
+
 		# List a single pod in JSON output format.
 		pi get -o json pod web-pod-13je7
 

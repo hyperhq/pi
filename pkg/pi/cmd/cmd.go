@@ -254,6 +254,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 	}
 
 	cmds.AddCommand(NewCmdOptions(out))
+	cmds.AddCommand(NewCmdInfo(f, out, err))
 	cmds.AddCommand(cmdconfig.NewCmdConfig(clientcmd.NewDefaultPathOptions(), out, err))
 	return cmds
 }

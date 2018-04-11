@@ -102,6 +102,7 @@ Troubleshooting and Debugging Commands:
 Other Commands:
   config      Modify piconfig files
   help        Help about any command
+  info        Print region and user info
 
 Usage:
   pi [flags] [options]
@@ -201,7 +202,6 @@ Display one or many resources
 
 Valid resource types include:
 
-  * nodes (aka 'no')
   * pods (aka 'po')
   * secrets
   * services (aka 'svc')
@@ -214,6 +214,9 @@ Examples:
 
   # List all pods in ps output format with more information (such as node name).
   pi get pods -o wide
+
+  # List pods by lable
+  pi get pods -l app=nginx
 
   # List a single pod in JSON output format.
   pi get -o json pod web-pod-13je7
@@ -315,49 +318,21 @@ Usage:
 
 # Example
 
-## nodes operation example
+## get info
 
 ```
-$ pi get nodes
-NAME              STATUS    ROLES     AGE       VERSION
-gcp-us-central1   Ready     <none>    4d
-
-
-$ pi get nodes --show-labels
-NAME              STATUS    ROLES     AGE       VERSION   LABELS
-gcp-us-central1   Ready     <none>    6d                  availabilityZone=gcp-us-central1-b|UP,defaultZone=gcp-us-central1-b,email=testuser3@test.com,resources=pod:3/20,volume:6/40,fip:0/5,service:1/5,secret:1/3,serviceClusterIPRange=10.96.0.0/12,tenantID=00a54ebcc0444bb384e48f6fd7b5597b
-
-
-$ pi get nodes -o yaml
-apiVersion: v1
-items:
-- apiVersion: v1
-  kind: Node
-  metadata:
-    creationTimestamp: 2018-04-01T00:00:00Z
-    labels:
-      availabilityZone: gcp-us-central1-b|UP
-      defaultZone: gcp-us-central1-b
-      email: zewenzhang+gce1@gmail.com
-      resources: pod:2/20,volume:1/40,fip:2/5,service:1/5,secret:1/3
-      serviceClusterIPRange: 10.96.0.0/12
-      tenantID: 5a91a867043f4ff18e18c4a4ed8f85a2
-    name: gcp-us-central1
-    namespace: ""
-  spec:
-    podCIDR: 10.244.0.0/16
-  status:
-    addresses:
-    - address: 10.244.0.1
-      type: Internal Gateway
-    conditions:
-    - lastHeartbeatTime: 2018-04-09T02:47:23Z
-      lastTransitionTime: 2018-04-09T02:47:23Z
-      message: kubelet is posting ready status
-      reason: KubeletReady
-      status: "True"
-      type: Ready
-  ...    
+$ pi info
+Region Info:
+  Region                 gcp-us-central1
+  AvailabilityZone       gcp-us-central1-b|UP
+  ServiceClusterIPRange  10.96.0.0/12
+Account Info:
+  Email                  testuser3@test.com
+  TenantID               00a54ebcc0444bb384e48f6fd7b5597b
+  DefaultZone            gcp-us-central1-b
+  Resources              pod:0/20,volume:1/40,fip:1/5,service:2/5,secret:0/3
+Other:
+  Version                alpha
 ```
 
 

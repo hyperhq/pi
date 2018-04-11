@@ -183,7 +183,6 @@ func ValidResourceTypeList(f ClientAccessFactory) string {
 	// that is calculated from code compiled into the factory.
 	return templates.LongDesc(`Valid resource types include:
 
-			* nodes (aka 'no')
 			* pods (aka 'po')
 			* secrets
 			* services (aka 'svc')

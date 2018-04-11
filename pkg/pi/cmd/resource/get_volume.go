@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/hyperhq/client-go/tools/clientcmd/api/hyper"
@@ -28,10 +29,8 @@ import (
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
 
-	"github.com/golang/glog"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 // NewCmdGetVolume groups subcommands to get various zones of volumes
@@ -47,10 +46,7 @@ func NewCmdGetVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperVolumeV1GeneratorName)
+	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|name")
 	cmd.Flags().String("zone", "", i18n.T("The zone of volume to get"))
 	return cmd
 }
@@ -84,7 +80,7 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 				if len(volList) == 0 {
 					fmt.Println("No resources found.")
 				} else {
-					PrintVolumeResult(output, volList)
+					return PrintVolumeResult(output, volList)
 				}
 			}
 		} else {
@@ -94,7 +90,7 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 				if httpStatus == http.StatusNotFound {
 					fmt.Println("No resources found.")
 				} else {
-					PrintVolumeResult(output, []hyper.VolumeResponse{*vol})
+					return PrintVolumeResult(output, []hyper.VolumeResponse{*vol})
 				}
 			}
 		}
@@ -102,8 +98,8 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 	return nil
 }
 
-func PrintVolumeResult(output string, result []hyper.VolumeResponse) {
-	if output == "table" || output == "" {
+func PrintVolumeResult(output string, result []hyper.VolumeResponse) error {
+	if output == "" {
 		data := [][]string{}
 		for _, vol := range result {
 			item := []string{vol.Name, vol.Zone, fmt.Sprint(vol.Size), vol.CreatedAt.Format("2006-01-02T15:04:05-07:00"), vol.Pod}
@@ -131,9 +127,15 @@ func PrintVolumeResult(output string, result []hyper.VolumeResponse) {
 		} else {
 			fmt.Println(string(buf))
 		}
+	} else if output == "name" {
+		for _, vol := range result {
+			fmt.Println(vol.Name)
+		}
 	} else {
-		glog.Warningf("--output support table,json")
+		err := fmt.Errorf("error: output format \"%v\" not recognized", output)
+		return err
 	}
+	return nil
 }
 
 func VolNameFromCommandArgs(cmd *cobra.Command, args []string) string {

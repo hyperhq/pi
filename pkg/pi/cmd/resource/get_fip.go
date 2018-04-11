@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -29,10 +30,8 @@ import (
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
 
-	"github.com/golang/glog"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 // NewCmdGetFip groups subcommands to get various zones of fips
@@ -48,10 +47,7 @@ func NewCmdGetFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1GeneratorName)
+	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|ip")
 	return cmd
 }
 
@@ -83,7 +79,7 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 				if len(fipList) == 0 {
 					fmt.Println("No resources found.")
 				} else {
-					PrintFipResult(output, fipList)
+					return PrintFipResult(output, fipList)
 				}
 			}
 		} else {
@@ -93,7 +89,7 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 				if httpStatus == http.StatusNotFound {
 					fmt.Println("No resources found.")
 				} else {
-					PrintFipResult(output, []hyper.FipResponse{*fip})
+					return PrintFipResult(output, []hyper.FipResponse{*fip})
 				}
 			}
 		}
@@ -101,8 +97,8 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 	return nil
 }
 
-func PrintFipResult(output string, result []hyper.FipResponse) {
-	if output == "table" || output == "" {
+func PrintFipResult(output string, result []hyper.FipResponse) error {
+	if output == "" {
 		data := [][]string{}
 		for _, fip := range result {
 			item := []string{fip.Fip, fip.Name, fip.CreatedAt.Format("2006-01-02T15:04:05-07:00"), strings.Join(fip.Services, ",")}
@@ -129,9 +125,15 @@ func PrintFipResult(output string, result []hyper.FipResponse) {
 		} else {
 			fmt.Print(string(buf))
 		}
+	} else if output == "ip" {
+		for _, fip := range result {
+			fmt.Println(fip.Fip)
+		}
 	} else {
-		glog.Warningf("--output support table,json")
+		err := fmt.Errorf("error: output format \"%v\" not recognized", output)
+		return err
 	}
+	return nil
 }
 
 func IPFromCommandArgs(cmd *cobra.Command, args []string) string {
