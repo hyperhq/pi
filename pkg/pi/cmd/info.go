@@ -17,17 +17,22 @@ limitations under the License.
 */
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/hyperhq/client-go/tools/clientcmd/api/hyper"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
 
+	"github.com/golang/glog"
+	"github.com/google/go-github/github"
+	"github.com/hyperhq/pi"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 // NewCmdInfo groups subcommands to get various zones of infos
@@ -42,6 +47,7 @@ func NewCmdInfo(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 			cmdutil.CheckErr(err)
 		},
 	}
+	cmd.Flags().BoolP("check-update", "c", false, "check new version of pi")
 	return cmd
 }
 
@@ -66,6 +72,12 @@ func InfoGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args [
 			PrintInfoResult(info)
 		}
 	}
+
+	checkUpdate := cmdutil.GetFlagBool(cmd, "check-update")
+	if checkUpdate {
+		checkRelease()
+	}
+
 	return nil
 }
 
@@ -81,12 +93,12 @@ func PrintInfoResult(result map[string]string) {
 		"  TenantID",
 		"  DefaultZone",
 		"  Resources",
-		"Other:",
-		"  Version",
+		"Version Info:",
 	}
 	for _, p := range propertyList {
 		data = getProperty(p, result, data)
 	}
+	data = getVersion(data)
 
 	table := tablewriter.NewWriter(os.Stdout)
 
@@ -114,3 +126,68 @@ func getProperty(property string, result map[string]string, data [][]string) [][
 	}
 	return data
 }
+
+func getVersion(data [][]string) [][]string {
+	item := []string{"  Version", pi.Version}
+	data = append(data, item)
+
+	item = []string{"  Hash", pi.Commit}
+	data = append(data, item)
+
+	item = []string{"  Build", pi.Build}
+	data = append(data, item)
+
+	return data
+}
+
+func checkRelease() {
+	client := github.NewClient(nil)
+	opt := &github.ListOptions{}
+	var (
+		releases []*github.RepositoryRelease
+		err      error
+		latest   string
+	)
+	if releases, _, err = client.Repositories.ListReleases(context.Background(), "hyperhq", "pi", opt); err != nil {
+		glog.V(4).Info("failed to list repo from github")
+	} else {
+		for _, r := range releases {
+			if *r.Name == "latest" {
+				latest = *r.Body
+				if latest == pi.Version {
+					fmt.Printf("you are using the latest version")
+					return
+				} else {
+					fmt.Printf("there is a new version:")
+				}
+				break
+			}
+		}
+		for _, r := range releases {
+			if *r.Name == latest {
+				preRelease := ""
+				for _, a := range r.Assets {
+					if *r.Prerelease {
+						preRelease = "Pre-release"
+					}
+					fmt.Printf("- (%v) %v\n", preRelease, *a.BrowserDownloadURL)
+				}
+				return
+			}
+		}
+	}
+}
+
+//func getLatestRelease(id int64) {
+//	client := github.NewClient(nil)
+//	var (
+//		latestRelease *github.RepositoryRelease
+//		err error
+//	)
+//	if latestRelease, _, err = client.Repositories.GetRelease(context.Background(),"hyperhq", "pi", id ); err != nil {
+//		glog.V(4).Info("failed to list repo from github")
+//	} else {
+//		latestRelease.
+//
+//	}
+//}

@@ -6,8 +6,18 @@
 #########################################################
 
 base_dir=$(cd $(dirname $0);pwd)
-GOPATH=$(cd ../../../..;pwd)
-export GOPATH=$base_dir/vendor:$GOPATH
-go build -ldflags "-w" cmd/pi/pi.go
+cd $base_dir
 
-[ $? -eq 0 ] && echo "build pi done" || echo "build pi error"
+GOPATH=$(cd ../../../../..;pwd)
+export GOPATH=$base_dir/vendor:$GOPATH
+
+LDFLAGS="$@"
+LDFLAGS=${LDFLAGS:--w}
+
+START=`date +"%s"`
+cd ..
+echo "LDFLAGS: $LDFLAGS"
+go build -ldflags "$LDFLAGS"  cmd/pi/pi.go
+END=`date +"%s"`
+
+[ $? -eq 0 ] && echo "build pi done ($(($END - $START)) seconds)" || echo "build pi error"
