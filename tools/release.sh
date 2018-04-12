@@ -22,10 +22,22 @@
 # Check dependencies.
 set -e
 
+echo "Check jq"
+which jq
+if [ $? -ne 0 ];then
+	echo "jq is required, please install it first"
+	exit 1
+else
+	echo "jq is installed"
+fi
+
 base_dir=$(cd $(dirname $0);pwd)
 cd $base_dir/..
 
+set +e
 xargs=$(which gxargs || which xargs)
+set -e
+echo "xargs:$xargs"
 
 # Validate settings.
 [ "$TRACE" ] && set -x
@@ -49,10 +61,13 @@ WGET_ARGS="--content-disposition --auth-no-challenge --no-cookie"
 CURL_ARGS="-LJO#"
 
 if [[ "$tag" == "latest" ]]; then
-	echo "can not use latest as tag"
+	echo "> can not use latest as tag"
 	exit 1
 fi
-
+if [[ "$tag" == "" ]]; then
+	echo "> tag can not be empty"
+	exit 1
+fi
 
 if [ "$os" == "linux" ];then
 	FILENAME=pi.$os-$arch.tar.gz
@@ -66,6 +81,7 @@ curl -o /dev/null -sH "$AUTH" $GH_REPO || { echo "Error: Invalid repo, token or 
 
 # Read asset tags.
 response=$(curl -sH "$AUTH" $GH_TAGS)
+
 
 # Get ID of the asset based on given filename.
 eval $(echo "$response" | grep -m 1 "id.:" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
