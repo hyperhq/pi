@@ -62,25 +62,25 @@ users:
 
 
 //user default user
-$ pi get nodes
+$ pi info
 
 //use specified user
-$ pi --user=user2 get nodes
+$ pi --user=user2 info
 
 //specify credential
-$ pi --access-key=xxx --secret-key=xxxxxx get nodes
+$ pi --access-key=xxx --secret-key=xxxxxx info
 
 //specify region
-$ pi --region=gcp-us-central1 --access-key=xxx --secret-key=xxxxxx get nodes
+$ pi --region=gcp-us-central1 --access-key=xxx --secret-key=xxxxxx info
 
 //specify server
-$ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxxxx get nodes
+$ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxxxx info
 ```
 
 
 # Usage
 
-## subcommand
+## show all subcommand
 
 ```
 $ pi                                                                                                                               17:12:51
@@ -337,6 +337,26 @@ Version Info:
   Build                  2018-04-13T10:16:19+0800
 ```
 
+## check new pi version
+
+```
+$ pi info --check-update
+Region Info:
+  Region                 gcp-us-central1
+  AvailabilityZone       gcp-us-central1-b|DOWN
+  ServiceClusterIPRange  10.96.0.0/12
+Account Info:
+  Email                  bin@hyper.sh
+  TenantID               b1aee2a7c28d4abebb9b17a0f2cfabd6
+  DefaultZone            gcp-us-central1-b
+  Resources              pod:1/1,volume:1/1001,fip:1/1001,service:1/1,secret:1/1
+Version Info:
+  Version                alpha-0.2
+  Hash                   f544cd7a
+  Build                  2018-04-13T17:19:11+0800
+you are using the latest version
+```
+
 
 ## pod operation example
 
@@ -350,6 +370,11 @@ pod/nginx
 $ pi get pods
 NAME      READY     STATUS    RESTARTS   AGE
 nginx     1/1       Running   0          12s
+
+
+// exec pod
+$ pi exec nginx -- echo "hello world"
+hello world
 
 
 // get pod
