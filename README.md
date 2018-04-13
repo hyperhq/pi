@@ -1,7 +1,7 @@
 # Build
 
 ```
-./build.sh
+$ make
 ```
 
 # Config
@@ -330,9 +330,11 @@ Account Info:
   Email                  testuser3@test.com
   TenantID               00a54ebcc0444bb384e48f6fd7b5597b
   DefaultZone            gcp-us-central1-b
-  Resources              pod:0/20,volume:1/40,fip:1/5,service:2/5,secret:0/3
-Other:
-  Version                alpha
+  Resources              pod:1/20,volume:1/40,fip:1/5,service:4/5,secret:1/3
+Version Info:
+  Version                alpha-0.1
+  Hash                   0ade6742
+  Build                  2018-04-13T10:16:19+0800
 ```
 
 
@@ -351,7 +353,7 @@ nginx     1/1       Running   0          12s
 
 
 // get pod
-$ pi get pods nginx -o yaml
+$ pi get pod nginx -o yaml
 apiVersion: v1
 items:
 - apiVersion: v1
@@ -422,9 +424,10 @@ service/test-clusterip-default
 
 
 // list services
-$ pi get service
-NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
-test-clusterip-default   ClusterIP   10.105.34.132   <none>        8080/     15s
+$ pi get services
+NAME                          TYPE           CLUSTER-IP      LOADBALANCER-IP   PORT(S)             AGE
+test-clusterip-nginx          ClusterIP      10.109.216.15   <none>            8080/TCP,8080/UDP   20m
+test-loadbalancer-mysql       LoadBalancer   10.102.5.104    35.188.87.53      3306/TCP            26m
 
 
 // get service
@@ -451,7 +454,7 @@ status:
 
 
 // delete service
-$ pi delete services test-clusterip-default
+$ pi delete service test-clusterip-default
 service "test-clusterip-default" deleted
 ```
 
@@ -476,7 +479,7 @@ test-secret-gitlab             kubernetes.io/dockerconfigjson   1         8s
 
 
 // delete secret
-$ pi delete secrets test-secret-gitlab
+$ pi delete secret test-secret-gitlab
 secret "test-secret-gitlab" deleted
 ```
 
@@ -495,7 +498,7 @@ test-performance  gcp-us-central1-b  50        2018-03-26T05:31:05+00:00  test-f
 
 
 // get volume
-$ pi get volumes test-performance -o json
+$ pi get volume test-performance -o json
 [
   {
     "name": "test-performance",
@@ -534,7 +537,7 @@ $ pi name fip 35.192.x.x --name=test
 fip 35.192.x.x renamed to test
 
 
-$ pi get fips 35.192.x.x
+$ pi get fip 35.192.x.x
 FIP         NAME  CREATEDAT                  SERVICES
 35.192.x.x        2018-04-08T15:27:49+00:00
 
@@ -547,6 +550,6 @@ $ pi get fips 35.192.x.x -o json
 }
 
 
-$ pi delete fips 35.188.x.x
+$ pi delete fip 35.188.x.x
 fip "35.188.x.x" deleted
 ```

@@ -34,6 +34,7 @@ import (
 	openapitesting "github.com/hyperhq/pi/pkg/pi/cmd/util/openapi/testing"
 	"github.com/hyperhq/pi/pkg/pi/resource"
 	"github.com/hyperhq/pi/pkg/pi/validation"
+	"github.com/hyperhq/pi/pkg/printers"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -48,7 +49,6 @@ import (
 	"k8s.io/kubernetes/pkg/api/testapi"
 	api "k8s.io/kubernetes/pkg/apis/core"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/printers"
 )
 
 // +k8s:deepcopy-gen=true

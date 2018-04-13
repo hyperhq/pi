@@ -26,13 +26,13 @@ import (
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/resource"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
+	"github.com/hyperhq/pi/pkg/printers"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/kubernetes/pkg/printers"
 )
 
 var (

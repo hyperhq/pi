@@ -21,18 +21,18 @@ import (
 	"io"
 	"strings"
 
-	"github.com/spf13/cobra"
-
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"github.com/hyperhq/pi/pkg/pi"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/resource"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
-	"k8s.io/kubernetes/pkg/printers"
-	printersinternal "k8s.io/kubernetes/pkg/printers/internalversion"
+	"github.com/hyperhq/pi/pkg/printers"
+	printersinternal "github.com/hyperhq/pi/pkg/printers/internalversion"
+
+	"github.com/spf13/cobra"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 var (

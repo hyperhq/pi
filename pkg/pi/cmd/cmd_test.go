@@ -33,6 +33,8 @@ import (
 	cmdtesting "github.com/hyperhq/pi/pkg/pi/cmd/testing"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/scheme"
+	"github.com/hyperhq/pi/pkg/printers"
+	printersinternal "github.com/hyperhq/pi/pkg/printers/internalversion"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,8 +42,6 @@ import (
 	"k8s.io/kubernetes/pkg/api/testapi"
 	apitesting "k8s.io/kubernetes/pkg/api/testing"
 	api "k8s.io/kubernetes/pkg/apis/core"
-	"k8s.io/kubernetes/pkg/printers"
-	printersinternal "k8s.io/kubernetes/pkg/printers/internalversion"
 	"k8s.io/kubernetes/pkg/util/strings"
 )
 

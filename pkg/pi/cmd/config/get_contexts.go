@@ -23,16 +23,16 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/spf13/cobra"
-
 	"github.com/hyperhq/client-go/tools/clientcmd"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
+	"github.com/hyperhq/pi/pkg/printers"
+
+	"github.com/spf13/cobra"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/sets"
-	"k8s.io/kubernetes/pkg/printers"
 )
 
 // GetContextsOptions contains the assignable options from the args.

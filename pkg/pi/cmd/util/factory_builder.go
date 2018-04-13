@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/spf13/cobra"
+	"github.com/hyperhq/pi/pkg/pi/resource"
+	"github.com/hyperhq/pi/pkg/printers"
 
+	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/hyperhq/pi/pkg/pi/resource"
-	"k8s.io/kubernetes/pkg/printers"
 )
 
 type ring2Factory struct {

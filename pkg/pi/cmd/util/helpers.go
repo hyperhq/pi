@@ -30,6 +30,7 @@ import (
 	"github.com/hyperhq/client-go/tools/clientcmd"
 	"github.com/hyperhq/pi/pkg/pi"
 	"github.com/hyperhq/pi/pkg/pi/resource"
+	"github.com/hyperhq/pi/pkg/printers"
 
 	"github.com/evanphx/json-patch"
 	"github.com/golang/glog"
@@ -46,7 +47,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
-	"k8s.io/kubernetes/pkg/printers"
 	utilexec "k8s.io/utils/exec"
 )
 

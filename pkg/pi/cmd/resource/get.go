@@ -28,6 +28,7 @@ import (
 	"github.com/hyperhq/pi/pkg/pi/cmd/util/openapi"
 	"github.com/hyperhq/pi/pkg/pi/resource"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
+	"github.com/hyperhq/pi/pkg/printers"
 
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
@@ -40,7 +41,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/watch"
 	api "k8s.io/kubernetes/pkg/apis/core"
-	"k8s.io/kubernetes/pkg/printers"
 	"k8s.io/kubernetes/pkg/util/interrupt"
 )
 

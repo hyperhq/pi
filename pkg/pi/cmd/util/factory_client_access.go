@@ -36,6 +36,8 @@ import (
 	"github.com/hyperhq/client-go/util/homedir"
 	"github.com/hyperhq/pi/pkg/pi"
 	"github.com/hyperhq/pi/pkg/pi/resource"
+	"github.com/hyperhq/pi/pkg/printers"
+	printersinternal "github.com/hyperhq/pi/pkg/printers/internalversion"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -57,8 +59,6 @@ import (
 	api "k8s.io/kubernetes/pkg/apis/core"
 	"k8s.io/kubernetes/pkg/apis/extensions"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
-	"k8s.io/kubernetes/pkg/printers"
-	printersinternal "k8s.io/kubernetes/pkg/printers/internalversion"
 )
 
 type ring0Factory struct {

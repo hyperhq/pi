@@ -22,6 +22,13 @@ import (
 	"io"
 	"text/tabwriter"
 
+	"github.com/hyperhq/client-go/kubernetes"
+	clientappsv1beta1 "github.com/hyperhq/client-go/kubernetes/typed/apps/v1beta1"
+	clientextv1beta1 "github.com/hyperhq/client-go/kubernetes/typed/extensions/v1beta1"
+	kapps "github.com/hyperhq/pi/pkg/pi/apps"
+	sliceutil "github.com/hyperhq/pi/pkg/pi/util/slice"
+	printersinternal "github.com/hyperhq/pi/pkg/printers/internalversion"
+
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	"k8s.io/api/core/v1"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
@@ -32,15 +39,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
-	"github.com/hyperhq/client-go/kubernetes"
-	clientappsv1beta1 "github.com/hyperhq/client-go/kubernetes/typed/apps/v1beta1"
-	clientextv1beta1 "github.com/hyperhq/client-go/kubernetes/typed/extensions/v1beta1"
 	api "k8s.io/kubernetes/pkg/apis/core"
 	apiv1 "k8s.io/kubernetes/pkg/apis/core/v1"
 	deploymentutil "k8s.io/kubernetes/pkg/controller/deployment/util"
-	kapps "github.com/hyperhq/pi/pkg/pi/apps"
-	sliceutil "github.com/hyperhq/pi/pkg/pi/util/slice"
-	printersinternal "k8s.io/kubernetes/pkg/printers/internalversion"
 )
 
 const (

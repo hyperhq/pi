@@ -21,18 +21,18 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/spf13/cobra"
-
 	"github.com/hyperhq/client-go/tools/clientcmd"
 	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
 	"github.com/hyperhq/client-go/tools/clientcmd/api/latest"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
+	"github.com/hyperhq/pi/pkg/printers"
+
+	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apiserver/pkg/util/flag"
-	"k8s.io/kubernetes/pkg/printers"
 )
 
 type ViewOptions struct {

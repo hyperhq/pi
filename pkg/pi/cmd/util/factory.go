@@ -24,29 +24,29 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hyperhq/client-go/discovery"
+	"github.com/hyperhq/client-go/kubernetes"
+	restclient "github.com/hyperhq/client-go/rest"
+	"github.com/hyperhq/client-go/tools/clientcmd"
+	"github.com/hyperhq/pi/pkg/pi"
+	"github.com/hyperhq/pi/pkg/pi/categories"
+	"github.com/hyperhq/pi/pkg/pi/cmd/util/openapi"
+	"github.com/hyperhq/pi/pkg/pi/resource"
+	"github.com/hyperhq/pi/pkg/pi/validation"
+	"github.com/hyperhq/pi/pkg/printers"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
-	"github.com/hyperhq/client-go/discovery"
-	"github.com/hyperhq/client-go/kubernetes"
-	restclient "github.com/hyperhq/client-go/rest"
-	"github.com/hyperhq/client-go/tools/clientcmd"
 	api "k8s.io/kubernetes/pkg/apis/core"
 	apiv1 "k8s.io/kubernetes/pkg/apis/core/v1"
 	"k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	coreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
-	"github.com/hyperhq/pi/pkg/pi"
-	"github.com/hyperhq/pi/pkg/pi/categories"
-	"github.com/hyperhq/pi/pkg/pi/cmd/util/openapi"
-	"github.com/hyperhq/pi/pkg/pi/resource"
-	"github.com/hyperhq/pi/pkg/pi/validation"
-	"k8s.io/kubernetes/pkg/printers"
 )
 
 const (
@@ -242,7 +242,6 @@ type BuilderFactory interface {
 	// NewBuilder returns an object that assists in loading objects from both disk and the server
 	// and which implements the common patterns for CLI interactions with generic resources.
 	NewBuilder() *resource.Builder
-
 }
 
 func getGroupVersionKinds(gvks []schema.GroupVersionKind, group string) []schema.GroupVersionKind {

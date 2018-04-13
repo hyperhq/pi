@@ -22,12 +22,12 @@ import (
 
 	"github.com/hyperhq/pi/pkg/pi"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
-	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/kubernetes/pkg/printers"
-	printersinternal "k8s.io/kubernetes/pkg/printers/internalversion"
+	"github.com/hyperhq/pi/pkg/printers"
+	printersinternal "github.com/hyperhq/pi/pkg/printers/internalversion"
 
 	"github.com/spf13/cobra"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // AddPrinterFlags adds printing related flags to a command (e.g. output format, no headers, template path)
