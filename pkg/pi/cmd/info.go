@@ -152,19 +152,19 @@ func checkRelease() {
 		glog.V(4).Info("failed to list repo from github")
 	} else {
 		for _, r := range releases {
-			if *r.Name == "latest" {
-				latest = *r.Body
+			if *r.TagName == "latest" {
+				latest = strings.TrimSpace(strings.Split(*r.Body, "\n")[0])
 				if latest == pi.Version {
 					fmt.Printf("you are using the latest version")
 					return
 				} else {
-					fmt.Printf("there is a new version:")
+					fmt.Printf("there is a new version: %v\n", latest)
 				}
 				break
 			}
 		}
 		for _, r := range releases {
-			if *r.Name == latest {
+			if latest == *r.TagName {
 				preRelease := ""
 				for _, a := range r.Assets {
 					if *r.Prerelease {
