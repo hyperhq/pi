@@ -21,20 +21,22 @@ import (
 	"io"
 	"net/url"
 
-	dockerterm "github.com/docker/docker/pkg/term"
-	"github.com/spf13/cobra"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "github.com/hyperhq/client-go/rest"
+	"github.com/hyperhq/client-go/tools/clientcmd/api/hyper"
 	"github.com/hyperhq/client-go/tools/remotecommand"
-	"k8s.io/kubernetes/pkg/api/legacyscheme"
-	api "k8s.io/kubernetes/pkg/apis/core"
-	coreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
+	"github.com/hyperhq/pi/pkg/pi/cmd/util"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
 	"github.com/hyperhq/pi/pkg/pi/util/term"
 	"k8s.io/kubernetes/pkg/util/interrupt"
+
+	dockerterm "github.com/docker/docker/pkg/term"
+	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/kubernetes/pkg/api/legacyscheme"
+	api "k8s.io/kubernetes/pkg/apis/core"
+	coreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 )
 
 var (
@@ -81,7 +83,8 @@ func NewCmdExec(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *c
 			argsLenAtDash := cmd.ArgsLenAtDash()
 			cmdutil.CheckErr(options.Complete(f, cmd, args, argsLenAtDash))
 			cmdutil.CheckErr(options.Validate())
-			cmdutil.CheckErr(options.Run())
+			//cmdutil.CheckErr(options.Run())
+			cmdutil.CheckErr(options.RunHyper(f))
 		},
 	}
 	cmd.Flags().StringVarP(&options.PodName, "pod", "p", "", "Pod name")
@@ -330,5 +333,37 @@ func (p *ExecOptions) Run() error {
 		return err
 	}
 
+	return nil
+}
+
+func (p *ExecOptions) RunHyper(f util.Factory) error {
+	pod, err := p.PodClient.Pods(p.Namespace).Get(p.PodName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	if pod.Status.Phase == api.PodSucceeded || pod.Status.Phase == api.PodFailed {
+		return fmt.Errorf("cannot exec into a container in a completed pod; current phase is %s", pod.Status.Phase)
+	}
+
+	containerName := p.ContainerName
+	if len(containerName) == 0 {
+		if len(pod.Spec.Containers) > 1 {
+			usageString := fmt.Sprintf("Defaulting container name to %s.", pod.Spec.Containers[0].Name)
+			if len(p.SuggestedCmdUsage) > 0 {
+				usageString = fmt.Sprintf("%s\n%s", usageString, p.SuggestedCmdUsage)
+			}
+			fmt.Fprintf(p.Err, "%s\n", usageString)
+		}
+		containerName = pod.Spec.Containers[0].Name
+	}
+
+	if cfg, err := f.ClientConfig(); err != nil {
+		return err
+	} else {
+		hyperConn := hyper.NewHyperConn(cfg)
+		podCli := hyper.NewPodCli(hyperConn)
+		podCli.HyperExecPod(pod.Name, containerName, p.Command)
+	}
 	return nil
 }

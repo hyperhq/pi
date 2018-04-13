@@ -230,6 +230,12 @@ func (u *HyperConn) SockRequestHijack(method, endpoint string, data io.Reader, c
 }
 
 func (u *HyperConn) newRequestHyperConn(method, endpoint string, data io.Reader, ct string) (*http.Request, *httputil.ClientConn, error) {
+	//replace default domain
+	if strings.Contains(u.Host, restclient.DefaultDomain) {
+		u.Host = strings.Replace(u.Host, "*", u.Region, 1)
+		glog.V(4).Infof("replace default domain to %v", u.Host)
+	}
+
 	c, err := u.sockConn(time.Duration(10 * time.Second))
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not dial docker daemon: %v", err)
@@ -247,6 +253,7 @@ func (u *HyperConn) newRequestHyperConn(method, endpoint string, data io.Reader,
 	}
 
 	//init
+	req.URL.Scheme = "tcp"
 	req.URL.Host = strings.Split(u.Host, "://")[1]
 
 	if ct != "" {
@@ -282,20 +289,14 @@ func (u *HyperConn) sockConn(timeout time.Duration) (net.Conn, error) {
 		return nil, fmt.Errorf("could not parse url %q: %v", daemon, err)
 	}
 
-	var c net.Conn
-	switch daemonURL.Scheme {
-	case "unix":
-		return net.DialTimeout(daemonURL.Scheme, daemonURL.Path, timeout)
-	case "tcp":
-		tlsConfig, err := tlsconfig.Client(tlsconfig.Options{
-			InsecureSkipVerify: true,
-		})
-		if err != nil {
-			return nil, err
-		}
-		dialer := &net.Dialer{Timeout: timeout}
-		return tls.DialWithDialer(dialer, daemonURL.Scheme, daemonURL.Host, tlsConfig)
-	default:
-		return c, fmt.Errorf("unknown scheme %v (%s)", daemonURL.Scheme, daemon)
+	daemonURL.Scheme = "tcp"
+
+	tlsConfig, err := tlsconfig.Client(tlsconfig.Options{
+		InsecureSkipVerify: true,
+	})
+	if err != nil {
+		return nil, err
 	}
+	dialer := &net.Dialer{Timeout: timeout}
+	return tls.DialWithDialer(dialer, daemonURL.Scheme, daemonURL.Host, tlsConfig)
 }

@@ -81,14 +81,14 @@ func NewSPDYExecutor(config *restclient.Config, method string, url *url.URL) (Ex
 	if err != nil {
 		return nil, err
 	}
-	return NewSPDYExecutorForTransports(wrapper, upgradeRoundTripper, method, url)
+	return NewSPDYExecutorForTransports(wrapper, upgradeRoundTripper, method, url, config)
 }
 
 // NewSPDYExecutorForTransports connects to the provided server using the given transport,
 // upgrades the response using the given upgrader to multiplexed bidirectional streams.
-func NewSPDYExecutorForTransports(transport http.RoundTripper, upgrader spdy.Upgrader, method string, url *url.URL) (Executor, error) {
+func NewSPDYExecutorForTransports(transport http.RoundTripper, upgrader spdy.Upgrader, method string, url *url.URL, config *restclient.Config) (Executor, error) {
 	return NewSPDYExecutorForProtocols(
-		transport, upgrader, method, url,
+		transport, upgrader, method, url, config,
 		remotecommand.StreamProtocolV4Name,
 		remotecommand.StreamProtocolV3Name,
 		remotecommand.StreamProtocolV2Name,
@@ -99,12 +99,15 @@ func NewSPDYExecutorForTransports(transport http.RoundTripper, upgrader spdy.Upg
 // NewSPDYExecutorForProtocols connects to the provided server and upgrades the connection to
 // multiplexed bidirectional streams using only the provided protocols. Exposed for testing, most
 // callers should use NewSPDYExecutor or NewSPDYExecutorForTransports.
-func NewSPDYExecutorForProtocols(transport http.RoundTripper, upgrader spdy.Upgrader, method string, url *url.URL, protocols ...string) (Executor, error) {
+func NewSPDYExecutorForProtocols(transport http.RoundTripper, upgrader spdy.Upgrader, method string, url *url.URL, config *restclient.Config, protocols ...string) (Executor, error) {
 	return &streamExecutor{
 		upgrader:  upgrader,
 		transport: transport,
 		method:    method,
 		url:       url,
+		region:    config.Region, //patch for hyper
+		accessKey: config.AccessKey,
+		secretKey: config.SecretKey,
 		protocols: protocols,
 	}, nil
 }
