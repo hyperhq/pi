@@ -512,29 +512,38 @@ secret "test-secret-gitlab" deleted
 
 ```
 // create volume
-$ pi create volume vol1 --size=1
+$ pi create volume vol1 --size=50
 volume vol1(1GB) created in zone gcp-us-central1-b
+
+// create pod with volume
+
+$ pi create -f examples/pod/pod-mysql-with-volume.yaml
+pod/mysql
 
 
 // list volumes
 $ pi get volumes
 NAME              ZONE               SIZE(GB)  CREATEDAT                  POD
-test-performance  gcp-us-central1-b  50        2018-03-26T05:31:05+00:00  test-flexvolume
+vol1              gcp-us-central1-b  50        2018-03-26T05:31:05+00:00  mysql
 
 
 // get volume
-$ pi get volume test-performance -o json
+$ pi get volume vol1 -o json
 [
   {
-    "name": "test-performance",
+    "name": "vol1",
     "size": 50,
     "zone": "gcp-us-central1-b",
-    "pod": "test-flexvolume",
+    "pod": "mysql",
     "createdAt": "2018-03-26T05:31:05.773Z"
   }
 ]
 
 // delete volume
+// first you need pods which using this volume
+$ pi delete pod mysql
+pod "mysql" deleted
+
 $ pi delete volume vol1
 volume "vol1" deleted
 
