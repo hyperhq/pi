@@ -22,8 +22,10 @@ import (
 	"net/url"
 
 	restclient "github.com/hyperhq/client-go/rest"
-	"github.com/hyperhq/client-go/tools/clientcmd/api/hyper"
 	"github.com/hyperhq/client-go/tools/remotecommand"
+	"github.com/hyperhq/hyper-api/types"
+	"github.com/hyperhq/hypercli/pkg/promise"
+	"github.com/hyperhq/pi/pkg/hyper"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	"github.com/hyperhq/pi/pkg/pi/cmd/util"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
@@ -32,7 +34,9 @@ import (
 	"k8s.io/kubernetes/pkg/util/interrupt"
 
 	dockerterm "github.com/docker/docker/pkg/term"
+	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 	api "k8s.io/kubernetes/pkg/apis/core"
@@ -361,9 +365,120 @@ func (p *ExecOptions) RunHyper(f util.Factory) error {
 	if cfg, err := f.ClientConfig(); err != nil {
 		return err
 	} else {
-		hyperConn := hyper.NewHyperConn(cfg)
-		podCli := hyper.NewPodCli(hyperConn)
-		podCli.HyperExecPod(pod.Name, containerName, p.Command)
+		// ensure we can recover the terminal while attached
+		t := p.setupTTY()
+
+		// Set terminal emulation based on platform as required.
+		stdin, stdout, stderr := dockerterm.StdStreams()
+		cli, err := hyper.NewHyperCli(cfg.Host, cfg, stdin, stdout, stderr)
+		if err != nil {
+			return err
+		}
+
+		execConfig := &types.ExecConfig{
+			Cmd:          p.Command,
+			DetachKeys:   "",
+			Detach:       false,
+			Tty:          t.Raw,
+			AttachStdin:  p.Stdin,
+			AttachStdout: true,
+			AttachStderr: true,
+		}
+
+		ctx := context.Background()
+		response, err := cli.Client.PodExecCreate(ctx, pod.Name, containerName, *execConfig)
+		if err != nil {
+			return err
+		}
+
+		execID := response.ID
+		if execID == "" {
+			fmt.Printf("exec ID empty")
+			return nil
+		}
+
+		//Temp struct for execStart so that we don't need to transfer all the execConfig
+		if !execConfig.Detach {
+			if err := cli.CheckTtyInput(execConfig.AttachStdin, execConfig.Tty); err != nil {
+				return err
+			}
+		} else {
+			execStartCheck := types.ExecStartCheck{
+				Detach: execConfig.Detach,
+				Tty:    execConfig.Tty,
+			}
+
+			if err := cli.Client.PodExecStart(ctx, execID, execStartCheck); err != nil {
+				return err
+			}
+			// For now don't print this - wait for when we support exec wait()
+			// fmt.Fprintf(cli.out, "%s\n", execID)
+			return nil
+		}
+
+		glog.V(7).Infof("contID:%v execID:%v\n execConfig.DetachKeys:%v execConfig.Detach:%v execConfig.AttachStdin:%v execConfig.Tty:%v\n", containerName, execID, execConfig.DetachKeys, execConfig.Detach, execConfig.AttachStdin, execConfig.Tty)
+
+		// Interactive exec requested.
+		var (
+			sOut  io.Writer
+			sIn   io.ReadCloser
+			sErr  io.Writer
+			errCh chan error
+		)
+
+		if execConfig.AttachStdin {
+			sIn = cli.In
+		}
+		if execConfig.AttachStdout {
+			sOut = cli.Out
+		}
+		if execConfig.AttachStderr {
+			if execConfig.Tty {
+				sErr = cli.Out
+			} else {
+				sErr = cli.Err
+			}
+		}
+
+		glog.V(7).Infof("PodExecAttach: execID:%v\n", execID)
+		resp, err := cli.Client.PodExecAttach(ctx, execID, *execConfig)
+		if err != nil {
+			return err
+		}
+		defer resp.Close()
+		glog.V(7).Infof("sIn:%v, execConfig.Tty:%v\n", sIn, execConfig.Tty)
+		if sIn != nil && execConfig.Tty {
+			if err := cli.SetRawTerminal(); err != nil {
+				return err
+			}
+			defer cli.RestoreTerminal(sIn)
+		}
+		errCh = promise.Go(func() error {
+			glog.V(7).Infof("HoldHijackedConnection\n")
+			return cli.HoldHijackedConnection(execConfig.Tty, sIn, sOut, sErr, resp)
+		})
+
+		glog.V(7).Infof("MonitorTtySize: execConfig.Tty:%v cli.IsTerminalIn:%v\n", execConfig.Tty, cli.IsTerminalIn)
+		if execConfig.Tty && cli.IsTerminalIn {
+			if err := cli.MonitorTtySize(ctx, execID, true); err != nil {
+				fmt.Fprintf(cli.Err, "Error monitoring TTY size: %s\n", err)
+			}
+		}
+
+		if err := <-errCh; err != nil {
+			glog.Errorf("Error hijack: %s", err)
+			return err
+		}
+
+		var status int
+		if _, status, err = cli.GetExecExitCode(ctx, execID); err != nil {
+			return err
+		}
+
+		if status != 0 {
+			return hyper.StatusError{StatusCode: status}
+		}
+
+		return nil
 	}
-	return nil
 }

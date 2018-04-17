@@ -376,6 +376,11 @@ nginx     1/1       Running   0          12s
 $ pi exec nginx -- echo "hello world"
 hello world
 
+$ pi exec -it mysql -c mysql -- bash
+root@mysql:/# uname -r
+4.12.4-hyper
+
+
 
 // get pod
 $ pi get pod nginx -o yaml
