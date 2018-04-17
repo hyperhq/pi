@@ -202,6 +202,12 @@
 			"revisionTime": "2018-04-09T01:09:51Z"
 		},
 		{
+			"checksumSHA1": "jUfDG3VQsA2UZHvvIXncgiddpYA=",
+			"path": "github.com/docker/go-connections/sockets",
+			"revision": "98e7d807e5d804e4e42a98d74d1dd695321224ef",
+			"revisionTime": "2018-01-31T01:23:45Z"
+		},
+		{
 			"checksumSHA1": "1V8A4/D2RkJRviulalbYHpXBLYM=",
 			"path": "github.com/docker/go-connections/tlsconfig",
 			"revision": "98e7d807e5d804e4e42a98d74d1dd695321224ef",
@@ -856,6 +862,24 @@
 			"revisionTime": "2018-04-13T16:16:32Z"
 		},
 		{
+			"checksumSHA1": "0H5FZWSmdCP+Uen3gKVbKAS5EPw=",
+			"path": "github.com/hyperhq/hyper-api/client",
+			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
+			"revisionTime": "2017-11-27T03:29:13Z"
+		},
+		{
+			"checksumSHA1": "3IYInbbR4GF5IqiDBIziztHBYMw=",
+			"path": "github.com/hyperhq/hyper-api/client/transport",
+			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
+			"revisionTime": "2017-11-27T03:29:13Z"
+		},
+		{
+			"checksumSHA1": "UKOVdbw5M31ZmTroP27JoD2r2j8=",
+			"path": "github.com/hyperhq/hyper-api/client/transport/cancellable",
+			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
+			"revisionTime": "2017-11-27T03:29:13Z"
+		},
+		{
 			"checksumSHA1": "Rb6Flop8i9ltxTqv2whu4s8hxFk=",
 			"path": "github.com/hyperhq/hyper-api/signature",
 			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
@@ -892,6 +916,12 @@
 			"revisionTime": "2017-11-27T03:29:13Z"
 		},
 		{
+			"checksumSHA1": "78af+YmmuBjqbSYG9+ePKLUnNZw=",
+			"path": "github.com/hyperhq/hyper-api/types/reference",
+			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
+			"revisionTime": "2017-11-27T03:29:13Z"
+		},
+		{
 			"checksumSHA1": "uJfMMiUWFCtniBX9u082J4uf9Zg=",
 			"path": "github.com/hyperhq/hyper-api/types/registry",
 			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
@@ -900,6 +930,12 @@
 		{
 			"checksumSHA1": "Oh0e+mKX1LqwFtF+eYFH8/7TfPM=",
 			"path": "github.com/hyperhq/hyper-api/types/strslice",
+			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
+			"revisionTime": "2017-11-27T03:29:13Z"
+		},
+		{
+			"checksumSHA1": "9YvLkAY6cPysNE/Cp6jkWc5qOE0=",
+			"path": "github.com/hyperhq/hyper-api/types/time",
 			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
 			"revisionTime": "2017-11-27T03:29:13Z"
 		},
@@ -1128,6 +1164,12 @@
 		{
 			"checksumSHA1": "3xyuaSNmClqG4YWC7g0isQIbUTc=",
 			"path": "golang.org/x/net/lex/httplex",
+			"revision": "f5dfe339be1d06f81b22525fe34671ee7d2c8904",
+			"revisionTime": "2018-02-04T03:50:36Z"
+		},
+		{
+			"checksumSHA1": "r9l4r3H6FOLQ0c2JaoXpopFjpnw=",
+			"path": "golang.org/x/net/proxy",
 			"revision": "f5dfe339be1d06f81b22525fe34671ee7d2c8904",
 			"revisionTime": "2018-02-04T03:50:36Z"
 		},
