@@ -38,12 +38,12 @@ type RenameContextOptions struct {
 const (
 	renameContextUse = "rename-context CONTEXT_NAME NEW_NAME"
 
-	renameContextShort = "Renames a context from the piconfig file."
+	renameContextShort = "Renames a context from the pi config file."
 )
 
 var (
 	renameContextLong = templates.LongDesc(`
-		Renames a context from the piconfig file.
+		Renames a context from the pi config file.
 
 		CONTEXT_NAME is the context name that you wish change.
 
@@ -52,7 +52,7 @@ var (
 		Note: In case the context being renamed is the 'current-context', this field will also be updated.`)
 
 	renameContextExample = templates.Examples(`
-		# Rename the context 'old-name' to 'new-name' in your piconfig file
+		# Rename the context 'old-name' to 'new-name' in your pi config file
 		pi config rename-context old-name new-name`)
 )
 

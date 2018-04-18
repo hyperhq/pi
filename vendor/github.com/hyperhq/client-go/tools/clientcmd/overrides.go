@@ -188,16 +188,16 @@ func RecommendedAuthOverrideFlags(prefix string) AuthOverrideFlags {
 		ImpersonateGroups: FlagInfo{prefix + FlagImpersonateGroup, "", "", "Group to impersonate for the operation, this flag can be repeated to specify multiple groups."},
 		Username:          FlagInfo{prefix + FlagUsername, "", "", "Username for basic authentication to the API server"},
 		Password:          FlagInfo{prefix + FlagPassword, "", "", "Password for basic authentication to the API server"},
-		Region:            FlagInfo{prefix + FlagRegion, "", "", "Region of the API server"},
-		AccessKey:         FlagInfo{prefix + FlagAccessKey, "", "", "AccessKey authentication to the API server"},
-		SecretKey:         FlagInfo{prefix + FlagSecretKey, "", "", "SecretKey for basic authentication to the API server"},
+		Region:            FlagInfo{prefix + FlagRegion, "r", "", "Region of the Hyper API server"},
+		AccessKey:         FlagInfo{prefix + FlagAccessKey, "e", "", "AccessKey authentication to the API server"},
+		SecretKey:         FlagInfo{prefix + FlagSecretKey, "k", "", "SecretKey for basic authentication to the API server"},
 	}
 }
 
 // RecommendedClusterOverrideFlags is a convenience method to return recommended flag names prefixed with a string of your choosing
 func RecommendedClusterOverrideFlags(prefix string) ClusterOverrideFlags {
 	return ClusterOverrideFlags{
-		APIServer:             FlagInfo{prefix + FlagAPIServer, "", "", "The address and port of the Kubernetes API server"},
+		APIServer:             FlagInfo{prefix + FlagAPIServer, "", "", "The address and port of the Hyper API server"},
 		CertificateAuthority:  FlagInfo{prefix + FlagCAFile, "", "", "Path to a cert file for the certificate authority"},
 		InsecureSkipTLSVerify: FlagInfo{prefix + FlagInsecure, "", "true", "If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure"},
 	}
@@ -207,7 +207,7 @@ func RecommendedClusterOverrideFlags(prefix string) ClusterOverrideFlags {
 func RecommendedContextOverrideFlags(prefix string) ContextOverrideFlags {
 	return ContextOverrideFlags{
 		ClusterName:  FlagInfo{prefix + FlagClusterName, "", "", "The name of the config cluster to use"},
-		AuthInfoName: FlagInfo{prefix + FlagAuthInfoName, "", "", "The name of the config user to use"},
+		AuthInfoName: FlagInfo{prefix + FlagAuthInfoName, "u", "", "The name of the config user to use"},
 		Namespace:    FlagInfo{prefix + FlagNamespace, "n", "", "If present, the namespace scope for this CLI request"},
 	}
 }
@@ -217,7 +217,7 @@ func BindOverrideFlags(overrides *ConfigOverrides, flags *pflag.FlagSet, flagNam
 	BindAuthInfoFlags(&overrides.AuthInfo, flags, flagNames.AuthOverrideFlags)
 	BindClusterFlags(&overrides.ClusterInfo, flags, flagNames.ClusterOverrideFlags)
 	BindContextFlags(&overrides.Context, flags, flagNames.ContextOverrideFlags)
-	flagNames.CurrentContext.BindStringFlag(flags, &overrides.CurrentContext)
+	//flagNames.CurrentContext.BindStringFlag(flags, &overrides.CurrentContext)
 	flagNames.Timeout.BindStringFlag(flags, &overrides.Timeout)
 }
 

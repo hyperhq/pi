@@ -75,7 +75,7 @@ func NameFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, arg
 		if _, result, err := fipCli.NameFip(ip, name); err != nil {
 			log.Fatal(result)
 		} else {
-			fmt.Printf("fip %v renamed to %v\n", ip, name)
+			fmt.Printf("fip '%v' named to '%v'\n", ip, name)
 		}
 	}
 	return nil

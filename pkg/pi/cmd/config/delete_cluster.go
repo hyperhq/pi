@@ -36,8 +36,8 @@ var (
 func NewCmdConfigDeleteCluster(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "delete-cluster NAME",
-		Short:   i18n.T("Delete the specified cluster from the piconfig"),
-		Long:    "Delete the specified cluster from the piconfig",
+		Short:   i18n.T("Delete the specified cluster from the pi config"),
+		Long:    "Delete the specified cluster from the pi config",
 		Example: delete_cluster_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runDeleteCluster(out, configAccess, cmd)

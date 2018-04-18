@@ -8,5 +8,5 @@ metadata:
 spec:
   containers:
   - name: nginx
-    image: nginx
+    image: oveits/docker-nginx-busybox
 

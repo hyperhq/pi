@@ -36,8 +36,8 @@ var (
 func NewCmdConfigDeleteContext(out, errOut io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "delete-context NAME",
-		Short:   i18n.T("Delete the specified context from the piconfig"),
-		Long:    "Delete the specified context from the piconfig",
+		Short:   i18n.T("Delete the specified context from the pi config"),
+		Long:    "Delete the specified context from the pi config",
 		Example: delete_context_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runDeleteContext(out, errOut, configAccess, cmd)

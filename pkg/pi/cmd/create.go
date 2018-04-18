@@ -44,26 +44,22 @@ type CreateOptions struct {
 
 var (
 	createLong = templates.LongDesc(i18n.T(`
-		Create a resource.
+		Create a resource(pod, service, secret, volume, fip).
 
-		JSON and YAML formats are accepted.`))
+		JSON and YAML formats are accepted(pod, service, secret).`))
 
 	createExample = templates.Examples(i18n.T(`
 		# Create a pod using the data in yaml.
 		pi create -f examples/pod/pod-nginx.yaml
 
+		# Create multiple pods using the data in yaml.
+		pi create -f pod-test1.yaml -f pod-test2.yaml
+
 		# Create a service using the data in yaml.
 		pi create -f examples/service/service-nginx.yaml
 
 		# Create a secret using the data in yaml.
-		pi create -f examples/secret/secret-dockerconfigjson.yaml
-
-		# Create a volume
-		pi create volume vol1 --size=1 --zone=gcp-us-central1-b
-
-		# Create a fip
-		pi create fip --count=1
-`))
+		pi create -f examples/secret/secret-dockerconfigjson.yaml`))
 )
 
 func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
@@ -71,7 +67,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "create -f FILENAME",
-		Short:   i18n.T("Create a resource."),
+		Short:   i18n.T("Create a resource(support pod, service, secret, volume, fip)"),
 		Long:    createLong,
 		Example: createExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -80,7 +76,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 				defaultRunFunc(cmd, args)
 				return
 			}
-			cmdutil.CheckErr(options.ValidateArgs(cmd, args))
+			//cmdutil.CheckErr(options.ValidateArgs(cmd, args))
 			cmdutil.CheckErr(RunCreate(f, cmd, out, errOut, &options))
 		},
 	}
@@ -88,7 +84,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	usage := "to use to create the resource"
 	cmdutil.AddFilenameOptionFlags(cmd, &options.FilenameOptions, usage)
 	cmd.MarkFlagRequired("filename")
-	cmdutil.AddValidateFlags(cmd)
+	//cmdutil.AddValidateFlags(cmd)
 	//cmdutil.AddPrinterFlags(cmd)
 	//cmd.Flags().BoolVar(&options.EditBeforeCreate, "edit", false, "Edit the API resource before creating")
 	//cmd.Flags().Bool("windows-line-endings", runtime.GOOS == "windows",
@@ -100,8 +96,8 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	//cmd.Flags().StringVar(&options.Raw, "raw", options.Raw, "Raw URI to POST to the server.  Uses the transport specified by the kubeconfig file.")
 
 	// create subcommands
-	cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
-	cmd.AddCommand(NewCmdCreateService(f, out, errOut))
+	//cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
+	//cmd.AddCommand(NewCmdCreateService(f, out, errOut))
 
 	// create volume, fip
 	cmd.AddCommand(NewCmdCreateVolume(f, out, errOut))
@@ -168,10 +164,10 @@ func RunCreate(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, opt
 		return nil
 	}
 
-	schema, err := f.Validator(cmdutil.GetFlagBool(cmd, "validate"))
-	if err != nil {
-		return err
-	}
+	//schema, err := f.Validator(cmdutil.GetFlagBool(cmd, "validate"))
+	//if err != nil {
+	//	return err
+	//}
 
 	cmdNamespace, enforceNamespace, err := f.DefaultNamespace()
 	if err != nil {
@@ -180,7 +176,7 @@ func RunCreate(f cmdutil.Factory, cmd *cobra.Command, out, errOut io.Writer, opt
 
 	r := f.NewBuilder().
 		Unstructured().
-		Schema(schema).
+		//Schema(schema).
 		ContinueOnError().
 		NamespaceParam(cmdNamespace).DefaultNamespace().
 		FilenameParam(enforceNamespace, &options.FilenameOptions).
@@ -338,7 +334,7 @@ func RunCreateVolumeSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Wri
 		if _, volCreated, err := volCli.CreateVolume(opts.Name, opts.Zone, fmt.Sprintf("%v", opts.Size)); err != nil {
 			return err
 		} else {
-			fmt.Printf("volume %v(%vGB) created in zone %v\n", volCreated.Name, volCreated.Size, volCreated.Zone)
+			fmt.Printf("volume/%v\n", volCreated.Name)
 		}
 	}
 	return nil
@@ -360,7 +356,7 @@ func RunCreateFipSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Writer
 			return err
 		} else {
 			for _, fip := range fipList {
-				fmt.Println(fip.Fip)
+				fmt.Printf("fip/%v\n", fip.Fip)
 			}
 		}
 	}

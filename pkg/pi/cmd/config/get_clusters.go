@@ -34,12 +34,12 @@ var (
 )
 
 // NewCmdConfigGetClusters creates a command object for the "get-clusters" action, which
-// lists all clusters defined in the piconfig.
+// lists all clusters defined in the pi config.
 func NewCmdConfigGetClusters(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "get-clusters",
-		Short:   i18n.T("Display clusters defined in the piconfig"),
-		Long:    "Display clusters defined in the piconfig.",
+		Short:   i18n.T("Display clusters defined in the pi config"),
+		Long:    "Display clusters defined in the pi config.",
 		Example: get_clusters_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runGetClusters(out, configAccess)

@@ -45,18 +45,18 @@ type GetContextsOptions struct {
 }
 
 var (
-	getContextsLong = templates.LongDesc(`Displays one or many contexts from the piconfig file.`)
+	getContextsLong = templates.LongDesc(`Displays one or many contexts from the pi config file.`)
 
 	getContextsExample = templates.Examples(`
-		# List all the contexts in your piconfig file
+		# List all the contexts in your pi config file
 		pi config get-contexts
 
-		# Describe one context in your piconfig file.
+		# Describe one context in your pi config file.
 		pi config get-contexts my-context`)
 )
 
 // NewCmdConfigGetContexts creates a command object for the "get-contexts" action, which
-// retrieves one or more contexts from a piconfig.
+// retrieves one or more contexts from a pi config.
 func NewCmdConfigGetContexts(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
 	options := &GetContextsOptions{configAccess: configAccess}
 

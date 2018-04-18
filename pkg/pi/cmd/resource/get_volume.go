@@ -58,8 +58,14 @@ var (
 	  # List volumes
 	  pi get volumes	  
 
-	  # Get a volume named vol1 with default size and zone
-	  pi get volume vol1`))
+	  # Get a volume named vol1
+	  pi get volume vol1
+
+	  # Get volume in specified zone
+	  pi get volumes --zone=gcp-us-central1-b
+
+	  # Show volume name only
+	  pi get volumes -o name`))
 )
 
 // GetVolumeGeneric is the implementation of the get volume generic command
@@ -129,7 +135,7 @@ func PrintVolumeResult(output string, result []hyper.VolumeResponse) error {
 		}
 	} else if output == "name" {
 		for _, vol := range result {
-			fmt.Println(vol.Name)
+			fmt.Printf("volumes/%v\n", vol.Name)
 		}
 	} else {
 		err := fmt.Errorf("error: output format \"%v\" not recognized", output)

@@ -17,7 +17,6 @@ limitations under the License.
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -45,16 +44,18 @@ type ViewOptions struct {
 
 var (
 	view_long = templates.LongDesc(`
-		Display merged piconfig settings or a specified piconfig file.
-
-		You can use --output jsonpath={...} to extract specific values using a jsonpath expression.`)
+		Display pi config file.`)
 
 	view_example = templates.Examples(`
-		# Show Merged piconfig settings.
+		# Show pi config settings(available flag --minify --output).
 		pi config view
 
-		# Get the password for the e2e user
-		pi config view -o jsonpath='{.users[?(@.name == "e2e")].user.password}'`)
+		# Show current user current-context info
+		pi config view --minify=true
+
+		# Output as json
+		pi config view --output=json
+		`)
 )
 
 func NewCmdConfigView(out, errOut io.Writer, ConfigAccess clientcmd.ConfigAccess) *cobra.Command {
@@ -64,16 +65,16 @@ func NewCmdConfigView(out, errOut io.Writer, ConfigAccess clientcmd.ConfigAccess
 
 	cmd := &cobra.Command{
 		Use:     "view",
-		Short:   i18n.T("Display merged piconfig settings or a specified piconfig file"),
+		Short:   i18n.T("Display pi config file"),
 		Long:    view_long,
 		Example: view_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			options.Complete()
 			outputFormat := cmdutil.GetFlagString(cmd, "output")
-			if outputFormat == "wide" {
-				fmt.Fprintf(errOut, "--output wide is not available in pi config view; reset to default output format (%s)\n\n", defaultOutputFormat)
+			if outputFormat == "wide" || outputFormat == "name" {
+				fmt.Fprintf(errOut, "--output '%v' is not available in pi config view; reset to default output format (%s)\n\n", outputFormat, defaultOutputFormat)
 				// TODO: once printing is abstracted, this should be handled at flag declaration time
-				cmd.Flags().Set("output", defaultOutputFormat)
+				//cmd.Flags().Set("output", defaultOutputFormat)
 			}
 			if outputFormat == "" {
 				fmt.Fprintf(errOut, "Reset to default output format (%s) as --output is empty\n", defaultOutputFormat)
@@ -93,11 +94,11 @@ func NewCmdConfigView(out, errOut io.Writer, ConfigAccess clientcmd.ConfigAccess
 	cmdutil.AddPrinterFlags(cmd)
 	cmd.Flags().Set("output", defaultOutputFormat)
 
-	options.Merge.Default(true)
-	f := cmd.Flags().VarPF(&options.Merge, "merge", "", "Merge the full hierarchy of piconfig files")
-	f.NoOptDefVal = "true"
-	cmd.Flags().BoolVar(&options.RawByteData, "raw", false, "Display raw byte data")
-	cmd.Flags().BoolVar(&options.Flatten, "flatten", false, "Flatten the resulting piconfig file into self-contained output (useful for creating portable piconfig files)")
+	//options.Merge.Default(true)
+	//f := cmd.Flags().VarPF(&options.Merge, "merge", "", "Merge the full hierarchy of pi config files")
+	//f.NoOptDefVal = "true"
+	//cmd.Flags().BoolVar(&options.RawByteData, "raw", false, "Display raw byte data")
+	//cmd.Flags().BoolVar(&options.Flatten, "flatten", false, "Flatten the resulting pi config file into self-contained output (useful for creating portable pi config files)")
 	cmd.Flags().BoolVar(&options.Minify, "minify", false, "Remove all information not used by current-context from the output")
 	return cmd
 }
@@ -114,13 +115,13 @@ func (o ViewOptions) Run(out io.Writer, printer printers.ResourcePrinter) error 
 		}
 	}
 
-	if o.Flatten {
-		if err := clientcmdapi.FlattenConfig(config); err != nil {
-			return err
-		}
-	} else if !o.RawByteData {
-		clientcmdapi.ShortenConfig(config)
-	}
+	//if o.Flatten {
+	//	if err := clientcmdapi.FlattenConfig(config); err != nil {
+	//		return err
+	//	}
+	//} else if !o.RawByteData {
+	//	clientcmdapi.ShortenConfig(config)
+	//}
 
 	err = printer.PrintObj(config, out)
 	if err != nil {
@@ -131,11 +132,11 @@ func (o ViewOptions) Run(out io.Writer, printer printers.ResourcePrinter) error 
 }
 
 func (o *ViewOptions) Complete() bool {
-	if o.ConfigAccess.IsExplicitFile() {
-		if !o.Merge.Provided() {
-			o.Merge.Set("false")
-		}
-	}
+	//if o.ConfigAccess.IsExplicitFile() {
+	//	if !o.Merge.Provided() {
+	//		o.Merge.Set("false")
+	//	}
+	//}
 
 	return true
 }
@@ -151,9 +152,9 @@ func (o ViewOptions) loadConfig() (*clientcmdapi.Config, error) {
 }
 
 func (o ViewOptions) Validate() error {
-	if !o.Merge.Value() && !o.ConfigAccess.IsExplicitFile() {
-		return errors.New("if merge==false a precise file must to specified")
-	}
+	//if !o.Merge.Value() && !o.ConfigAccess.IsExplicitFile() {
+	//	return errors.New("if merge==false a precise file must to specified")
+	//}
 
 	return nil
 }
@@ -161,8 +162,8 @@ func (o ViewOptions) Validate() error {
 // getStartingConfig returns the Config object built from the sources specified by the options, the filename read (only if it was a single file), and an error if something goes wrong
 func (o *ViewOptions) getStartingConfig() (*clientcmdapi.Config, error) {
 	switch {
-	case !o.Merge.Value():
-		return clientcmd.LoadFromFile(o.ConfigAccess.GetExplicitFile())
+	//case !o.Merge.Value():
+	//	return clientcmd.LoadFromFile(o.ConfigAccess.GetExplicitFile())
 
 	default:
 		return o.ConfigAccess.GetStartingConfig()
