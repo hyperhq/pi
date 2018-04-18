@@ -198,8 +198,8 @@
 			"checksumSHA1": "kV9tTtr7lAO0l6NJi6yOE9YFu3E=",
 			"origin": "k8s.io/kubernetes/vendor/github.com/docker/go-connections/nat",
 			"path": "github.com/docker/go-connections/nat",
-			"revision": "64cc419ba9640d41994ec73e22d0422220f815b7",
-			"revisionTime": "2018-04-09T01:09:51Z"
+			"revision": "49f8b6a0fee8b81244231da99411e7d585d106de",
+			"revisionTime": "2018-04-04T04:03:51Z"
 		},
 		{
 			"checksumSHA1": "jUfDG3VQsA2UZHvvIXncgiddpYA=",
@@ -217,8 +217,8 @@
 			"checksumSHA1": "JWdDWmXHdusGMp+0cRSWKvPnVf4=",
 			"origin": "k8s.io/kubernetes/vendor/github.com/docker/go-units",
 			"path": "github.com/docker/go-units",
-			"revision": "64cc419ba9640d41994ec73e22d0422220f815b7",
-			"revisionTime": "2018-04-09T01:09:51Z"
+			"revision": "49f8b6a0fee8b81244231da99411e7d585d106de",
+			"revisionTime": "2018-04-04T04:03:51Z"
 		},
 		{
 			"checksumSHA1": "5Z0J6IIV39bPOf0NOVHLolGwcfo=",
@@ -882,8 +882,8 @@
 		{
 			"checksumSHA1": "Rb6Flop8i9ltxTqv2whu4s8hxFk=",
 			"path": "github.com/hyperhq/hyper-api/signature",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
 		},
 		{
 			"checksumSHA1": "CDb4AeZJt+LgMbLcteADfXLnYnY=",
@@ -894,26 +894,26 @@
 		{
 			"checksumSHA1": "qh1uHds08h0cr7Xmm1PM3H8IDWE=",
 			"path": "github.com/hyperhq/hyper-api/types/blkiodev",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
 		},
 		{
 			"checksumSHA1": "AXJQYRpHwDKnP3QbcPQSZVQLaKc=",
 			"path": "github.com/hyperhq/hyper-api/types/container",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
 		},
 		{
 			"checksumSHA1": "nlbz+qjEGfnoWyJK8GyRHRjluUM=",
 			"path": "github.com/hyperhq/hyper-api/types/filters",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
 		},
 		{
 			"checksumSHA1": "WFZIUnn4qMJQI69MJYRCBj+wCq4=",
 			"path": "github.com/hyperhq/hyper-api/types/network",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
 		},
 		{
 			"checksumSHA1": "78af+YmmuBjqbSYG9+ePKLUnNZw=",
@@ -924,14 +924,14 @@
 		{
 			"checksumSHA1": "uJfMMiUWFCtniBX9u082J4uf9Zg=",
 			"path": "github.com/hyperhq/hyper-api/types/registry",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
 		},
 		{
 			"checksumSHA1": "Oh0e+mKX1LqwFtF+eYFH8/7TfPM=",
 			"path": "github.com/hyperhq/hyper-api/types/strslice",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
 		},
 		{
 			"checksumSHA1": "9YvLkAY6cPysNE/Cp6jkWc5qOE0=",
@@ -942,8 +942,44 @@
 		{
 			"checksumSHA1": "0PRN+e7pt/7ysQibutgMmxLcXiA=",
 			"path": "github.com/hyperhq/hyper-api/types/versions",
-			"revision": "18c77d3f9fe0abebb41b45c12f383ecac46f4ff1",
-			"revisionTime": "2017-11-27T03:29:13Z"
+			"revision": "de1363a4d5bc443910c6979ae90149d8f8cb168e",
+			"revisionTime": "2018-04-17T09:39:56Z"
+		},
+		{
+			"checksumSHA1": "12WGyFY5XKcFqyoOH0X5t0DZYws=",
+			"path": "github.com/hyperhq/hypercli/pkg/promise",
+			"revision": "eae40509e63c29daa0941ebb414beb47b9979525",
+			"revisionTime": "2018-04-18T08:00:23Z"
+		},
+		{
+			"checksumSHA1": "Y/vfHr6cOcDHJBcMlFa+7VdvYCA=",
+			"path": "github.com/hyperhq/hypercli/pkg/signal",
+			"revision": "eae40509e63c29daa0941ebb414beb47b9979525",
+			"revisionTime": "2018-04-18T08:00:23Z"
+		},
+		{
+			"checksumSHA1": "Mo5VnzdB+qCMIIY+ld394f+dUXY=",
+			"path": "github.com/hyperhq/hypercli/pkg/stdcopy",
+			"revision": "eae40509e63c29daa0941ebb414beb47b9979525",
+			"revisionTime": "2018-04-18T08:00:23Z"
+		},
+		{
+			"checksumSHA1": "Pz15VPKzK3MW6y60P7/YoLTKsUU=",
+			"path": "github.com/hyperhq/hypercli/pkg/system",
+			"revision": "29217d318cab52815518a1126d57ca010de83e4d",
+			"revisionTime": "2018-04-14T05:49:30Z"
+		},
+		{
+			"checksumSHA1": "YAleIKtaBxdpSaeJUBcevix+Has=",
+			"path": "github.com/hyperhq/hypercli/pkg/term",
+			"revision": "eae40509e63c29daa0941ebb414beb47b9979525",
+			"revisionTime": "2018-04-18T08:00:23Z"
+		},
+		{
+			"checksumSHA1": "KDhNcyqFmpsW688Zgq9fZ3N8lzI=",
+			"path": "github.com/hyperhq/hypercli/pkg/term/windows",
+			"revision": "29217d318cab52815518a1126d57ca010de83e4d",
+			"revisionTime": "2018-04-14T05:49:30Z"
 		},
 		{
 			"checksumSHA1": "/MbkohdDPqGPeAkHq6ZkInB/WD0=",

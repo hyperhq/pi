@@ -326,6 +326,9 @@ func RunCreateVolumeSubcommand(f cmdutil.Factory, cmd *cobra.Command, out io.Wri
 		return err
 	}
 	opts := obj.(*hyper.VolumeCreateRequest)
+	if opts.Size < 1 {
+		return fmt.Errorf("volume size should be >=1 (GB)")
+	}
 	if cfg, err := f.ClientConfig(); err != nil {
 		return err
 	} else {
