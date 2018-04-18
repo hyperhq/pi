@@ -38,35 +38,43 @@ func NewCmdConfig(pathOptions *clientcmd.PathOptions, out, errOut io.Writer) *co
 
 	cmd := &cobra.Command{
 		Use:   "config SUBCOMMAND",
-		Short: i18n.T("Modify piconfig files"),
-		Long: templates.LongDesc(`
-			Modify piconfig files using subcommands like "pi config set current-context my-context"
+		Short: i18n.T("Modify pi config file"),
+		Long:  templates.LongDesc(`Modify pi config file ` + path.Join("${HOME}", pathOptions.GlobalFileSubpath)),
+		Example: templates.Examples(`
+			# Set credential for user (default region is gcp-us-central1)  
+			pi config set-credentials user1 --access-key="xxx" --secret-key="xxxxxx"
 
-			The loading order follows these rules:
+			# Set credential for user with region
+			pi config set-credentials user1 --region=gcp-us-central1 --access-key="xxx" --secret-key="xxxxxx"
 
-			1. If the --` + pathOptions.ExplicitFileFlag + ` flag is set, then only that file is loaded.  The flag may only be set once and no merging takes place.
-			2. If $` + pathOptions.EnvVar + ` environment variable is set, then it is used a list of paths (normal path delimitting rules for your system).  These paths are merged.  When a value is modified, it is modified in the file that defines the stanza.  When a value is created, it is created in the first file that exists.  If no files in the chain exist, then it creates the last file in the list.
-			3. Otherwise, ` + path.Join("${HOME}", pathOptions.GlobalFileSubpath) + ` is used and no merging takes place.`),
+			# Print credentials for current user
+			pi config view --minify=true
+
+			# Switch current credential of specified user
+			pi config set-context default --user=user1
+
+			# Delete specified credentials
+			pi config delete-credentials user1`),
 		Run: cmdutil.DefaultSubCommandRun(errOut),
 	}
 
 	// file paths are common to all sub commands
-	cmd.PersistentFlags().StringVar(&pathOptions.LoadingRules.ExplicitPath, pathOptions.ExplicitFileFlag, pathOptions.LoadingRules.ExplicitPath, "use a particular piconfig file")
+	cmd.PersistentFlags().StringVar(&pathOptions.LoadingRules.ExplicitPath, pathOptions.ExplicitFileFlag, pathOptions.LoadingRules.ExplicitPath, "use a particular pi config file")
 
 	cmd.AddCommand(NewCmdConfigView(out, errOut, pathOptions))
-	cmd.AddCommand(NewCmdConfigSetCluster(out, pathOptions))
+	//cmd.AddCommand(NewCmdConfigSetCluster(out, pathOptions))
 	cmd.AddCommand(NewCmdConfigSetAuthInfo(out, pathOptions))
 	cmd.AddCommand(NewCmdConfigSetContext(out, pathOptions))
-	cmd.AddCommand(NewCmdConfigSet(out, pathOptions))
-	cmd.AddCommand(NewCmdConfigUnset(out, pathOptions))
+	//cmd.AddCommand(NewCmdConfigSet(out, pathOptions))
+	//cmd.AddCommand(NewCmdConfigUnset(out, pathOptions))
 	cmd.AddCommand(NewCmdConfigCurrentContext(out, pathOptions))
-	cmd.AddCommand(NewCmdConfigUseContext(out, pathOptions))
+	//cmd.AddCommand(NewCmdConfigUseContext(out, pathOptions))
 	cmd.AddCommand(NewCmdConfigGetContexts(out, pathOptions))
-	cmd.AddCommand(NewCmdConfigGetClusters(out, pathOptions))
-	cmd.AddCommand(NewCmdConfigDeleteCluster(out, pathOptions))
-	cmd.AddCommand(NewCmdConfigDeleteContext(out, errOut, pathOptions))
-	cmd.AddCommand(NewCmdConfigRenameContext(out, pathOptions))
-
+	//cmd.AddCommand(NewCmdConfigGetClusters(out, pathOptions))
+	//cmd.AddCommand(NewCmdConfigDeleteCluster(out, pathOptions))
+	//cmd.AddCommand(NewCmdConfigDeleteContext(out, errOut, pathOptions))
+	//cmd.AddCommand(NewCmdConfigRenameContext(out, pathOptions))
+	cmd.AddCommand(NewCmdConfigDeleteAuthInfo(out, errOut, pathOptions))
 	return cmd
 }
 

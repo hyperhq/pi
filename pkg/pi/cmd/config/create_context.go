@@ -41,7 +41,7 @@ type createContextOptions struct {
 
 var (
 	create_context_long = templates.LongDesc(`
-		Sets a context entry in piconfig
+		Sets a context entry in pi config
 
 		Specifying a name that already exists will merge new fields on top of existing values for those fields.`)
 
@@ -55,7 +55,7 @@ func NewCmdConfigSetContext(out io.Writer, configAccess clientcmd.ConfigAccess) 
 
 	cmd := &cobra.Command{
 		Use:     fmt.Sprintf("set-context NAME [--%v=cluster_nickname] [--%v=user_nickname] [--%v=namespace]", clientcmd.FlagClusterName, clientcmd.FlagAuthInfoName, clientcmd.FlagNamespace),
-		Short:   i18n.T("Sets a context entry in piconfig"),
+		Short:   i18n.T("Sets a context entry in pi config"),
 		Long:    create_context_long,
 		Example: create_context_example,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -70,9 +70,9 @@ func NewCmdConfigSetContext(out io.Writer, configAccess clientcmd.ConfigAccess) 
 		},
 	}
 
-	cmd.Flags().Var(&options.cluster, clientcmd.FlagClusterName, clientcmd.FlagClusterName+" for the context entry in piconfig")
-	cmd.Flags().Var(&options.authInfo, clientcmd.FlagAuthInfoName, clientcmd.FlagAuthInfoName+" for the context entry in piconfig")
-	cmd.Flags().Var(&options.namespace, clientcmd.FlagNamespace, clientcmd.FlagNamespace+" for the context entry in piconfig")
+	cmd.Flags().Var(&options.cluster, clientcmd.FlagClusterName, clientcmd.FlagClusterName+" for the context entry in pi config")
+	cmd.Flags().Var(&options.authInfo, clientcmd.FlagAuthInfoName, clientcmd.FlagAuthInfoName+" for the context entry in pi config")
+	cmd.Flags().Var(&options.namespace, clientcmd.FlagNamespace, clientcmd.FlagNamespace+" for the context entry in pi config")
 
 	return cmd
 }

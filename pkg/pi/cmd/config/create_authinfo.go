@@ -57,7 +57,7 @@ type createAuthInfoOptions struct {
 
 var (
 	create_authinfo_long = fmt.Sprintf(templates.LongDesc(`
-		Sets a user entry in piconfig
+		Sets a user entry in pi config
 
 		Specifying a name that already exists will merge new fields on top of existing values.
 
@@ -70,8 +70,8 @@ var (
 		Bearer token and basic auth are mutually exclusive.`), clientcmd.FlagRegion, clientcmd.FlagAccessKey, clientcmd.FlagSecretKey)
 
 	create_authinfo_example = templates.Examples(`
-		# Set basic auth for the "cluster-admin" entry
-		pi config set-credentials user1@test.com --region=gcp-us-central1 --access-key=xxxx --secret-key=xxxxxxxxx`)
+		# Set credentials for hyper user
+		pi config set-credentials user1 --region=gcp-us-central1 --access-key=xxxx --secret-key=xxxxxxxxx`)
 )
 
 func NewCmdConfigSetAuthInfo(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
@@ -82,7 +82,7 @@ func NewCmdConfigSetAuthInfo(out io.Writer, configAccess clientcmd.ConfigAccess)
 func newCmdConfigSetAuthInfo(out io.Writer, options *createAuthInfoOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     fmt.Sprintf("set-credentials NAME [--%v=access_key] [--%v=secret_key] [--%v=region] ", clientcmd.FlagAccessKey, clientcmd.FlagSecretKey, clientcmd.FlagRegion),
-		Short:   i18n.T("Sets a user entry in piconfig"),
+		Short:   i18n.T("Sets a user entry in pi config"),
 		Long:    create_authinfo_long,
 		Example: create_authinfo_example,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -96,9 +96,9 @@ func newCmdConfigSetAuthInfo(out io.Writer, options *createAuthInfoOptions) *cob
 		},
 	}
 
-	cmd.Flags().Var(&options.accessKey, clientcmd.FlagAccessKey, clientcmd.FlagAccessKey+" for the user entry in piconfig")
-	cmd.Flags().Var(&options.secretKey, clientcmd.FlagSecretKey, clientcmd.FlagSecretKey+" for the user entry in piconfig")
-	cmd.Flags().Var(&options.region, clientcmd.FlagRegion, "region for the user entry in piconfig")
+	cmd.Flags().Var(&options.accessKey, clientcmd.FlagAccessKey, clientcmd.FlagAccessKey+" for the user entry in pi config")
+	cmd.Flags().Var(&options.secretKey, clientcmd.FlagSecretKey, clientcmd.FlagSecretKey+" for the user entry in pi config")
+	cmd.Flags().Var(&options.region, clientcmd.FlagRegion, "region for the user entry in pi config")
 
 	return cmd
 }
@@ -161,7 +161,6 @@ func (o *createAuthInfoOptions) modifyDefaultCluster(existingCluster clientcmdap
 
 	return modifiedCluster
 }
-
 
 func (o *createAuthInfoOptions) modifyDefaultContext(user string, existingContext clientcmdapi.Context) clientcmdapi.Context {
 	modifiedContext := existingContext
@@ -233,6 +232,9 @@ func (o *createAuthInfoOptions) modifyAuthInfo(existingAuthInfo clientcmdapi.Aut
 	//patch for hyper
 	if o.region.Provided() {
 		modifiedAuthInfo.Region = o.region.Value()
+		setCredential = setCredential || len(modifiedAuthInfo.Region) > 0
+	} else {
+		modifiedAuthInfo.Region = clientcmd.DefaultRegion
 		setCredential = setCredential || len(modifiedAuthInfo.Region) > 0
 	}
 	if o.accessKey.Provided() {

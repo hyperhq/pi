@@ -59,7 +59,10 @@ var (
 	  pi get fips
 
 	  # Get a specified fip
-	  pi get fip x.x.x.x`))
+	  pi get fip x.x.x.x
+
+	  # Show ip only
+	  pi get fip -o ip`))
 )
 
 // GetFipGeneric is the implementation of the get fip generic command
@@ -127,7 +130,7 @@ func PrintFipResult(output string, result []hyper.FipResponse) error {
 		}
 	} else if output == "ip" {
 		for _, fip := range result {
-			fmt.Println(fip.Fip)
+			fmt.Printf("fips/%v\n", fip.Fip)
 		}
 	} else {
 		err := fmt.Errorf("error: output format \"%v\" not recognized", output)

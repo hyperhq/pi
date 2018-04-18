@@ -91,7 +91,7 @@ func NewCmdExec(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *c
 			cmdutil.CheckErr(options.RunHyper(f))
 		},
 	}
-	cmd.Flags().StringVarP(&options.PodName, "pod", "p", "", "Pod name")
+	//cmd.Flags().StringVarP(&options.PodName, "pod", "p", "", "Pod name")
 	// TODO support UID
 	cmd.Flags().StringVarP(&options.ContainerName, "container", "c", "", "Container name. If omitted, the first container in the pod will be chosen")
 	cmd.Flags().BoolVarP(&options.Stdin, "stdin", "i", false, "Pass stdin to the container")

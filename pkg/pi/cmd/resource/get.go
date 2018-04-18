@@ -85,16 +85,10 @@ var (
 		pi get -o json pod web-pod-13je7
 
 		# List all replication controllers and services together in ps output format.
-		pi get pods,services
+		pi get pods,services,secret
 
 		# List one or more resources by their type and names.
-		pi get services/nginx pods/nginx
-		
-		# List volumes
-		pi get volumes
-
-		# List fips
-		pi get fips`))
+		pi get services/nginx pods/nginx`))
 )
 
 const (

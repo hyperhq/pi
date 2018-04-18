@@ -46,9 +46,9 @@ func NewCmdConfigUseContext(out io.Writer, configAccess clientcmd.ConfigAccess) 
 
 	cmd := &cobra.Command{
 		Use:     "use-context CONTEXT_NAME",
-		Short:   i18n.T("Sets the current-context in a piconfig file"),
+		Short:   i18n.T("Sets the current-context in a pi config file"),
 		Aliases: []string{"use"},
-		Long:    `Sets the current-context in a piconfig file`,
+		Long:    `Sets the current-context in a pi config file`,
 		Example: use_context_example,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(options.complete(cmd))

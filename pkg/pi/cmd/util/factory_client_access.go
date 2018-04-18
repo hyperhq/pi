@@ -119,7 +119,8 @@ func (f *discoveryFactory) DiscoveryClient() (discovery.CachedDiscoveryInterface
 
 func (f *discoveryFactory) BindFlags(flags *pflag.FlagSet) {
 	defaultCacheDir := filepath.Join(homedir.HomeDir(), ".pi", "http-cache")
-	flags.StringVar(&f.cacheDir, FlagHTTPCacheDir, defaultCacheDir, "Default HTTP cache directory")
+	f.cacheDir = defaultCacheDir
+	//flags.StringVar(&f.cacheDir, FlagHTTPCacheDir, defaultCacheDir, "Default HTTP cache directory")
 }
 
 // DefaultClientConfig creates a clientcmd.ClientConfig with the following hierarchy:

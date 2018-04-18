@@ -178,10 +178,10 @@ __custom_func() {
 
 var (
 	bash_completion_flags = map[string]string{
-	//"namespace": "__pi_get_resource_namespace",
-	//"context":   "__pi_config_get_contexts",
-	//"cluster":   "__pi_config_get_clusters",
-	//"user":      "__pi_config_get_users",
+		//"namespace": "__pi_get_resource_namespace",
+		//"context":   "__pi_config_get_contexts",
+		//"cluster":   "__pi_config_get_clusters",
+		//"user":      "__pi_config_get_users",
 	}
 )
 
@@ -190,9 +190,9 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 	// Parent command to which all subcommands are added.
 	cmds := &cobra.Command{
 		Use:   "pi",
-		Short: i18n.T("pi controls the resources on Hyper GCP cluster"),
+		Short: i18n.T("pi controls the resources on Pi platform."),
 		Long: templates.LongDesc(`
-      pi controls the resources on Hyper GCP cluster.
+      pi controls the resources on Pi platform.
 
       Find more information at https://github.com/hyperhq/pi.`),
 		Run: runHelp,

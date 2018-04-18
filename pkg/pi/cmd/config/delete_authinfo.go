@@ -28,19 +28,19 @@ import (
 )
 
 var (
-	delete_context_example = templates.Examples(`
-		# Delete the context for the minikube cluster
-		pi config delete-context minikube`)
+	delete_authinfo_example = templates.Examples(`
+		# Delete the credentials
+		pi config delete-credentials user1`)
 )
 
-func NewCmdConfigDeleteContext(out, errOut io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
+func NewCmdConfigDeleteAuthInfo(out, errOut io.Writer, configAccess clientcmd.ConfigAccess) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "delete-context NAME",
-		Short:   i18n.T("Delete the specified context from the pi config"),
-		Long:    "Delete the specified context from the pi config",
-		Example: delete_context_example,
+		Use:     "delete-credentials NAME",
+		Short:   i18n.T("Delete the specified credentials from the pi config"),
+		Long:    "Delete the specified credentials from the pi config",
+		Example: delete_authinfo_example,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runDeleteContext(out, errOut, configAccess, cmd)
+			err := runDeleteAuthInfo(out, errOut, configAccess, cmd)
 			cmdutil.CheckErr(err)
 		},
 	}
@@ -48,7 +48,7 @@ func NewCmdConfigDeleteContext(out, errOut io.Writer, configAccess clientcmd.Con
 	return cmd
 }
 
-func runDeleteContext(out, errOut io.Writer, configAccess clientcmd.ConfigAccess, cmd *cobra.Command) error {
+func runDeleteAuthInfo(out, errOut io.Writer, configAccess clientcmd.ConfigAccess, cmd *cobra.Command) error {
 	config, err := configAccess.GetStartingConfig()
 	if err != nil {
 		return err
@@ -66,22 +66,18 @@ func runDeleteContext(out, errOut io.Writer, configAccess clientcmd.ConfigAccess
 	}
 
 	name := args[0]
-	_, ok := config.Contexts[name]
-	if !ok {
-		return fmt.Errorf("cannot delete context %s, not in %s", name, configFile)
+	_, exists := config.AuthInfos[name]
+	if !exists {
+		return fmt.Errorf("credentials $v not found")
 	}
 
-	if config.CurrentContext == name {
-		fmt.Fprint(errOut, "warning: this removed your active context, use \"pi config use-context\" to select a different one\n")
-	}
-
-	delete(config.Contexts, name)
+	delete(config.AuthInfos, name)
 
 	if err := clientcmd.ModifyConfig(configAccess, *config, true); err != nil {
 		return err
 	}
 
-	fmt.Fprintf(out, "deleted context %s from %s\n", name, configFile)
+	fmt.Fprintf(out, "deleted credentials %s from %s\n", name, configFile)
 
 	return nil
 }

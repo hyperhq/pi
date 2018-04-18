@@ -41,7 +41,7 @@ func NewCmdCreateFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command
 		},
 	}
 	//cmdutil.AddGeneratorFlags(cmd, cmdutil.HyperFipV1GeneratorName)
-	cmd.Flags().Int("count", 1, "Specify the count of fip to allocate, default is 1")
+	cmd.Flags().IntP("count", "c", 1, "Specify the count of fip to allocate, default is 1")
 	return cmd
 }
 

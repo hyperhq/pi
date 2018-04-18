@@ -36,7 +36,7 @@ type unsetOptions struct {
 }
 
 var unset_long = templates.LongDesc(`
-	Unsets an individual value in a piconfig file
+	Unsets an individual value in a pi config file
 
 	PROPERTY_NAME is a dot delimited name where each token represents either an attribute name or a map key.  Map keys may not contain dots.`)
 
@@ -45,7 +45,7 @@ func NewCmdConfigUnset(out io.Writer, configAccess clientcmd.ConfigAccess) *cobr
 
 	cmd := &cobra.Command{
 		Use:   "unset PROPERTY_NAME",
-		Short: i18n.T("Unsets an individual value in a piconfig file"),
+		Short: i18n.T("Unsets an individual value in a pi config file"),
 		Long:  unset_long,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(options.complete(cmd, args))

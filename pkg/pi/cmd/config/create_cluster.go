@@ -44,7 +44,7 @@ type createClusterOptions struct {
 
 var (
 	create_cluster_long = templates.LongDesc(`
-		Sets a cluster entry in piconfig.
+		Sets a cluster entry in pi config.
 
 		Specifying a name that already exists will merge new fields on top of existing values for those fields.`)
 
@@ -64,7 +64,7 @@ func NewCmdConfigSetCluster(out io.Writer, configAccess clientcmd.ConfigAccess) 
 
 	cmd := &cobra.Command{
 		Use:     fmt.Sprintf("set-cluster NAME [--%v=server] [--%v=path/to/certificate/authority] [--%v=true]", clientcmd.FlagAPIServer, clientcmd.FlagCAFile, clientcmd.FlagInsecure),
-		Short:   i18n.T("Sets a cluster entry in piconfig"),
+		Short:   i18n.T("Sets a cluster entry in pi config"),
 		Long:    create_cluster_long,
 		Example: create_cluster_example,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -76,12 +76,12 @@ func NewCmdConfigSetCluster(out io.Writer, configAccess clientcmd.ConfigAccess) 
 
 	options.insecureSkipTLSVerify.Default(false)
 
-	cmd.Flags().Var(&options.server, clientcmd.FlagAPIServer, clientcmd.FlagAPIServer+" for the cluster entry in piconfig")
-	f := cmd.Flags().VarPF(&options.insecureSkipTLSVerify, clientcmd.FlagInsecure, "", clientcmd.FlagInsecure+" for the cluster entry in piconfig")
+	cmd.Flags().Var(&options.server, clientcmd.FlagAPIServer, clientcmd.FlagAPIServer+" for the cluster entry in pi config")
+	f := cmd.Flags().VarPF(&options.insecureSkipTLSVerify, clientcmd.FlagInsecure, "", clientcmd.FlagInsecure+" for the cluster entry in pi config")
 	f.NoOptDefVal = "true"
-	cmd.Flags().Var(&options.certificateAuthority, clientcmd.FlagCAFile, "Path to "+clientcmd.FlagCAFile+" file for the cluster entry in piconfig")
+	cmd.Flags().Var(&options.certificateAuthority, clientcmd.FlagCAFile, "Path to "+clientcmd.FlagCAFile+" file for the cluster entry in pi config")
 	cmd.MarkFlagFilename(clientcmd.FlagCAFile)
-	f = cmd.Flags().VarPF(&options.embedCAData, clientcmd.FlagEmbedCerts, "", clientcmd.FlagEmbedCerts+" for the cluster entry in piconfig")
+	f = cmd.Flags().VarPF(&options.embedCAData, clientcmd.FlagEmbedCerts, "", clientcmd.FlagEmbedCerts+" for the cluster entry in pi config")
 	f.NoOptDefVal = "true"
 
 	return cmd

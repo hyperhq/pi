@@ -6,19 +6,17 @@ $ make
 
 # Config
 
-**priority**:  command line arguments > config file parameters
-
 ## use config file parameter
 
 ```
 //set user1(alias)
 $ pi config set-credentials user1 --region=gcp-us-central1 --access-key="xxx" --secret-key="xxxxxx"
 
-//set user2(alias)
-$ pi config set-credentials user2 --region=gcp-us-central1 --access-key="xxx" --secret-key="xxxxxx"
+//set user2(alias, default region is gcp-us-central1)
+$ pi config set-credentials user2 --access-key="yyy" --secret-key="yyyyyy"
 
-//select default user
-$ pi config set-context default --user=user1
+//switch default user
+$ pi config set-context default --user=user2
 
 
 // config file:
@@ -33,28 +31,34 @@ contexts:
 - context:
     cluster: default
     namespace: default
-    user: testuser3
+    user: user3
   name: default
 current-context: default
 kind: Config
 preferences: {}
 users:
-- name: testuser2
+- name: user2
   user:
     access-key: xxx
     region: gcp-us-central1
     secret-key: xxxxxx
-- name: testuser3
+- name: user3
   user:
-    access-key: xxx
+    access-key: yyy
     region: gcp-us-central1
-    secret-key: xxxxxx
+    secret-key: yyyyyy
 ```
 
 ## use command line arguments
 
+**priority**:  
+
+> command line arguments --access-key,--secret-key,--region will cover the parameters in config file
+
+
 ```
-// argument:
+// main global options:
+--user
 --server
 --region
 --access-key
@@ -67,14 +71,17 @@ $ pi info
 //use specified user
 $ pi --user=user2 info
 
-//specify credential
+//use specified user and region
+$ pi --user=user2 --region=gcp-us-central1 info
+
+//use specify credential
 $ pi --access-key=xxx --secret-key=xxxxxx info
 
 //specify region
 $ pi --region=gcp-us-central1 --access-key=xxx --secret-key=xxxxxx info
 
 //specify server
-$ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxxxx info
+$ pi --server=https://gcp-us-central1.hyper.sh --access-key=xxx --secret-key=xxxxxx info
 ```
 
 
@@ -83,13 +90,13 @@ $ pi --server=https://gcp-us-central1.hypersh --access-key=xxx --secret-key=xxxx
 ## show all subcommand
 
 ```
-$ pi                                                                                                                               17:12:51
-pi controls the resources on Hyper GCP cluster.
+$ pi
+pi controls the resources on Pi platform.
 
 Find more information at https://github.com/hyperhq/pi.
 
 Basic Commands (Beginner):
-  create      Create a resource.
+  create      Create a resource(support pod, service, secret, volume, fip)
 
 Basic Commands (Intermediate):
   get         Display one or many resources
@@ -100,7 +107,7 @@ Troubleshooting and Debugging Commands:
   exec        Execute a command in a container
 
 Other Commands:
-  config      Modify piconfig files
+  config      Modify pi config file
   help        Help about any command
   info        Print region and user info
 
@@ -115,26 +122,31 @@ Use "pi options" for a list of global command-line options (applies to all comma
 ## global options
 
 ``` 
-$ pi options                                                                                                                        14:39:32
+$ pi options
 The following options can be passed to any command:
 
-      --access-key='': AccessKey authentication to the API server
-      --region='': Region of the API server
-      --secret-key='': SecretKey for basic authentication to the API server
-      --user='': The name of the config user to use
+  -e, --access-key='': AccessKey authentication to the API server
+  -r, --region='': Region of the API server
+  -k, --secret-key='': SecretKey for basic authentication to the API server
+  -s, --server='': The address and port of the Kubernetes API server
+  -u, --user='': The name of the config user to use
+
 ```
 
 ## create flags
 
 ```
 $ pi create -h
-Create a resource.
+Create a resource(pod, service, secret, volume, fip).
 
-JSON and YAML formats are accepted.
+JSON and YAML formats are accepted(pod, service, secret).
 
 Examples:
   # Create a pod using the data in yaml.
   pi create -f examples/pod/pod-nginx.yaml
+
+  # Create multiple pods using the data in yaml.
+  pi create -f pod-test1.yaml -f pod-test2.yaml
 
   # Create a service using the data in yaml.
   pi create -f examples/service/service-nginx.yaml
@@ -142,57 +154,63 @@ Examples:
   # Create a secret using the data in yaml.
   pi create -f examples/secret/secret-dockerconfigjson.yaml
 
-  # Create a volume
-  pi create volume vol1 --size=1 --zone=gcp-us-central1-b
-
-  # Create a fip
-  pi create fip --count=1
-
 Available Commands:
   fip         Create one or more fip(s) using specified subcommand
-  secret      Create a secret using specified subcommand
-  service     Create a service using specified subcommand
   volume      Create a volume using specified subcommand
 
 Options:
   -f, --filename=[]: Filename, directory, or URL to files to use to create the resource
-      --validate=true: If true, use a schema to validate the input before sending it
 
 Usage:
   pi create -f FILENAME [flags] [options]
 ```
 
-### create service
+### create volume flag
 
 ```
-$ pi create service -h                                                                                                                                                 16:21:58
-Create a service using specified subcommand
-
-Aliases:
-service, svc
-
-Available Commands:
-  clusterip    Create a ClusterIP service.
-  loadbalancer Create a LoadBalancer service.
-
-Usage:
-  pi create service [flags] [options]
-```
-
-### create secret
-
-```
-$ pi create secret -h
+$ pi create volume -h
 Create a secret using specified subcommand
 
-Available Commands:
-  docker-registry Create a secret for use with a Docker registry
-  generic         Create a secret from a local file, directory or literal value
+Examples:
+  # Create a new volume named vol1 with default size and zone
+  pi create volume vol1
+
+  # Create a new volume named vol1 with specified size
+  pi create volume vol1 --size=1
+
+  # Create a new volume named vol1 with specified size and zone
+  pi create volume vol1 --size=1 --zone=gcp-us-central1
+
+Options:
+      --size='': Specify the volume size, default 10(GB), min 1, max 1024
+      --zone='': The zone of volume to create
 
 Usage:
-  pi create secret [flags] [options]
+  pi create volume NAME [--zone=string] [--size=int] [flags] [options]
 ```
 
+### create fip flag
+
+```
+$ pi create fip -h
+Create one or more fip(s) using specified subcommand
+
+Aliases:
+fip, fips
+
+Examples:
+  # Create one new fip
+  pi create fip
+
+  # Create two new fips
+  pi create fip --count=2
+
+Options:
+  -c, --count=1: Specify the count of fip to allocate, default is 1
+
+Usage:
+  pi create fip [--count=int] [flags] [options]
+```
 
 ## get flags
 
@@ -222,16 +240,10 @@ Examples:
   pi get -o json pod web-pod-13je7
 
   # List all replication controllers and services together in ps output format.
-  pi get pods,services
+  pi get pods,services,secret
 
   # List one or more resources by their type and names.
   pi get services/nginx pods/nginx
-
-  # List volumes
-  pi get volumes
-
-  # List fips
-  pi get fips
 
 Available Commands:
   fip         list fips or get a fip
@@ -249,6 +261,62 @@ must be an integer or a string.
 
 Usage:
   pi get [(-o|--output=)json|yaml|wide (TYPE [NAME | -l label] | TYPE/NAME ...) [flags] [options]
+```
+
+### get volume flag
+
+```
+$ pi get volume --help
+List volumes or get a volume.
+
+Aliases:
+volume, volumes
+
+Examples:
+  # List volumes
+  pi get volumes
+
+  # Get a volume named vol1
+  pi get volume vol1
+
+  # Get volume in specified zone
+  pi get volumes --zone=gcp-us-central1-b
+
+  # Show volume name only
+  pi get volumes -o name
+
+Options:
+  -o, --output='': Output format. One of: json|name
+      --zone='': The zone of volume to get
+
+Usage:
+  pi get volume NAME [--zone=string] [flags] [options]
+```
+
+### get fip flag
+
+```
+pi get fip --help
+List fips or get a fip.
+
+Aliases:
+fip, fips
+
+Examples:
+  # List fips
+  pi get fips
+
+  # Get a specified fip
+  pi get fip x.x.x.x
+
+  # Show ip only
+  pi get fip -o ip
+
+Options:
+  -o, --output='': Output format. One of: json|ip
+
+Usage:
+  pi get fip IP [flags] [options]
 ```
 
 ## delete flag
@@ -270,12 +338,6 @@ Examples:
   # Delete all pods
   pi delete pods --all
 
-  # Delete a volume
-  pi delete volume vol1
-
-  # Delete a fip
-  pi delete fip x.x.x.x
-
 Available Commands:
   fip         Delete a fip
   volume      Delete a volume
@@ -294,9 +356,41 @@ size of the object
 
 Usage:
   pi delete (TYPE [(NAME | --all)]) [flags] [options]
-
 ```
 
+### delete volume flag
+
+```
+$ pi delete volume -h
+Delete a volume.
+
+Aliases:
+volume, volumes
+
+Examples:
+  # Delete a volume named vol1
+  pi delete volume vol1
+
+Usage:
+  pi delete volume NAME [flags] [options]
+```
+
+### delete fip flag
+
+```
+$ pi delete fip -h
+Delete a fip.
+
+Aliases:
+fip, fips
+
+Examples:
+  # Delete a fip
+  pi delete fip x.x.x.x
+
+Usage:
+  pi delete fip IP [flags] [options]
+```
 
 ## name flag
 
@@ -327,7 +421,7 @@ Region Info:
   AvailabilityZone       gcp-us-central1-b|UP
   ServiceClusterIPRange  10.96.0.0/12
 Account Info:
-  Email                  testuser3@test.com
+  Email                  user3@test.com
   TenantID               00a54ebcc0444bb384e48f6fd7b5597b
   DefaultZone            gcp-us-central1-b
   Resources              pod:1/20,volume:1/40,fip:1/5,service:4/5,secret:1/3
@@ -351,10 +445,12 @@ Account Info:
   DefaultZone            gcp-us-central1-b
   Resources              pod:1/1,volume:1/1001,fip:1/1001,service:1/1,secret:1/1
 Version Info:
-  Version                alpha-0.2
+  Version                alpha-0.1
   Hash                   f544cd7a
   Build                  2018-04-13T17:19:11+0800
-you are using the latest version
+there is a new version: alpha-0.2
+- (Pre-release) https://github.com/hyperhq/pi/releases/download/alpha-0.2/pi.darwin-amd64.zip
+- (Pre-release) https://github.com/hyperhq/pi/releases/download/alpha-0.2/pi.linux-amd64.tar.gz
 ```
 
 
@@ -385,59 +481,54 @@ root@mysql:/# uname -r
 // get pod
 $ pi get pod nginx -o yaml
 apiVersion: v1
-items:
-- apiVersion: v1
-  kind: Pod
-  metadata:
-    annotations:
-      id: a0eabb46fccd616f4a22cbeec8547c344c3a85b7a1b95c1f88c17bb4d27b1267
-      sh_hyper_instancetype: s4
-      zone: gcp-us-central1-b
-    creationTimestamp: 2018-04-08T14:39:52Z
-    labels:
-      app: nginx
-    name: nginx
-    namespace: default
-    uid: b2aa75df-3b3a-11e8-b8a4-42010a000032
-  spec:
-    containers:
-    - image: nginx
-      name: nginx
-      resources: {}
-    nodeName: gcp-us-central1
-  status:
-    conditions:
-    - lastProbeTime: null
-      lastTransitionTime: 2018-04-08T14:39:52Z
-      status: "True"
-      type: Initialized
-    - lastProbeTime: null
-      lastTransitionTime: 2018-04-08T14:39:56Z
-      status: "True"
-      type: Ready
-    - lastProbeTime: null
-      lastTransitionTime: 2018-04-08T14:39:52Z
-      status: "True"
-      type: PodScheduled
-    containerStatuses:
-    - containerID: hyper://2a077fec7051be72cb9435a7114c66c0d43cf66e7f6667cb34b28eeeea374a54
-      image: sha256:c5c4e8fa2cf7d87545ed017b60a4b71e047e26c4ebc71eb1709d9e5289f9176f
-      imageID: sha256:c5c4e8fa2cf7d87545ed017b60a4b71e047e26c4ebc71eb1709d9e5289f9176f
-      lastState: {}
-      name: nginx
-      ready: true
-      restartCount: 0
-      state:
-        running:
-          startedAt: 2018-04-08T14:39:56Z
-    phase: Running
-    podIP: 10.244.58.203
-    qosClass: Burstable
-    startTime: 2018-04-08T14:39:52Z
-kind: List
+kind: Pod
 metadata:
-  resourceVersion: ""
-  selfLink: ""
+  annotations:
+    id: c48e79bf8214f3130f683765794bc23d2074709544c5224754b749627f8d0e18
+    sh_hyper_instancetype: s4
+    zone: gcp-us-central1-b
+  creationTimestamp: 2018-04-18T06:11:32Z
+  labels:
+    app: nginx
+    role: web
+  name: nginx
+  namespace: default
+  uid: 576353ab-42cf-11e8-b8a4-42010a000032
+spec:
+  containers:
+  - image: oveits/docker-nginx-busybox
+    name: nginx
+    resources: {}
+  nodeName: gcp-us-central1
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: 2018-04-18T06:11:32Z
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: 2018-04-18T06:11:36Z
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: 2018-04-18T06:11:32Z
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: hyper://f148791445f45204a03e33dfdd6dc8363ab98e6484eb6a13e43c93ebc705e059
+    image: sha256:f4d95172a4064702d438b3eb5adea2d792e846ab190d971818f7a7268df7f844
+    imageID: sha256:f4d95172a4064702d438b3eb5adea2d792e846ab190d971818f7a7268df7f844
+    lastState: {}
+    name: nginx
+    ready: true
+    restartCount: 0
+    state:
+      running:
+        startedAt: 2018-04-18T06:11:36Z
+  phase: Running
+  podIP: 10.244.209.165
+  qosClass: Burstable
+  startTime: 2018-04-18T06:11:32Z
 
 
 // delete pod
@@ -483,6 +574,12 @@ status:
   loadBalancer: {}
 
 
+//get pods via service's selector
+$ pi get pods -l app=nginx
+NAME      READY     STATUS    RESTARTS   AGE
+nginx     1/1       Running   0          9s
+
+
 // delete service
 $ pi delete service test-clusterip-default
 service "test-clusterip-default" deleted
@@ -493,12 +590,7 @@ service "test-clusterip-default" deleted
 ```
 // create secret via yaml
 $ pi create -f examples/secret/secret-dockerconfigjson.yaml
-secret "test-secret-dockerconfigjson" created
-
-
-// create secret via command line arguments
-$ pi create secret docker-registry test-secret-gitlab --docker-server=https://registry.gitlab.com --docker-username=xjimmy --docker-password=xxx --docker-email=xjimmyshcn@gmail.com
-secret "test-secret-gitlab" created
+secret/test-secret-dockerconfigjson
 
 
 // list all secrets
@@ -518,13 +610,11 @@ secret "test-secret-gitlab" deleted
 ```
 // create volume
 $ pi create volume vol1 --size=50
-volume vol1(1GB) created in zone gcp-us-central1-b
+volume/vol1
 
 // create pod with volume
-
 $ pi create -f examples/pod/pod-mysql-with-volume.yaml
 pod/mysql
-
 
 // list volumes
 $ pi get volumes
@@ -551,7 +641,6 @@ pod "mysql" deleted
 
 $ pi delete volume vol1
 volume "vol1" deleted
-
 ```
 
 # fip operation example
@@ -564,30 +653,25 @@ $ pi create fip --count=2
 35.188.x.x
 35.189.x.x
 
-
 $ pi get fips
 FIP             NAME  CREATEDAT                  SERVICES
 35.192.x.x            2018-04-08T15:27:49+00:00
 35.188.x.x            2018-04-08T15:31:08+00:00
 35.189.x.x            2018-04-08T15:31:10+00:00
 
-
 $ pi name fip 35.192.x.x --name=test
 fip 35.192.x.x renamed to test
 
 
+// create loadBalancer service with fip
+$ pi create -f examples/service/service-loadbalancer-nginx.yaml
+
 $ pi get fip 35.192.x.x
 FIP         NAME  CREATEDAT                  SERVICES
-35.192.x.x        2018-04-08T15:27:49+00:00
+35.192.x.x        2018-04-08T15:27:49+00:00  test-loadbalancer-nginx
 
-$ pi get fips 35.192.x.x -o json
-{
-  "fip": "35.192.x.x",
-  "name": "test",
-  "createdAt": "2018-04-08T15:27:49.862Z",
-  "services": []
-}
-
+// delete service first
+$ pi delete service test-loadbalancer-nginx
 
 $ pi delete fip 35.188.x.x
 fip "35.188.x.x" deleted

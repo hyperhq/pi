@@ -46,7 +46,7 @@ type setOptions struct {
 }
 
 var set_long = templates.LongDesc(`
-	Sets an individual value in a piconfig file
+	Sets an individual value in a pi config file
 
 	PROPERTY_NAME is a dot delimited name where each token represents either an attribute name or a map key.  Map keys may not contain dots.
 
@@ -57,7 +57,7 @@ func NewCmdConfigSet(out io.Writer, configAccess clientcmd.ConfigAccess) *cobra.
 
 	cmd := &cobra.Command{
 		Use:   "set PROPERTY_NAME PROPERTY_VALUE",
-		Short: i18n.T("Sets an individual value in a piconfig file"),
+		Short: i18n.T("Sets an individual value in a pi config file"),
 		Long:  set_long,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmdutil.CheckErr(options.complete(cmd))
