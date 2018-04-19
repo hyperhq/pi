@@ -366,7 +366,7 @@ func IsConfigTransportTLS(config Config) bool {
 	if err != nil {
 		return false
 	}
-	return baseURL.Scheme == "https"
+	return baseURL.Scheme == "https" || baseURL.Scheme == "tcp"
 }
 
 // LoadTLSFiles copies the data from the CertFile, KeyFile, and CAFile fields into the CertData,

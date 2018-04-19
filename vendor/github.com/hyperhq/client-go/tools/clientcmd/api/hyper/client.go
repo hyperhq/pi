@@ -129,8 +129,9 @@ func (u *HyperConn) prepareRequest(method string, endpoint string, data io.Reade
 
 	//replace default domain
 	if strings.Contains(hostURL.Host, restclient.DefaultDomain) {
+		oldHost := hostURL.Host
 		hostURL.Host = strings.Replace(hostURL.Host, "*", u.Region, 1)
-		glog.V(4).Infof("replace default domain to %v", hostURL.Host)
+		glog.V(4).Infof("default domain %v: change region to %v (%v)", oldHost, u.Region, hostURL.Host)
 	}
 
 	req, err := http.NewRequest(method, endpoint, data)

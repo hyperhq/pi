@@ -34,7 +34,7 @@ import (
 )
 
 var (
-	DefaultServer  = "https://*.hyper.sh:6443"
+	DefaultServer  = "https://*.hyper.sh:443"
 	DefaultCluster = "default"
 	DefaultContext = "default"
 	DefaultRegion  = "gcp-us-central1"
