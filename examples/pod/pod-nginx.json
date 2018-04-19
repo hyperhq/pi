@@ -1,0 +1,19 @@
+{
+  "apiVersion": "v1",
+  "kind": "Pod",
+  "metadata": {
+    "name": "nginx-from-json",
+    "labels": {
+      "app": "nginx",
+      "role": "web"
+    }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "nginx",
+        "image": "oveits/docker-nginx-busybox"
+      }
+    ]
+  }
+}

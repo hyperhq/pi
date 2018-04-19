@@ -33,7 +33,7 @@ import (
 func NewCmdDeleteFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "fip IP",
-		Short:   i18n.T("Delete a fip"),
+		Short:   i18n.T("Delete fip(s)"),
 		Aliases: []string{"fips"},
 		Long:    delFipLong,
 		Example: delFipExample,
@@ -46,16 +46,19 @@ func NewCmdDeleteFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command
 }
 
 var (
-	delFipLong = templates.LongDesc(i18n.T(`Delete a fip.`))
+	delFipLong = templates.LongDesc(i18n.T(`Delete fip(s).`))
 
 	delFipExample = templates.Examples(i18n.T(`
 	  # Delete a fip
-	  pi delete fip x.x.x.x`))
+	  pi delete fips x.x.x.x
+
+	  # Delete multiple fips
+	  pi delete fips x.x.x.x y.y.y.y`))
 )
 
 // DeleteFipGeneric is the implementation of the delete fip generic command
 func DeleteFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
-	ip, err := IPFromCommandArgs(cmd, args)
+	_, err := IPFromCommandArgs(cmd, args)
 	if err != nil {
 		return err
 	}
@@ -65,11 +68,13 @@ func DeleteFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 	} else {
 		hyperConn := hyper.NewHyperConn(cfg)
 		fipCli := hyper.NewFipCli(hyperConn)
-		httpStatus, result := fipCli.ReleaseFip(ip)
-		if httpStatus == http.StatusNoContent {
-			fmt.Printf("fip \"%v\" deleted\n", ip)
-		} else {
-			fmt.Println(result)
+		for _, ip := range args {
+			httpStatus, result := fipCli.ReleaseFip(ip)
+			if httpStatus == http.StatusNoContent {
+				fmt.Printf("fip \"%v\" deleted\n", ip)
+			} else {
+				fmt.Println(result)
+			}
 		}
 	}
 	return nil

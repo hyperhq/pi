@@ -96,7 +96,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	//cmd.Flags().StringVar(&options.Raw, "raw", options.Raw, "Raw URI to POST to the server.  Uses the transport specified by the kubeconfig file.")
 
 	// create subcommands
-	//cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
+	cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
 	//cmd.AddCommand(NewCmdCreateService(f, out, errOut))
 
 	// create volume, fip

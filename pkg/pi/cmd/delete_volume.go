@@ -33,7 +33,7 @@ import (
 func NewCmdDeleteVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "volume NAME",
-		Short:   i18n.T("Delete a volume"),
+		Short:   i18n.T("Delete volume(s)"),
 		Aliases: []string{"volumes"},
 		Long:    delVolumeLong,
 		Example: delVolumeExample,
@@ -46,16 +46,19 @@ func NewCmdDeleteVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Comm
 }
 
 var (
-	delVolumeLong = templates.LongDesc(i18n.T(`Delete a volume.`))
+	delVolumeLong = templates.LongDesc(i18n.T(`Delete volume(s).`))
 
 	delVolumeExample = templates.Examples(i18n.T(`
 	  # Delete a volume named vol1
-	  pi delete volume vol1`))
+	  pi delete volumes vol1
+
+	  # Delete multiple volumes
+	  pi delete volumes vol1 vol2`))
 )
 
 // DeleteVolumeGeneric is the implementation of the delete volume generic command
 func DeleteVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
-	name, err := NameFromCommandArgs(cmd, args)
+	_, err := NameFromCommandArgs(cmd, args)
 	if err != nil {
 		return err
 	}
@@ -65,11 +68,13 @@ func DeleteVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command
 	} else {
 		hyperConn := hyper.NewHyperConn(cfg)
 		volCli := hyper.NewVolumeCli(hyperConn)
-		httpStatus, result := volCli.DeleteVolume(name, "")
-		if httpStatus == http.StatusNoContent {
-			fmt.Printf("volume \"%v\" deleted\n", name)
-		} else {
-			fmt.Println(result)
+		for _, name := range args {
+			httpStatus, result := volCli.DeleteVolume(name, "")
+			if httpStatus == http.StatusNoContent {
+				fmt.Printf("volume \"%v\" deleted\n", name)
+			} else {
+				fmt.Println(result)
+			}
 		}
 	}
 	return nil
