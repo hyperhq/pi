@@ -41,13 +41,13 @@ type ContainerCommitConfig struct {
 // ExecConfig is a small subset of the Config struct that holds the configuration
 // for the exec feature of docker.
 type ExecConfig struct {
-	User         string   // User that will run the command
-	Privileged   bool     // Is the container in privileged mode
-	Tty          bool     // Attach standard streams to a tty.
-	AttachStdin  bool     // Attach the standard input, makes possible user interaction
-	AttachStderr bool     // Attach the standard output
-	AttachStdout bool     // Attach the standard error
-	Detach       bool     // Execute in detach mode
-	DetachKeys   string   // Escape keys for detach
-	Cmd          []string // Execution commands and args
+	User         string `json:"user"`  // User that will run the command
+	Privileged   bool   `json:"privileged"`  // Is the container in privileged mode
+	Tty          bool   `json:"tty"`  // Attach standard streams to a tty.
+	AttachStdin  bool   `json:"attachStdin"`  // Attach the standard input, makes possible user interaction
+	AttachStderr bool   `json:"attachStderr"`  // Attach the standard output
+	AttachStdout bool   `json:"attachStdout"`  // Attach the standard error
+	Detach       bool   `json:"detach"`  // Execute in detach mode
+	DetachKeys   string `json:"detachKeys"`  // Escape keys for detach
+	Cmd          []string `json:"cmd"` // Execution commands and args
 }

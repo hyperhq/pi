@@ -51,8 +51,8 @@ var (
 		# List all the contexts in your pi config file
 		pi config get-contexts
 
-		# Describe one context in your pi config file.
-		pi config get-contexts my-context`)
+		# Describe one context in your pi config file(support default only).
+		pi config get-contexts default`)
 )
 
 // NewCmdConfigGetContexts creates a command object for the "get-contexts" action, which

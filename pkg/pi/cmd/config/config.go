@@ -41,7 +41,7 @@ func NewCmdConfig(pathOptions *clientcmd.PathOptions, out, errOut io.Writer) *co
 		Short: i18n.T("Modify pi config file"),
 		Long:  templates.LongDesc(`Modify pi config file ` + path.Join("${HOME}", pathOptions.GlobalFileSubpath)),
 		Example: templates.Examples(`
-			# Set credential for user (default region is gcp-us-central1)  
+			# Set credential for user (default region is gcp-us-central1)
 			pi config set-credentials user1 --access-key="xxx" --secret-key="xxxxxx"
 
 			# Set credential for user with region
