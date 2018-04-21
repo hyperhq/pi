@@ -82,7 +82,7 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 				if len(fipList) == 0 {
 					fmt.Println("No resources found.")
 				} else {
-					return PrintFipResult(output, fipList)
+					return PrintFipResult(output, true, fipList)
 				}
 			}
 		} else {
@@ -92,7 +92,7 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 				if httpStatus == http.StatusNotFound {
 					fmt.Println("No resources found.")
 				} else {
-					return PrintFipResult(output, []hyper.FipResponse{*fip})
+					return PrintFipResult(output, false, []hyper.FipResponse{*fip})
 				}
 			}
 		}
@@ -100,7 +100,7 @@ func GetFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args
 	return nil
 }
 
-func PrintFipResult(output string, result []hyper.FipResponse) error {
+func PrintFipResult(output string, isList bool, result []hyper.FipResponse) error {
 	if output == "" {
 		data := [][]string{}
 		for _, fip := range result {
@@ -123,11 +123,22 @@ func PrintFipResult(output string, result []hyper.FipResponse) error {
 		}
 		table.Render()
 	} else if output == "json" {
-		if buf, err := json.MarshalIndent(result, "", "  "); err != nil {
-			log.Fatal(err)
+		var (
+			buf []byte
+			err error
+		)
+		if !isList {
+			buf, err = json.MarshalIndent(result[0], "", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
 		} else {
-			fmt.Print(string(buf))
+			buf, err = json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
+		fmt.Print(string(buf))
 	} else if output == "ip" {
 		for _, fip := range result {
 			fmt.Printf("fips/%v\n", fip.Fip)

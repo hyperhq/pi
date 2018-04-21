@@ -86,7 +86,7 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 				if len(volList) == 0 {
 					fmt.Println("No resources found.")
 				} else {
-					return PrintVolumeResult(output, volList)
+					return PrintVolumeResult(output, true, volList)
 				}
 			}
 		} else {
@@ -96,7 +96,7 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 				if httpStatus == http.StatusNotFound {
 					fmt.Println("No resources found.")
 				} else {
-					return PrintVolumeResult(output, []hyper.VolumeResponse{*vol})
+					return PrintVolumeResult(output, false, []hyper.VolumeResponse{*vol})
 				}
 			}
 		}
@@ -104,7 +104,7 @@ func GetVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 	return nil
 }
 
-func PrintVolumeResult(output string, result []hyper.VolumeResponse) error {
+func PrintVolumeResult(output string, isList bool, result []hyper.VolumeResponse) error {
 	if output == "" {
 		data := [][]string{}
 		for _, vol := range result {
@@ -128,11 +128,22 @@ func PrintVolumeResult(output string, result []hyper.VolumeResponse) error {
 		}
 		table.Render()
 	} else if output == "json" {
-		if buf, err := json.MarshalIndent(result, "", "  "); err != nil {
-			log.Fatal(err)
+		var (
+			buf []byte
+			err error
+		)
+		if !isList {
+			buf, err = json.MarshalIndent(result[0], "", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
 		} else {
-			fmt.Println(string(buf))
+			buf, err = json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
+		fmt.Print(string(buf))
 	} else if output == "name" {
 		for _, vol := range result {
 			fmt.Printf("volumes/%v\n", vol.Name)

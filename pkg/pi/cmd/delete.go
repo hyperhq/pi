@@ -65,6 +65,9 @@ var (
 		# Delete pods and services with same names "baz" and "foo"
 		pi delete pod,service baz foo
 
+		# Delete different kind of resources
+		pi delete pods/nginx secrets/my-secret
+
 		# Delete a pod with minimal delay
 		pi delete pod foo --now
 
