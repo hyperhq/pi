@@ -9,4 +9,11 @@ spec:
   containers:
   - name: nginx
     image: oveits/docker-nginx-busybox
-
+    volumeMounts:
+      - name: persistent-storage
+        mountPath: /data
+  volumes:
+    - name: persistent-storage
+      flexVolume:
+        options:
+          volumeID: vol1
