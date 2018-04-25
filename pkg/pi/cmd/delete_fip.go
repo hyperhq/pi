@@ -31,6 +31,7 @@ import (
 
 // NewCmdDeleteFip groups subcommands to delete various zones of fips
 func NewCmdDeleteFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
+	options := &DeleteOptions{}
 	cmd := &cobra.Command{
 		Use:     "fip IP",
 		Short:   i18n.T("Delete fip(s)"),
@@ -38,10 +39,11 @@ func NewCmdDeleteFip(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command
 		Long:    delFipLong,
 		Example: delFipExample,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := DeleteFipGeneric(f, cmdOut, cmd, args)
+			err := options.DeleteFipGeneric(f, cmdOut, cmd, args)
 			cmdutil.CheckErr(err)
 		},
 	}
+	cmd.Flags().BoolVar(&options.DeleteAll, "all", false, "Delete all fips")
 	return cmd
 }
 
@@ -57,10 +59,12 @@ var (
 )
 
 // DeleteFipGeneric is the implementation of the delete fip generic command
-func DeleteFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
-	_, err := IPFromCommandArgs(cmd, args)
-	if err != nil {
-		return err
+func (o *DeleteOptions) DeleteFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
+	if len(args) != 0 && o.DeleteAll {
+		return fmt.Errorf("ip cannot be provided when --all is specified")
+	}
+	if len(args) == 0 && !o.DeleteAll {
+		return fmt.Errorf("resource(s) were provided, but no ip or --all flag specified")
 	}
 
 	if cfg, err := f.ClientConfig(); err != nil {
@@ -68,6 +72,16 @@ func DeleteFipGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, a
 	} else {
 		hyperConn := hyper.NewHyperConn(cfg)
 		fipCli := hyper.NewFipCli(hyperConn)
+		if o.DeleteAll {
+			_, fipList, err := fipCli.ListFips()
+			if err != nil {
+				return fmt.Errorf("failed to list all fips, error:%v", err)
+			}
+			for _, ip := range fipList {
+				args = append(args, ip.Fip)
+			}
+		}
+
 		for _, ip := range args {
 			httpStatus, result := fipCli.ReleaseFip(ip)
 			if httpStatus == http.StatusNoContent {

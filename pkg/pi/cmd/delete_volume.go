@@ -31,6 +31,7 @@ import (
 
 // NewCmdDeleteVolume groups subcommands to delete various zones of volumes
 func NewCmdDeleteVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
+	options := &DeleteOptions{}
 	cmd := &cobra.Command{
 		Use:     "volume NAME",
 		Short:   i18n.T("Delete volume(s)"),
@@ -38,10 +39,11 @@ func NewCmdDeleteVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Comm
 		Long:    delVolumeLong,
 		Example: delVolumeExample,
 		Run: func(cmd *cobra.Command, args []string) {
-			err := DeleteVolumeGeneric(f, cmdOut, cmd, args)
+			err := options.DeleteVolumeGeneric(f, cmdOut, cmd, args)
 			cmdutil.CheckErr(err)
 		},
 	}
+	cmd.Flags().BoolVar(&options.DeleteAll, "all", false, "Delete all volumes")
 	return cmd
 }
 
@@ -57,10 +59,12 @@ var (
 )
 
 // DeleteVolumeGeneric is the implementation of the delete volume generic command
-func DeleteVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
-	_, err := NameFromCommandArgs(cmd, args)
-	if err != nil {
-		return err
+func (o *DeleteOptions) DeleteVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args []string) error {
+	if len(args) != 0 && o.DeleteAll {
+		return fmt.Errorf("name cannot be provided when --all is specified")
+	}
+	if len(args) == 0 && !o.DeleteAll {
+		return fmt.Errorf("resource(s) were provided, but no name or --all flag specified")
 	}
 
 	if cfg, err := f.ClientConfig(); err != nil {
@@ -68,6 +72,17 @@ func DeleteVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command
 	} else {
 		hyperConn := hyper.NewHyperConn(cfg)
 		volCli := hyper.NewVolumeCli(hyperConn)
+
+		if o.DeleteAll {
+			_, volList, err := volCli.ListVolumes("")
+			if err != nil {
+				return fmt.Errorf("failed to list all fips, error:%v", err)
+			}
+			for _, vol := range volList {
+				args = append(args, vol.Name)
+			}
+		}
+
 		for _, name := range args {
 			httpStatus, result := volCli.DeleteVolume(name, "")
 			if httpStatus == http.StatusNoContent {
