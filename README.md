@@ -169,7 +169,7 @@ Usage:
 
 ```
 $ pi create volume -h
-Create a secret using specified subcommand
+Create a volume using specified subcommand
 
 Examples:
   # Create a new volume named vol1 with default size and zone

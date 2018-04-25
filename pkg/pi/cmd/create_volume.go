@@ -50,7 +50,7 @@ func NewCmdCreateVolume(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Comm
 }
 
 var (
-	volumeLong = templates.LongDesc(i18n.T(`Create a secret using specified subcommand`))
+	volumeLong = templates.LongDesc(i18n.T(`Create a volume using specified subcommand`))
 
 	volumeExample = templates.Examples(i18n.T(`
 	  # Create a new volume named vol1 with default size and zone
