@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  containers:
+  - image: mariadb:10.3.6
+    name: mysql
+    args:
+      - "--ignore-db-dir"
+      - "lost+found"
+    env:
+      - name: MYSQL_ROOT_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: mysql-password
+            key: password
+    ports:
+      - containerPort: 3306
+        name: mysql
+    resources:
+      limits:
+          memory: 1000Mi
+      requests:
+          memory: 1000Mi
+    volumeMounts:
+        # name must match the volume name below
+      - name: mysql-data
+        # mount path within the container
+        mountPath: /var/lib/mysql
+  volumes:
+    - name: mysql-data
+      flexVolume:
+        options:
+          # volumes from `pi get volumes`
+          volumeID: mysql-data
