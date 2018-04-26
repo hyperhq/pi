@@ -69,12 +69,16 @@ func CreateVolumeGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command
 	if err != nil {
 		return err
 	}
+	size := cmdutil.GetFlagString(cmd, "size")
+	if size == "" {
+		size = "10"
+	}
 	var generator pi.StructuredGenerator
 	switch generatorName := cmdutil.HyperVolumeV1GeneratorName; generatorName {
 	case cmdutil.HyperVolumeV1GeneratorName:
 		generator = &pi.VolumeGeneratorV1{
 			Name: name,
-			Size: cmdutil.GetFlagString(cmd, "size"),
+			Size: size,
 			Zone: cmdutil.GetFlagString(cmd, "zone"),
 		}
 	default:
