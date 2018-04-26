@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  # Must be   `clusterIP: None`, `type: ClusterIP` will not work.
+  clusterIP: None
+  selector:
+    app: mysql
+  ports:
+    - name: tcp-3306
+      port: 3306
+      protocol: TCP
+      targetPort: 3306

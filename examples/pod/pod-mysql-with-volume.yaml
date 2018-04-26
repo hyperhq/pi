@@ -6,7 +6,7 @@ metadata:
     name: mysql
 spec:
   containers:
-    - image: mysql
+    - image: mysql:5.7
       name: mysql
       args:
         - "--ignore-db-dir"
