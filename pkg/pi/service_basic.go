@@ -29,12 +29,14 @@ import (
 )
 
 type ServiceCommonGeneratorV1 struct {
-	Name         string
-	TCP          []string
-	Type         v1.ServiceType
-	ClusterIP    string
-	NodePort     int
-	ExternalName string
+	Name           string
+	TCP            []string
+	Type           v1.ServiceType
+	ClusterIP      string
+	NodePort       int
+	ExternalName   string
+	LoadBalancerIP string
+	Selector       []string
 }
 
 type ServiceClusterIPGeneratorV1 struct {
@@ -72,6 +74,8 @@ func (ServiceLoadBalancerGeneratorV1) ParamNames() []GeneratorParam {
 	return []GeneratorParam{
 		{"name", true},
 		{"tcp", true},
+		{"loadbalancerip", true},
+		{"selector", true},
 	}
 }
 
@@ -120,7 +124,7 @@ func (s ServiceCommonGeneratorV1) GenerateCommon(params map[string]interface{}) 
 	}
 	tcpStrings, isArray := params["tcp"].([]string)
 	if !isArray {
-		return fmt.Errorf("expected []string, found :%v", tcpStrings)
+		return fmt.Errorf("expected []string, found :%v to 'tcp'", tcpStrings)
 	}
 	clusterip, isString := params["clusterip"].(string)
 	if !isString {
@@ -130,10 +134,21 @@ func (s ServiceCommonGeneratorV1) GenerateCommon(params map[string]interface{}) 
 	if !isString {
 		return fmt.Errorf("expected string, saw %v for 'externalname'", externalname)
 	}
+	loadbalancerip, isString := params["loadbalancerip"].(string)
+	if !isString {
+		return fmt.Errorf("expected string, saw %v for 'loadbalancerip'", loadbalancerip)
+	}
+	selectorStrings, isArray := params["selector"].([]string)
+	if !isArray {
+		return fmt.Errorf("expected []string, found :%v for 'selector'", selectorStrings)
+	}
+
 	s.Name = name
 	s.TCP = tcpStrings
 	s.ClusterIP = clusterip
 	s.ExternalName = externalname
+	s.LoadBalancerIP = loadbalancerip
+	s.Selector = selectorStrings
 	return nil
 }
 
@@ -142,7 +157,7 @@ func (s ServiceLoadBalancerGeneratorV1) Generate(params map[string]interface{}) 
 	if err != nil {
 		return nil, err
 	}
-	delegate := &ServiceCommonGeneratorV1{Type: v1.ServiceTypeLoadBalancer, ClusterIP: ""}
+	delegate := &ServiceCommonGeneratorV1{Type: v1.ServiceTypeLoadBalancer, ClusterIP: "", LoadBalancerIP: ""}
 	err = delegate.GenerateCommon(params)
 	if err != nil {
 		return nil, err
@@ -209,6 +224,13 @@ func (s ServiceCommonGeneratorV1) validate() error {
 			return fmt.Errorf("invalid service external name %s", s.ExternalName)
 		}
 	}
+	if s.Type == v1.ServiceTypeLoadBalancer {
+		if s.LoadBalancerIP == "" {
+			return fmt.Errorf("loadbalancerip must be provided")
+		} else if len(s.Selector) == 0 {
+			return fmt.Errorf("at least one selector specifier must be provided")
+		}
+	}
 	return nil
 }
 
@@ -254,6 +276,18 @@ func (s ServiceCommonGeneratorV1) StructuredGenerate() (runtime.Object, error) {
 	}
 	if len(s.ClusterIP) > 0 {
 		service.Spec.ClusterIP = s.ClusterIP
+	}
+	//LoadBalancerIP should be fip
+	if s.Type == v1.ServiceTypeLoadBalancer {
+		service.Spec.LoadBalancerIP = s.LoadBalancerIP
+		for _, l := range s.Selector {
+			ary := strings.SplitN(l, "=", 2)
+			if len(ary) == 2 {
+				service.Spec.Selector[ary[0]] = ary[1]
+			} else {
+				service.Spec.Selector[ary[0]] = ""
+			}
+		}
 	}
 	return &service, nil
 }

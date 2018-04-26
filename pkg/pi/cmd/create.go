@@ -97,7 +97,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 
 	// create subcommands
 	cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
-	//cmd.AddCommand(NewCmdCreateService(f, out, errOut))
+	cmd.AddCommand(NewCmdCreateService(f, out, errOut))
 
 	// create volume, fip
 	cmd.AddCommand(NewCmdCreateVolume(f, out, errOut))
