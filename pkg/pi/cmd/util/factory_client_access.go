@@ -512,10 +512,10 @@ func DefaultGenerators(cmdName string) map[string]pi.Generator {
 		generator = map[string]pi.Generator{
 			ServiceClusterIPGeneratorV1Name: pi.ServiceClusterIPGeneratorV1{},
 		}
-	case "service-nodeport":
-		generator = map[string]pi.Generator{
-			ServiceNodePortGeneratorV1Name: pi.ServiceNodePortGeneratorV1{},
-		}
+	//case "service-nodeport":
+	//	generator = map[string]pi.Generator{
+	//		ServiceNodePortGeneratorV1Name: pi.ServiceNodePortGeneratorV1{},
+	//	}
 	case "service-loadbalancer":
 		generator = map[string]pi.Generator{
 			ServiceLoadBalancerGeneratorV1Name: pi.ServiceLoadBalancerGeneratorV1{},
@@ -528,10 +528,10 @@ func DefaultGenerators(cmdName string) map[string]pi.Generator {
 		generator = map[string]pi.Generator{
 			SecretForDockerRegistryV1GeneratorName: pi.SecretForDockerRegistryGeneratorV1{},
 		}
-	case "secret-for-tls":
-		generator = map[string]pi.Generator{
-			SecretForTLSV1GeneratorName: pi.SecretForTLSGeneratorV1{},
-		}
+	//case "secret-for-tls":
+	//	generator = map[string]pi.Generator{
+	//		SecretForTLSV1GeneratorName: pi.SecretForTLSGeneratorV1{},
+	//	}
 	case "hyper-volume":
 		generator = map[string]pi.Generator{
 			HyperVolumeV1GeneratorName: pi.VolumeGeneratorV1{},
@@ -543,6 +543,10 @@ func DefaultGenerators(cmdName string) map[string]pi.Generator {
 	case "hyper-rename-fip":
 		generator = map[string]pi.Generator{
 			HyperFipV1RenameName: pi.FipNameV1{},
+		}
+	case "run":
+		generator = map[string]pi.Generator{
+			RunPodV1GeneratorName: pi.BasicPod{},
 		}
 	}
 	return generator
