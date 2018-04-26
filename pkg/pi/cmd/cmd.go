@@ -194,7 +194,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 		Long: templates.LongDesc(`
       pi controls the resources on Pi platform.
 
-      Find more information at https://github.com/hyperhq/pi.`),
+      Find more information at https://docs.hyper.sh/pi.`),
 		Run: runHelp,
 		BashCompletionFunction: bashCompletionFunc,
 	}

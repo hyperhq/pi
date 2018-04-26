@@ -25,6 +25,7 @@ import (
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
 
 	"github.com/docker/distribution/reference"
+	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
@@ -38,7 +39,6 @@ import (
 	coreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 	conditions "k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/util/interrupt"
-	uexec "k8s.io/utils/exec"
 )
 
 const (
@@ -62,16 +62,13 @@ var (
 		pi run nginx --image=nginx --labels="app=nginx,env=prod"
 
 		# Start a pod of busybox and keep it in the foreground, don't restart it if it exits.
-		pi run -i -t busybox --image=busybox --restart=Never
+		pi run -it busybox --image=busybox --restart=Never -- sh
 
-		# Start the nginx container using the default command, but use custom arguments (arg1 .. argN) for that command.
-		pi run nginx --image=nginx -- <arg1> <arg2> ... <argN>
+		# Start the nginx container using a specified command and custom arguments.
+		pi run nginx --image=nginx -- <cmd> <arg1> ... <argN>
 
-		# Start the nginx container using a different command and custom arguments.
-		pi run nginx --image=nginx --command -- <cmd> <arg1> ... <argN>
-
-		# Start the perl container to compute π to 2000 places and print it out.
-		pi run pi --image=perl --restart=OnFailure -- perl -Mbignum=bpi -wle 'print bpi(2000)'`))
+		# Start the nginx container using a specified command and custom arguments.
+		pi run nginx --rm --image=nginx -- echo hello world`))
 )
 
 type RunObject struct {
@@ -83,7 +80,7 @@ type RunObject struct {
 
 func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "run NAME --image=image [--env=\"key=value\"] [--command] -- [COMMAND] [args...]",
+		Use:     "run NAME --image=image [--env=\"key=value\"] -- [COMMAND] [args...]",
 		Short:   i18n.T("Run a particular image on the cluster"),
 		Long:    runLong,
 		Example: runExample,
@@ -98,7 +95,7 @@ func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *co
 	//cmdutil.AddApplyAnnotationFlags(cmd)
 	//cmdutil.AddRecordFlag(cmd)
 	//cmdutil.AddInclude3rdPartyFlags(cmd)
-	cmdutil.AddPodRunningTimeoutFlag(cmd, defaultPodAttachTimeout)
+	//cmdutil.AddPodRunningTimeoutFlag(cmd, defaultPodAttachTimeout)
 	return cmd
 }
 
@@ -107,7 +104,7 @@ func addRunFlags(cmd *cobra.Command) {
 	//cmd.Flags().String("generator", "", i18n.T("The name of the API generator to use, see http://kubernetes.io/docs/user-guide/pi-conventions/#generators for a list."))
 	cmd.Flags().String("image", "", i18n.T("The image for the container to run."))
 	cmd.MarkFlagRequired("image")
-	cmd.Flags().String("image-pull-policy", "", i18n.T("The image pull policy for the container. If left empty, this value will not be specified by the client and defaulted by the server"))
+	//cmd.Flags().String("image-pull-policy", "", i18n.T("The image pull policy for the container. If left empty, this value will not be specified by the client and defaulted by the server"))
 	//cmd.Flags().IntP("replicas", "r", 1, "Number of replicas to create for this container. Default is 1.")
 	cmd.Flags().Bool("rm", false, "If true, delete resources created in this command for attached containers.")
 	//cmd.Flags().String("overrides", "", i18n.T("An inline JSON override for the generated object. If this is non-empty, it is used to override the generated object. Requires that the object supply a valid apiVersion field."))
@@ -121,13 +118,13 @@ func addRunFlags(cmd *cobra.Command) {
 	//cmd.Flags().Bool("attach", false, "If true, wait for the Pod to start running, and then attach to the Pod as if 'pi attach ...' were called.  Default false, unless '-i/--stdin' is set, in which case the default is true. With '--restart=Never' the exit code of the container process is returned.")
 	//cmd.Flags().Bool("leave-stdin-open", false, "If the pod is started in interactive mode or with stdin, leave stdin open after the first attach completes. By default, stdin will be closed after the first attach completes.")
 	cmd.Flags().String("restart", "Always", i18n.T("The restart policy for this Pod.  Legal values [Always, OnFailure, Never]. if set to 'Never', a regular pod is created. Default 'Always'"))
-	cmd.Flags().Bool("command", false, "If true and extra arguments are present, use them as the 'command' field in the container, rather than the 'args' field which is the default.")
+	//cmd.Flags().Bool("command", false, "If true and extra arguments are present, use them as the 'command' field in the container, rather than the 'args' field which is the default.")
 	//cmd.Flags().String("requests", "", i18n.T("The resource requirement requests for this container.  For example, 'cpu=100m,memory=256Mi'.  Note that server side components may assign requests depending on the server configuration, such as limit ranges."))
 	cmd.Flags().String("limits", "", i18n.T("The resource requirement limits for this container.  For example, 'cpu=200m,memory=512Mi'.  Note that server side components may assign limits depending on the server configuration, such as limit ranges."))
 	//cmd.Flags().Bool("expose", false, "If true, a public, external service is created for the container(s) which are run")
 	//cmd.Flags().String("service-generator", "service/v2", i18n.T("The name of the generator to use for creating a service.  Only used if --expose is true"))
 	//cmd.Flags().String("service-overrides", "", i18n.T("An inline JSON override for the generated service object. If this is non-empty, it is used to override the generated object. Requires that the object supply a valid apiVersion field.  Only used if --expose is true."))
-	cmd.Flags().Bool("quiet", false, "If true, suppress prompt messages.")
+	//cmd.Flags().Bool("quiet", false, "If true, suppress prompt messages.")
 	//cmd.Flags().String("schedule", "", i18n.T("A schedule in the Cron format the job should be run with."))
 }
 
@@ -135,11 +132,6 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	// Let pi run follow rules for `--`, see #13004 issue
 	if len(args) == 0 || argsLenAtDash == 0 {
 		return cmdutil.UsageErrorf(cmd, "NAME is required for run")
-	}
-
-	timeout, err := cmdutil.GetPodRunningTimeoutFlag(cmd)
-	if err != nil {
-		return cmdutil.UsageErrorf(cmd, "%v", err)
 	}
 
 	// validate image name
@@ -167,16 +159,11 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 		return err
 	}
 
-	attach := false
-
 	remove := cmdutil.GetFlagBool(cmd, "rm")
-	if !attach && remove {
-		return cmdutil.UsageErrorf(cmd, "--rm should only be used for attached containers")
-	}
 
-	if err := verifyImagePullPolicy(cmd); err != nil {
-		return err
-	}
+	//if err := verifyImagePullPolicy(cmd); err != nil {
+	//	return err
+	//}
 
 	clientset, err := f.ClientSet()
 	if err != nil {
@@ -245,8 +232,15 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	if len(args) > 1 {
 		params["args"] = args[1:]
 	}
+	command, err := getArgs(params)
+	if err != nil {
+		return err
+	}
 
 	params["env"] = cmdutil.GetFlagStringArray(cmd, "env")
+
+	podClient := clientset.Core()
+	podName := params["name"].(string)
 
 	var runObjectMap = map[string]*RunObject{}
 	runObject, err := createGeneratedObject(f, cmd, generator, names, params, "", namespace)
@@ -255,118 +249,61 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	}
 	runObjectMap[generatorName] = runObject
 
-	if attach {
-		quiet := cmdutil.GetFlagBool(cmd, "quiet")
-		opts := &AttachOptions{
-			StreamOptions: StreamOptions{
-				In:    cmdIn,
-				Out:   cmdOut,
-				Err:   cmdErr,
-				Stdin: interactive,
-				TTY:   tty,
-				Quiet: quiet,
-			},
-			GetPodTimeout: timeout,
-			CommandName:   cmd.Parent().CommandPath() + " attach",
-
-			Attach: &DefaultRemoteAttach{},
-		}
-		config, err := f.ClientConfig()
+	if len(command) > 0 {
+		pod, err := podClient.Pods("default").Get(podName, metav1.GetOptions{})
 		if err != nil {
 			return err
-		}
-		opts.Config = config
-
-		clientset, err := f.ClientSet()
-		if err != nil {
-			return err
-		}
-		opts.PodClient = clientset.Core()
-
-		attachablePod, err := f.AttachablePodForObject(runObject.Object, opts.GetPodTimeout)
-		if err != nil {
-			return err
-		}
-		err = handleAttachPod(f, clientset.Core(), attachablePod.Namespace, attachablePod.Name, opts)
-		if err != nil {
-			return err
-		}
-
-		var pod *api.Pod
-		leaveStdinOpen := cmdutil.GetFlagBool(cmd, "leave-stdin-open")
-		waitForExitCode := !leaveStdinOpen && restartPolicy == api.RestartPolicyNever
-		if waitForExitCode {
-			pod, err = waitForPod(clientset.Core(), attachablePod.Namespace, attachablePod.Name, conditions.PodCompleted)
-			if err != nil {
-				return err
-			}
 		}
 
 		if remove {
-			for _, obj := range runObjectMap {
-				namespace, err = obj.Mapping.MetadataAccessor.Namespace(obj.Object)
-				if err != nil {
-					return err
-				}
-				var name string
-				name, err = obj.Mapping.MetadataAccessor.Name(obj.Object)
-				if err != nil {
-					return err
-				}
-				r := f.NewBuilder().
-					Internal().
-					ContinueOnError().
-					NamespaceParam(namespace).DefaultNamespace().
-					ResourceNames(obj.Mapping.Resource, name).
-					Flatten().
-					Do()
-				// Note: we pass in "true" for the "quiet" parameter because
-				// ReadResult will only print one thing based on the "quiet"
-				// flag, and that's the "pod xxx deleted" message. If they
-				// asked for us to remove the pod (via --rm) then telling them
-				// its been deleted is unnecessary since that's what they asked
-				// for. We should only print something if the "rm" fails.
-				err = ReapResult(r, f, cmdOut, true, true, 0, -1, false, false, obj.Mapper, true)
-				if err != nil {
-					return err
-				}
-			}
+			defer deletePod(pod.Name, podClient)
 		}
 
-		// after removal is done, return successfully if we are not interested in the exit code
-		if !waitForExitCode {
-			return nil
+		if pod.Status.Phase == api.PodSucceeded || pod.Status.Phase == api.PodFailed {
+			return fmt.Errorf("cannot exec into a container in a completed pod; current phase is %s", pod.Status.Phase)
 		}
-
-		switch pod.Status.Phase {
-		case api.PodSucceeded:
-			return nil
-		case api.PodFailed:
-			unknownRcErr := fmt.Errorf("pod %s/%s failed with unknown exit code", pod.Namespace, pod.Name)
-			if len(pod.Status.ContainerStatuses) == 0 || pod.Status.ContainerStatuses[0].State.Terminated == nil {
-				return unknownRcErr
+		for i := 0; i <= 20; i++ {
+			if pod.Status.Phase == api.PodPending {
+				glog.V(4).Infof("%v/20 waiting for pod start", i)
+				time.Sleep(time.Duration(1 * time.Second))
+				pod, err = podClient.Pods("default").Get(podName, metav1.GetOptions{})
+			} else {
+				glog.V(4).Infof("pod started:%v", string(pod.Status.Phase))
+				break
 			}
-			// assume here that we have at most one status because pi-run only creates one container per pod
-			rc := pod.Status.ContainerStatuses[0].State.Terminated.ExitCode
-			if rc == 0 {
-				return unknownRcErr
-			}
-			return uexec.CodeExitError{
-				Err:  fmt.Errorf("pod %s/%s terminated (%s)\n%s", pod.Namespace, pod.Name, pod.Status.ContainerStatuses[0].State.Terminated.Reason, pod.Status.ContainerStatuses[0].State.Terminated.Message),
-				Code: int(rc),
-			}
-		default:
-			return fmt.Errorf("pod %s/%s left in phase %s", pod.Namespace, pod.Name, pod.Status.Phase)
 		}
-
-	}
-
-	if tty && interactive {
-		fmt.Printf("-it\n")
+		options := &ExecOptions{
+			StreamOptions: StreamOptions{
+				In:        cmdIn,
+				Out:       cmdOut,
+				Err:       cmdErr,
+				PodName:   pod.Name,
+				Namespace: "default",
+				Quiet:     false,
+				TTY:       tty,
+				Stdin:     interactive,
+			},
+			Executor: &DefaultRemoteExecutor{},
+			Command:  command,
+		}
+		options.PodClient = podClient
+		cmdutil.CheckErr(options.RunHyper(f))
 	} else {
 		f.PrintSuccess(runObject.Mapper, false, cmdOut, runObject.Mapping.Resource, args[0], false, "created")
 	}
+
 	return nil
+}
+
+func deletePod(podName string, podClient coreclient.CoreInterface) {
+	glog.V(4).Infof("deletel pod %v due to --rm", podName)
+	var gracePeriodSeconds int64 = 0
+	err := podClient.Pods("default").Delete(podName, &metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds})
+	if err != nil {
+		fmt.Printf("failed to delete pod \"%v\", error:%v\n", podName, err)
+	} else {
+		fmt.Printf("pod \"%v\" deleted\n", podName)
+	}
 }
 
 // waitForPod watches the given pod until the exitCondition is true
@@ -533,4 +470,19 @@ func createGeneratedObject(f cmdutil.Factory, cmd *cobra.Command, generator pi.G
 		Mapper:  mapper,
 		Mapping: mapping,
 	}, nil
+}
+
+// getArgs returns arguments for the container command.
+func getArgs(genericParams map[string]interface{}) ([]string, error) {
+	args := []string{}
+	val, found := genericParams["args"]
+	if found {
+		var isArray bool
+		args, isArray = val.([]string)
+		if !isArray {
+			return nil, fmt.Errorf("expected []string, found: %v", val)
+		}
+		delete(genericParams, "args")
+	}
+	return args, nil
 }
