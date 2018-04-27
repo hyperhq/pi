@@ -7,7 +7,7 @@ metadata:
 spec:
   containers:
   - name: wordpress
-    image: wordpress:4.8-apache
+    image: wordpress:4.9.5-apache
     env:
     - name: WORDPRESS_DB_HOST
       value: mysql
@@ -19,9 +19,20 @@ spec:
     ports:
     - containerPort: 80
       name: wordpress
-    resources:
-      limits:
-        memory: 1000Mi
-      requests:
-        memory: 1000Mi
+    volumeMounts:
+      - name: wp-data
+        mountPath: /var/www/html
+# leave it default
+#    resources:
+#      limits:
+#        memory: 1000Mi
+#      requests:
+#        memory: 1000Mi
+#
 
+  volumes:
+    - name: wp-data
+      flexVolume:
+        options:
+          # volumes from `pi get volumes`
+          volumeID: wp-data

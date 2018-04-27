@@ -9,10 +9,13 @@ This is a full example using full Pi's feature, including FIP, Volume, Service, 
 $ pi create volume mysql-data --size=10
 volume/mysql-data
 
+$ pi create volume wp-data --size=10
+volume/wp-data
+
 $ pi get volumes
 NAME        ZONE               SIZE(GB)  CREATEDAT                  POD
-mysql-data  gcp-us-central1-c  10        2018-04-25T04:44:14+00:00
-
+mysql-data  gcp-us-central1-c  10        2018-04-26T07:04:14+00:00
+wp-data     gcp-us-central1-c  10        2018-04-27T07:43:52+00:00
 ```
 
 ## Create a fip
