@@ -64,7 +64,7 @@ func addPortFlags(cmd *cobra.Command) {
 // NewCmdCreateServiceClusterIP is a command to create a ClusterIP service
 func NewCmdCreateServiceClusterIP(f cmdutil.Factory, cmdOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "clusterip NAME [--tcp=<port>:<targetPort>] [--dry-run]",
+		Use:     "clusterip NAME [--tcp=<port>:<targetPort>]",
 		Short:   i18n.T("Create a ClusterIP service."),
 		Long:    serviceClusterIPLong,
 		Example: serviceClusterIPExample,
@@ -73,10 +73,10 @@ func NewCmdCreateServiceClusterIP(f cmdutil.Factory, cmdOut io.Writer) *cobra.Co
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.ServiceClusterIPGeneratorV1Name)
+	//cmdutil.AddApplyAnnotationFlags(cmd)
+	//cmdutil.AddValidateFlags(cmd)
+	//cmdutil.AddPrinterFlags(cmd)
+	//cmdutil.AddGeneratorFlags(cmd, cmdutil.ServiceClusterIPGeneratorV1Name)
 	addPortFlags(cmd)
 	cmd.Flags().String("clusterip", "", i18n.T("Assign your own ClusterIP or set to 'None' for a 'headless' service (no loadbalancing)."))
 	return cmd
@@ -93,7 +93,7 @@ func CreateServiceClusterIP(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Comm
 		return err
 	}
 	var generator pi.StructuredGenerator
-	switch generatorName := cmdutil.GetFlagString(cmd, "generator"); generatorName {
+	switch generatorName := cmdutil.ServiceClusterIPGeneratorV1Name; generatorName {
 	case cmdutil.ServiceClusterIPGeneratorV1Name:
 		generator = &pi.ServiceCommonGeneratorV1{
 			Name:      name,
@@ -170,14 +170,14 @@ var (
     Create a LoadBalancer service with the specified name.`))
 
 	serviceLoadBalancerExample = templates.Examples(i18n.T(`
-    # Create a new LoadBalancer service named my-lbs
-    pi create service loadbalancer my-lbs --tcp=5678:8080`))
+    # Create a new LoadBalancer service named my-lbs (x.x.x.x is fip)
+    pi create service loadbalancer my-lbs --tcp=5678:8080 -f=x.x.x.x -l=role=web,zone=gcp-us-central1-a`))
 )
 
 // NewCmdCreateServiceLoadBalancer is a macro command for creating a LoadBalancer service
 func NewCmdCreateServiceLoadBalancer(f cmdutil.Factory, cmdOut io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "loadbalancer NAME [--tcp=port:targetPort] [--dry-run]",
+		Use:     "loadbalancer NAME [--tcp=port:targetPort] --loadbalancerip=fip --selector=key=val",
 		Short:   i18n.T("Create a LoadBalancer service."),
 		Long:    serviceLoadBalancerLong,
 		Example: serviceLoadBalancerExample,
@@ -186,11 +186,13 @@ func NewCmdCreateServiceLoadBalancer(f cmdutil.Factory, cmdOut io.Writer) *cobra
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmdutil.AddApplyAnnotationFlags(cmd)
-	cmdutil.AddValidateFlags(cmd)
-	cmdutil.AddPrinterFlags(cmd)
-	cmdutil.AddGeneratorFlags(cmd, cmdutil.ServiceLoadBalancerGeneratorV1Name)
+	//cmdutil.AddApplyAnnotationFlags(cmd)
+	//cmdutil.AddValidateFlags(cmd)
+	//cmdutil.AddPrinterFlags(cmd)
+	//cmdutil.AddGeneratorFlags(cmd, cmdutil.ServiceLoadBalancerGeneratorV1Name)
 	addPortFlags(cmd)
+	cmd.Flags().StringP("loadbalancerip", "f", "", "Set fip as LoadBalancerIP")
+	cmd.Flags().StringSliceP("selector", "l", []string{}, "Labels selectors for pods")
 	return cmd
 }
 
@@ -201,13 +203,15 @@ func CreateServiceLoadBalancer(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.C
 		return err
 	}
 	var generator pi.StructuredGenerator
-	switch generatorName := cmdutil.GetFlagString(cmd, "generator"); generatorName {
+	switch generatorName := cmdutil.ServiceLoadBalancerGeneratorV1Name; generatorName {
 	case cmdutil.ServiceLoadBalancerGeneratorV1Name:
 		generator = &pi.ServiceCommonGeneratorV1{
-			Name:      name,
-			TCP:       cmdutil.GetFlagStringSlice(cmd, "tcp"),
-			Type:      v1.ServiceTypeLoadBalancer,
-			ClusterIP: "",
+			Name:           name,
+			TCP:            cmdutil.GetFlagStringSlice(cmd, "tcp"),
+			Type:           v1.ServiceTypeLoadBalancer,
+			ClusterIP:      "",
+			LoadBalancerIP: cmdutil.GetFlagString(cmd, "loadbalancerip"),
+			Selector:       cmdutil.GetFlagStringSlice(cmd, "selector"),
 		}
 	default:
 		return errUnsupportedGenerator(cmd, generatorName)
