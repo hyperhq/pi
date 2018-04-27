@@ -51,10 +51,10 @@ var (
 
 	serviceClusterIPExample = templates.Examples(i18n.T(`
     # Create a new ClusterIP service named my-cs
-    pi create service clusterip my-cs --tcp=5678:8080
+    pi create service clusterip my-cs --tcp=5678:8080 --selector app=nginx
 
     # Create a new ClusterIP service named my-cs (in headless mode)
-    pi create service clusterip my-cs --clusterip="None"`))
+    pi create service clusterip my-cs --clusterip="None" --selector app=nginx`))
 )
 
 func addPortFlags(cmd *cobra.Command) {
@@ -79,6 +79,7 @@ func NewCmdCreateServiceClusterIP(f cmdutil.Factory, cmdOut io.Writer) *cobra.Co
 	//cmdutil.AddGeneratorFlags(cmd, cmdutil.ServiceClusterIPGeneratorV1Name)
 	addPortFlags(cmd)
 	cmd.Flags().String("clusterip", "", i18n.T("Assign your own ClusterIP or set to 'None' for a 'headless' service (no loadbalancing)."))
+	cmd.Flags().StringSliceP("selector", "l", []string{}, "Labels selectors for pods")
 	return cmd
 }
 
@@ -100,6 +101,7 @@ func CreateServiceClusterIP(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Comm
 			TCP:       cmdutil.GetFlagStringSlice(cmd, "tcp"),
 			Type:      v1.ServiceTypeClusterIP,
 			ClusterIP: cmdutil.GetFlagString(cmd, "clusterip"),
+			Selector:  cmdutil.GetFlagStringSlice(cmd, "selector"),
 		}
 	default:
 		return errUnsupportedGenerator(cmd, generatorName)

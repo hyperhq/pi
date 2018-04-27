@@ -61,6 +61,7 @@ func (ServiceClusterIPGeneratorV1) ParamNames() []GeneratorParam {
 		{"name", true},
 		{"tcp", true},
 		{"clusterip", false},
+		{"selector", true},
 	}
 }
 func (ServiceNodePortGeneratorV1) ParamNames() []GeneratorParam {
@@ -228,6 +229,11 @@ func (s ServiceCommonGeneratorV1) validate() error {
 		if s.LoadBalancerIP == "" {
 			return fmt.Errorf("loadbalancerip must be provided")
 		} else if len(s.Selector) == 0 {
+			return fmt.Errorf("at least one selector specifier must be provided")
+		}
+	}
+	if s.Type == v1.ServiceTypeClusterIP {
+		if len(s.Selector) == 0 {
 			return fmt.Errorf("at least one selector specifier must be provided")
 		}
 	}
