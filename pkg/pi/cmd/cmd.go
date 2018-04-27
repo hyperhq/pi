@@ -26,10 +26,10 @@ import (
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
-	"k8s.io/apiserver/pkg/util/flag"
 
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
+	"k8s.io/apiserver/pkg/util/flag"
 )
 
 const (
