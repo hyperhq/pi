@@ -18,9 +18,8 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/hyperhq/pi/cmd/pi/app"
+	"os"
 )
 
 func main() {

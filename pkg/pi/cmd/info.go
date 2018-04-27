@@ -17,20 +17,18 @@ limitations under the License.
 */
 
 import (
-	"context"
-	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/hyperhq/client-go/tools/clientcmd/api/hyper"
+	"github.com/hyperhq/pi"
 	"github.com/hyperhq/pi/pkg/pi/cmd/templates"
 	cmdutil "github.com/hyperhq/pi/pkg/pi/cmd/util"
 	"github.com/hyperhq/pi/pkg/pi/util/i18n"
 
-	"github.com/golang/glog"
-	"github.com/google/go-github/github"
-	"github.com/hyperhq/pi"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +45,7 @@ func NewCmdInfo(f cmdutil.Factory, cmdOut, errOut io.Writer) *cobra.Command {
 			cmdutil.CheckErr(err)
 		},
 	}
-	cmd.Flags().BoolP("check-update", "c", false, "check new version of pi")
+	cmd.Flags().BoolP("check-update", "c", false, "force to check new version of pi")
 	return cmd
 }
 
@@ -73,9 +71,27 @@ func InfoGeneric(f cmdutil.Factory, cmdOut io.Writer, cmd *cobra.Command, args [
 		}
 	}
 
-	checkUpdate := cmdutil.GetFlagBool(cmd, "check-update")
-	if checkUpdate {
-		checkRelease()
+	updater := pi.NewCheckUpdate()
+	if cmdutil.GetFlagBool(cmd, "check-update") {
+		//force check version
+		pi.CheckRelease()
+		updater.WriteTime(time.Now())
+	} else {
+		//check version after 24 hours
+		lastUpdate := updater.ReadTime()
+		hours := time.Since(lastUpdate).Hours()
+		if hours >= 24 {
+			if os.Getenv("HYPER_DEBUG") == "true" {
+				log.Printf("More than 24 hours(%v) of uncheck version.", int(hours))
+			}
+			//start check new version
+			pi.CheckRelease()
+			updater.WriteTime(time.Now())
+		} else {
+			if os.Getenv("HYPER_DEBUG") == "true" {
+				log.Printf("Checked version in 24 hours(%v), skip.", int(hours))
+			}
+		}
 	}
 
 	return nil
@@ -139,55 +155,3 @@ func getVersion(data [][]string) [][]string {
 
 	return data
 }
-
-func checkRelease() {
-	client := github.NewClient(nil)
-	opt := &github.ListOptions{}
-	var (
-		releases []*github.RepositoryRelease
-		err      error
-		latest   string
-	)
-	if releases, _, err = client.Repositories.ListReleases(context.Background(), "hyperhq", "pi", opt); err != nil {
-		glog.V(4).Info("failed to list repo from github")
-	} else {
-		for _, r := range releases {
-			if *r.TagName == "latest" {
-				latest = strings.TrimSpace(strings.Split(*r.Body, "\n")[0])
-				if latest == pi.Version {
-					fmt.Printf("you are using the latest version")
-					return
-				} else {
-					fmt.Printf("there is a new version: %v\n", latest)
-				}
-				break
-			}
-		}
-		for _, r := range releases {
-			if latest == *r.TagName {
-				preRelease := ""
-				for _, a := range r.Assets {
-					if *r.Prerelease {
-						preRelease = "Pre-release"
-					}
-					fmt.Printf("- (%v) %v\n", preRelease, *a.BrowserDownloadURL)
-				}
-				return
-			}
-		}
-	}
-}
-
-//func getLatestRelease(id int64) {
-//	client := github.NewClient(nil)
-//	var (
-//		latestRelease *github.RepositoryRelease
-//		err error
-//	)
-//	if latestRelease, _, err = client.Repositories.GetRelease(context.Background(),"hyperhq", "pi", id ); err != nil {
-//		glog.V(4).Info("failed to list repo from github")
-//	} else {
-//		latestRelease.
-//
-//	}
-//}
