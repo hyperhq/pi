@@ -60,10 +60,11 @@ AUTH="Authorization: token $github_api_token"
 WGET_ARGS="--content-disposition --auth-no-challenge --no-cookie"
 CURL_ARGS="-LJO#"
 
-if [[ "$tag" == "latest" ]]; then
-	echo "> can not use latest as tag"
-	exit 1
-fi
+#if [[ "$tag" == "latest" ]]; then
+#	echo "> can not use latest as tag"
+#	exit 1
+#fi
+
 if [[ "$tag" == "" ]]; then
 	echo "> tag can not be empty"
 	exit 1
@@ -136,6 +137,3 @@ if [ $? -eq 0 -o $? -eq 23 ];then
 else
 	echo "$FILENAME upload failed"
 fi
-
-
-
