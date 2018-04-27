@@ -3,7 +3,6 @@ kind: Service
 metadata:
   name: mysql
 spec:
-  # Must be   `clusterIP: None`, `type: ClusterIP` will not work.
   clusterIP: None
   selector:
     app: mysql
