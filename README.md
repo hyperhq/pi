@@ -37,6 +37,9 @@ For more about pi, please see https://docs.hyper.sh/pi
 	- [service operation](#service-operation)
 		- [add clusterip for pod](#add-clusterip-for-pod)
 		- [add loadbalancer for pod](#add-loadbalancer-for-pod)
+	- [secret operation](#secret-operation)
+		- [create docker-registry secret](#create-docker-registry-secret)
+		- [create generic secret](#create-generic-secret)
 	- [delete all resources](#delete-all-resources)
 - [Tutorials](#tutorials)
 	- [Wordpress example](#wordpress-example)
@@ -709,7 +712,7 @@ $ pi get services my-nginx-external -o yaml | grep -E "(clusterIP|selector):" -A
     app: nginx-external
 ```
 
-access nginx via fip
+access nginx
 ```
 $ pi run -it --rm busybox --image=busybox -- sh
 / # wget -qO- http://35.192.x.x:8080 | grep title             # use loadbalancerip(fip)
@@ -718,6 +721,25 @@ $ pi run -it --rm busybox --image=busybox -- sh
 <title>Welcome to nginx!</title>
 / # wget -qO- http://10.107.218.6:8080 | grep title           # use clusterip
 <title>Welcome to nginx!</title>
+```
+
+## secret operation
+
+### create docker-registry secret
+
+```
+$ pi create secret docker-registry my-docker-registry-secret \
+  --docker-username=DOCKER_USER \
+  --docker-password=DOCKER_PASSWORD \
+  --docker-email=DOCKER_EMAIL
+secret/my-docker-registry-secret
+```
+
+### create generic secret
+
+```
+$ pi create secret generic my-generic-secret --from-literal=key1=supersecret --from-literal=key2=topsecret
+secret/my-generic-secret
 ```
 
 ## delete all resources
