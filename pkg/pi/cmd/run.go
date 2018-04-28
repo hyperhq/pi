@@ -48,8 +48,7 @@ const (
 
 var (
 	runLong = templates.LongDesc(i18n.T(`
-		Create and run a particular image, possibly replicated.
-		Creates a deployment or job to manage the created container(s).`))
+		Create and run a pod with particular image.`))
 
 	runExample = templates.Examples(i18n.T(`
 		# Start a single instance of nginx.
@@ -80,8 +79,8 @@ type RunObject struct {
 
 func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "run NAME --image=image [--env=\"key=value\"] -- [COMMAND] [args...]",
-		Short:   i18n.T("Run a particular image on the cluster"),
+		Use:     "run NAME [-i] [-t] --image=image [--env=\"key=value\"] -- [COMMAND] [args...]",
+		Short:   i18n.T("Run a pod with particular image."),
 		Long:    runLong,
 		Example: runExample,
 		Run: func(cmd *cobra.Command, args []string) {
