@@ -79,7 +79,7 @@ func NewCmdDescribe(f cmdutil.Factory, out, cmdErr io.Writer) *cobra.Command {
 	argAliases := pi.ResourceAliases(validArgs)
 
 	cmd := &cobra.Command{
-		Use:     "describe (-f FILENAME | TYPE [NAME_PREFIX | -l label] | TYPE/NAME)",
+		Use:     "describe (TYPE [NAME_PREFIX | -l label] | TYPE/NAME)",
 		Short:   i18n.T("Show details of a specific resource or group of resources"),
 		Long:    describeLong + "\n\n" + cmdutil.ValidResourceTypeList(f),
 		Example: describeExample,
@@ -90,10 +90,10 @@ func NewCmdDescribe(f cmdutil.Factory, out, cmdErr io.Writer) *cobra.Command {
 		ValidArgs:  validArgs,
 		ArgAliases: argAliases,
 	}
-	usage := "containing the resource to describe"
-	cmdutil.AddFilenameOptionFlags(cmd, options, usage)
+	//usage := "containing the resource to describe"
+	//cmdutil.AddFilenameOptionFlags(cmd, options, usage)
 	cmd.Flags().StringP("selector", "l", "", "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
-	cmd.Flags().Bool("all-namespaces", false, "If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
+	//cmd.Flags().Bool("all-namespaces", false, "If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
 	cmd.Flags().BoolVar(&describerSettings.ShowEvents, "show-events", true, "If true, display events related to the described object.")
 	cmdutil.AddIncludeUninitializedFlag(cmd)
 	return cmd
@@ -101,14 +101,14 @@ func NewCmdDescribe(f cmdutil.Factory, out, cmdErr io.Writer) *cobra.Command {
 
 func RunDescribe(f cmdutil.Factory, out, cmdErr io.Writer, cmd *cobra.Command, args []string, options *resource.FilenameOptions, describerSettings *printers.DescriberSettings) error {
 	selector := cmdutil.GetFlagString(cmd, "selector")
-	allNamespaces := cmdutil.GetFlagBool(cmd, "all-namespaces")
-	cmdNamespace, enforceNamespace, err := f.DefaultNamespace()
+	//allNamespaces := cmdutil.GetFlagBool(cmd, "all-namespaces")
+	cmdNamespace, _, err := f.DefaultNamespace()
 	if err != nil {
 		return err
 	}
-	if allNamespaces {
-		enforceNamespace = false
-	}
+	//if allNamespaces {
+	//	enforceNamespace = false
+	//}
 	if len(args) == 0 && cmdutil.IsFilenameSliceEmpty(options.Filenames) {
 		fmt.Fprint(cmdErr, "You must specify the type of resource to describe. ", cmdutil.ValidResourceTypeList(f))
 		return cmdutil.UsageErrorf(cmd, "Required resource not specified.")
@@ -120,8 +120,8 @@ func RunDescribe(f cmdutil.Factory, out, cmdErr io.Writer, cmd *cobra.Command, a
 	r := f.NewBuilder().
 		Unstructured().
 		ContinueOnError().
-		NamespaceParam(cmdNamespace).DefaultNamespace().AllNamespaces(allNamespaces).
-		FilenameParam(enforceNamespace, options).
+		NamespaceParam(cmdNamespace).DefaultNamespace(). //AllNamespaces(allNamespaces).
+		//FilenameParam(enforceNamespace, options).
 		LabelSelectorParam(selector).
 		IncludeUninitialized(includeUninitialized).
 		ResourceTypeOrNameArgs(true, args...).
