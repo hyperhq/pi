@@ -232,6 +232,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 			Message: "Troubleshooting and Debugging Commands:",
 			Commands: []*cobra.Command{
 				//NewCmdDescribe(f, out, err),
+				NewCmdLogs(f, out),
 				NewCmdExec(f, in, out, err),
 			},
 		},
