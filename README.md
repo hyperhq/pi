@@ -29,7 +29,8 @@ For more about pi, please see https://docs.hyper.sh/pi
 		- [pod exec](#pod-exec)
 		- [pod run](#pod-run)
 		- [pod list](#pod-list)
-		- [delete pod immediately](#delete-pod-immediately)
+		- [pod logs](#pod-logs)
+		- [delete pod](#delete-pod)
 		- [pod in zone](#pod-in-zone)
 	- [fip operation](#fip-operation)
 		- [name fip](#name-fip)
@@ -560,7 +561,6 @@ bin   dev   etc   home  lib   proc  root  sys   tmp   usr   var
 pod "busybox" deleted
 ```
 
-
 ### pod list
 
 filter pods by label
@@ -578,9 +578,34 @@ nginx             1/1       Running     0          38m
 test-runonce      0/1       Succeeded   0          12m
 ```
 
-### delete pod immediately
+
+### pod logs
 
 ```
+// Display only the most recent 1 lines of output in pod mongo
+$ pi logs mongo --tail=1
+2018-04-23T06:44:04.130+0000 I COMMAND  [thread1] command config.$cmd command: createIndexes { createIndexes: "system.sessions", indexes: [ { key: { lastUse: 1 }, name: "lsidTTLIndex", expireAfterSeconds: 1800 } ], $db: "config" } numYields:0 reslen:98 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, Database: { acquireCount: { W: 1 } }, Collection: { acquireCount: { w: 1 } } } protocol:op_msg 134ms
+
+// Return snapshot logs from pod mongo with only one container
+$ pi logs mongo
+
+// Return snapshot logs for the pods defined by label app=nginx
+$ pi logs -lapp=mongo
+
+// Return snapshot of previous terminated ruby container logs from pod web-1
+$ pi logs -c mongo mongo
+
+// Begin streaming the logs of the ruby container in pod web-1
+$ pi logs -f -c ruby web-1
+
+// Show all logs from pod nginx written in the last hour
+$ pi logs --since=1h nginx
+```
+
+### delete pod
+
+```
+//delete pod immediately
 $ pi delete pod nginx --now
 
 $ pi delete pod nginx --grace-period=0
