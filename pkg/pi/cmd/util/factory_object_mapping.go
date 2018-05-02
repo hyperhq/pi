@@ -231,6 +231,8 @@ func (f *ring1Factory) LogsForObject(object, options runtime.Object, timeout tim
 	var namespace string
 	switch t := object.(type) {
 	case *api.Pod:
+		t.Namespace = "default"
+		glog.V(4).Infof("namespace:%v podName:%v opts:%v", t.Namespace, t.Name, opts)
 		return clientset.Core().Pods(t.Namespace).GetLogs(t.Name, opts), nil
 
 	case *api.ReplicationController:

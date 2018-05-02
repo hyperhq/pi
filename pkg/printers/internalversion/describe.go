@@ -30,9 +30,12 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/golang/glog"
+	"github.com/hyperhq/client-go/dynamic"
+	clientextensionsv1beta1 "github.com/hyperhq/client-go/kubernetes/typed/extensions/v1beta1"
+	"github.com/hyperhq/pi/pkg/printers"
 
 	"github.com/fatih/camelcase"
+	"github.com/golang/glog"
 	versionedextension "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -44,8 +47,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/sets"
-	"github.com/hyperhq/client-go/dynamic"
-	clientextensionsv1beta1 "github.com/hyperhq/client-go/kubernetes/typed/extensions/v1beta1"
 	"k8s.io/kubernetes/pkg/api/events"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 	"k8s.io/kubernetes/pkg/api/ref"
@@ -68,7 +69,6 @@ import (
 	coreclient "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/typed/core/internalversion"
 	deploymentutil "k8s.io/kubernetes/pkg/controller/deployment/util"
 	"k8s.io/kubernetes/pkg/fieldpath"
-	"github.com/hyperhq/pi/pkg/printers"
 	"k8s.io/kubernetes/pkg/registry/rbac/validation"
 	"k8s.io/kubernetes/pkg/util/slice"
 )
@@ -605,12 +605,16 @@ func (d *PodDescriber) Describe(namespace, name string, describerSettings printe
 
 	var events *api.EventList
 	if describerSettings.ShowEvents {
-		if ref, err := ref.GetReference(legacyscheme.Scheme, pod); err != nil {
-			glog.Errorf("Unable to construct reference to '%#v': %v", pod, err)
-		} else {
-			ref.Kind = ""
-			events, _ = d.Core().Events(namespace).Search(legacyscheme.Scheme, ref)
+		//if ref, err := ref.GetReference(legacyscheme.Scheme, pod); err != nil {
+		//	glog.Errorf("Unable to construct reference to '%#v': %v", pod, err)
+		//} else {
+		//	ref.Kind = ""
+		//	events, _ = d.Core().Events(namespace).Search(legacyscheme.Scheme, ref)
+		//}
+		opts := metav1.ListOptions{
+			FieldSelector: fmt.Sprintf("involvedObject.uid=%v,involvedObject.name=%v", pod.UID, pod.Name),
 		}
+		events, err = d.Core().Events("default").List(opts)
 	}
 
 	return describePod(pod, events)
