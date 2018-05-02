@@ -18,8 +18,10 @@ For more about pi, please see https://docs.hyper.sh/pi
 	- [create resource](#create-resource)
 		- [create from file](#create-from-file)
 		- [create from flag](#create-from-flag)
-	- [list resources](#list-resources)
-	- [get resource detail](#get-resource-detail)
+	- [get resource](#get-resource)
+		- [get list](#get-list)
+		- [get info](#get-info)
+		- [get detail](#get-detail)
 	- [delete resource](#delete-resource)
 - [Advance Example](#advance-example)
 	- [volume operation](#volume-operation)
@@ -46,6 +48,7 @@ For more about pi, please see https://docs.hyper.sh/pi
 	- [Wordpress example](#wordpress-example)
 
 <!-- /TOC -->
+
 
 # Build
 
@@ -326,8 +329,9 @@ $ pi create secret generic my-secret2 --from-literal=key1=supersecret --from-lit
 secret/my-secret2
 ```
 
+## get resource
 
-## list resources
+### get list
 
 ```
 // list pods
@@ -358,7 +362,7 @@ FIP             NAME  CREATEDAT                  SERVICES
 35.202.x.x            2018-04-27T04:19:27+00:00  my-lbs
 ```
 
-## get resource detail
+### get info
 
 get subcommand support `-o`(`--output`)
 - for pod, service, secret, output format could be one of: json|yaml|wide|name
@@ -430,6 +434,33 @@ $ pi get volumes vol1 -o json
   "createdAt": "2018-04-27T04:24:49.804Z"
 }
 ```
+
+### get detail
+
+> Show details of resource, include events
+
+Supported resources:
+- pod
+- servie
+- secret
+
+```
+// Describe a pod
+$ pi describe pods/nginx
+
+// Describe all pods
+$ pi describe pods
+
+// Describe pods by label app=nginx
+$ pi describe pods -l app=nginx
+
+// Describe a service
+$ pi describe service my-service
+
+// Describe a secret
+$ pi describe secret my-secret
+```
+
 
 ## delete resource
 
