@@ -18,8 +18,10 @@ For more about pi, please see https://docs.hyper.sh/pi
 	- [create resource](#create-resource)
 		- [create from file](#create-from-file)
 		- [create from flag](#create-from-flag)
-	- [list resources](#list-resources)
-	- [get resource detail](#get-resource-detail)
+	- [get resource](#get-resource)
+		- [get list](#get-list)
+		- [get info](#get-info)
+		- [get detail](#get-detail)
 	- [delete resource](#delete-resource)
 - [Advance Example](#advance-example)
 	- [volume operation](#volume-operation)
@@ -29,7 +31,8 @@ For more about pi, please see https://docs.hyper.sh/pi
 		- [pod exec](#pod-exec)
 		- [pod run](#pod-run)
 		- [pod list](#pod-list)
-		- [delete pod immediately](#delete-pod-immediately)
+		- [pod logs](#pod-logs)
+		- [delete pod](#delete-pod)
 		- [pod in zone](#pod-in-zone)
 	- [fip operation](#fip-operation)
 		- [name fip](#name-fip)
@@ -37,11 +40,15 @@ For more about pi, please see https://docs.hyper.sh/pi
 	- [service operation](#service-operation)
 		- [add clusterip for pod](#add-clusterip-for-pod)
 		- [add loadbalancer for pod](#add-loadbalancer-for-pod)
+	- [secret operation](#secret-operation)
+		- [create docker-registry secret](#create-docker-registry-secret)
+		- [create generic secret](#create-generic-secret)
 	- [delete all resources](#delete-all-resources)
 - [Tutorials](#tutorials)
 	- [Wordpress example](#wordpress-example)
 
 <!-- /TOC -->
+
 
 # Build
 
@@ -322,8 +329,9 @@ $ pi create secret generic my-secret2 --from-literal=key1=supersecret --from-lit
 secret/my-secret2
 ```
 
+## get resource
 
-## list resources
+### get list
 
 ```
 // list pods
@@ -354,7 +362,7 @@ FIP             NAME  CREATEDAT                  SERVICES
 35.202.x.x            2018-04-27T04:19:27+00:00  my-lbs
 ```
 
-## get resource detail
+### get info
 
 get subcommand support `-o`(`--output`)
 - for pod, service, secret, output format could be one of: json|yaml|wide|name
@@ -426,6 +434,33 @@ $ pi get volumes vol1 -o json
   "createdAt": "2018-04-27T04:24:49.804Z"
 }
 ```
+
+### get detail
+
+> Show details of resource, include events
+
+Supported resources:
+- pod
+- servie
+- secret
+
+```
+// Describe a pod
+$ pi describe pods/nginx
+
+// Describe all pods
+$ pi describe pods
+
+// Describe pods by label app=nginx
+$ pi describe pods -l app=nginx
+
+// Describe a service
+$ pi describe service my-service
+
+// Describe a secret
+$ pi describe secret my-secret
+```
+
 
 ## delete resource
 
@@ -557,7 +592,6 @@ bin   dev   etc   home  lib   proc  root  sys   tmp   usr   var
 pod "busybox" deleted
 ```
 
-
 ### pod list
 
 filter pods by label
@@ -575,9 +609,34 @@ nginx             1/1       Running     0          38m
 test-runonce      0/1       Succeeded   0          12m
 ```
 
-### delete pod immediately
+
+### pod logs
 
 ```
+// Display only the most recent 1 lines of output in pod mongo
+$ pi logs mongo --tail=1
+2018-04-23T06:44:04.130+0000 I COMMAND  [thread1] command config.$cmd command: createIndexes { createIndexes: "system.sessions", indexes: [ { key: { lastUse: 1 }, name: "lsidTTLIndex", expireAfterSeconds: 1800 } ], $db: "config" } numYields:0 reslen:98 locks:{ Global: { acquireCount: { r: 1, w: 1 } }, Database: { acquireCount: { W: 1 } }, Collection: { acquireCount: { w: 1 } } } protocol:op_msg 134ms
+
+// Return snapshot logs from pod mongo with only one container
+$ pi logs mongo
+
+// Return snapshot logs for the pods defined by label app=nginx
+$ pi logs -lapp=mongo
+
+// Return snapshot of previous terminated ruby container logs from pod web-1
+$ pi logs -c mongo mongo
+
+// Begin streaming the logs of the ruby container in pod web-1
+$ pi logs -f -c ruby web-1
+
+// Show all logs from pod nginx written in the last hour
+$ pi logs --since=1h nginx
+```
+
+### delete pod
+
+```
+//delete pod immediately
 $ pi delete pod nginx --now
 
 $ pi delete pod nginx --grace-period=0
@@ -709,7 +768,7 @@ $ pi get services my-nginx-external -o yaml | grep -E "(clusterIP|selector):" -A
     app: nginx-external
 ```
 
-access nginx via fip
+access nginx
 ```
 $ pi run -it --rm busybox --image=busybox -- sh
 / # wget -qO- http://35.192.x.x:8080 | grep title             # use loadbalancerip(fip)
@@ -718,6 +777,25 @@ $ pi run -it --rm busybox --image=busybox -- sh
 <title>Welcome to nginx!</title>
 / # wget -qO- http://10.107.218.6:8080 | grep title           # use clusterip
 <title>Welcome to nginx!</title>
+```
+
+## secret operation
+
+### create docker-registry secret
+
+```
+$ pi create secret docker-registry my-docker-registry-secret \
+  --docker-username=DOCKER_USER \
+  --docker-password=DOCKER_PASSWORD \
+  --docker-email=DOCKER_EMAIL
+secret/my-docker-registry-secret
+```
+
+### create generic secret
+
+```
+$ pi create secret generic my-generic-secret --from-literal=key1=supersecret --from-literal=key2=topsecret
+secret/my-generic-secret
 ```
 
 ## delete all resources
