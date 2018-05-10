@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-ping
+  labels:
+    app: test
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["ping","127.0.0.1"]
+  restartPolicy: Never
