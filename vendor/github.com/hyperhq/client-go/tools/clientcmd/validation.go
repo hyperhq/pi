@@ -23,14 +23,14 @@ import (
 	"reflect"
 	"strings"
 
+	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/validation"
-	clientcmdapi "github.com/hyperhq/client-go/tools/clientcmd/api"
 )
 
 var (
 	ErrNoContext   = errors.New("no context chosen")
-	ErrEmptyConfig = errors.New("no configuration has been provided")
+	ErrEmptyConfig = errors.New("no configuration has been provided, please run 'pi config set-credentials --help'")
 	// message is for consistency with old behavior
 	ErrEmptyCluster = errors.New("cluster has no server defined")
 )

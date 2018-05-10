@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: private-reg-gitlab
+spec:
+  containers:
+  - name: private-reg-container
+    image: registry.gitlab.com/xjimmy/busybox:latest
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  imagePullSecrets:
+  - name: regcred-gitlab

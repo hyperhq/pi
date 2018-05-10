@@ -70,17 +70,20 @@ func (a *PromptingAuthLoader) LoadAuth(path string) (*clientauth.Info, error) {
 
 // Prompt pulls the user and password from a reader
 func (a *PromptingAuthLoader) Prompt() (*clientauth.Info, error) {
-	var err error
-	auth := &clientauth.Info{}
-	auth.User, err = promptForString("Username", a.reader, true)
-	if err != nil {
-		return nil, err
-	}
-	auth.Password, err = promptForString("Password", nil, false)
-	if err != nil {
-		return nil, err
-	}
-	return auth, nil
+	return nil, fmt.Errorf("please run 'pi config set-context default --user=<USER>' to set a default user")
+	/*
+		var err error
+		auth := &clientauth.Info{}
+		auth.User, err = promptForString("Username", a.reader, true)
+		if err != nil {
+			return nil, err
+		}
+		auth.Password, err = promptForString("Password", nil, false)
+		if err != nil {
+			return nil, err
+		}
+		return auth, nil
+	*/
 }
 
 func promptForString(field string, r io.Reader, show bool) (result string, err error) {

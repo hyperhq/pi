@@ -68,7 +68,7 @@ func runDeleteAuthInfo(out, errOut io.Writer, configAccess clientcmd.ConfigAcces
 	name := args[0]
 	_, exists := config.AuthInfos[name]
 	if !exists {
-		return fmt.Errorf("credentials $v not found")
+		return fmt.Errorf("credentials %v not found", name)
 	}
 
 	delete(config.AuthInfos, name)
