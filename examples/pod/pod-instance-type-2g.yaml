@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-mongo-2g
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      limits:
+        memory: 1Gi
+  - name: mongo
+    image: mongo
+    resources:
+      limits:
+        memory: 1Gi

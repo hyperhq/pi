@@ -626,9 +626,6 @@ $ pi logs -lapp=mongo
 // Return snapshot of previous terminated ruby container logs from pod web-1
 $ pi logs -c mongo mongo
 
-// Begin streaming the logs of the ruby container in pod web-1
-$ pi logs -f -c ruby web-1
-
 // Show all logs from pod nginx written in the last hour
 $ pi logs --since=1h nginx
 ```
