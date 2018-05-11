@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-volume-exceed-limit
+  labels:
+    app: nginx
+    role: web
+spec:
+  containers:
+  - name: nginx
+    image: oveits/docker-nginx-busybox
+    volumeMounts:
+      - name: persistent-storage1
+        mountPath: /data1
+      - name: persistent-storage2
+        mountPath: /data2
+      - name: persistent-storage3
+        mountPath: /data3
+      - name: persistent-storage4
+        mountPath: /data4
+      - name: persistent-storage5
+        mountPath: /data5
+  volumes:
+    - name: persistent-storage1
+      flexVolume:
+        options:
+          volumeID: nginx-data1
+    - name: persistent-storage2
+      flexVolume:
+        options:
+          volumeID: nginx-data2
+    - name: persistent-storage3
+      flexVolume:
+        options:
+          volumeID: nginx-data3
+    - name: persistent-storage4
+      flexVolume:
+        options:
+          volumeID: nginx-data4
+    - name: persistent-storage5
+      flexVolume:
+        options:
+          volumeID: nginx-data5
