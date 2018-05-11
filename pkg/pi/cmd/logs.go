@@ -48,9 +48,6 @@ var (
 		# Return snapshot of previous terminated mongo container logs from pod mongo
 		pi logs -c mongo mongo
 
-		# Begin streaming the logs of the mongo container in pod mongo
-		pi logs -f -c mongo mongo
-
 		# Display only the most recent 10 lines of output in pod mongo
 		pi logs --tail=10 mongo
 
@@ -100,7 +97,7 @@ func NewCmdLogs(f cmdutil.Factory, out io.Writer) *cobra.Command {
 		},
 		Aliases: []string{"log"},
 	}
-	cmd.Flags().BoolP("follow", "f", false, "Specify if the logs should be streamed.")
+	//cmd.Flags().BoolP("follow", "f", false, "Specify if the logs should be streamed.")
 	cmd.Flags().Bool("timestamps", false, "Include timestamps on each line in the log output")
 	cmd.Flags().Int64("limit-bytes", 0, "Maximum bytes of logs to return. Defaults to no limit.")
 	cmd.Flags().BoolP("previous", "p", false, "If true, print the logs for the previous instance of the container in a pod if it exists.")
@@ -144,8 +141,8 @@ func (o *LogsOptions) Complete(f cmdutil.Factory, out io.Writer, cmd *cobra.Comm
 	}
 
 	logOptions := &api.PodLogOptions{
-		Container:  containerName,
-		Follow:     cmdutil.GetFlagBool(cmd, "follow"),
+		Container: containerName,
+		//Follow:     cmdutil.GetFlagBool(cmd, "follow"),
 		Previous:   cmdutil.GetFlagBool(cmd, "previous"),
 		Timestamps: cmdutil.GetFlagBool(cmd, "timestamps"),
 	}
