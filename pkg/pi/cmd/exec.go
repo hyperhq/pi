@@ -185,7 +185,7 @@ func (p *ExecOptions) Complete(f cmdutil.Factory, cmd *cobra.Command, argsIn []s
 		p.FullCmdName = cmdParent.CommandPath()
 	}
 	if len(p.FullCmdName) > 0 && cmdutil.IsSiblingCommandExists(cmd, "describe") {
-		p.SuggestedCmdUsage = fmt.Sprintf("Use '%s describe pod/%s -n %s' to see all of the containers in this pod.", p.FullCmdName, p.PodName, p.Namespace)
+		p.SuggestedCmdUsage = fmt.Sprintf("Use '%s describe pod/%s' to see all of the containers in this pod.", p.FullCmdName, p.PodName)
 	}
 
 	config, err := f.ClientConfig()
