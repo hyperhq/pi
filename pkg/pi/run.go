@@ -227,6 +227,20 @@ func getLabels(params map[string]string, name string) (map[string]string, error)
 	return labels, nil
 }
 
+// getImagePullSecrets returns map of imagePullSecrets.
+func getImagePullSecrets(params map[string]string) ([]v1.LocalObjectReference, error) {
+	str, found := params["image-pull-secrets"]
+	var res []v1.LocalObjectReference
+	var err error
+	if found && len(str) > 0 {
+		res, err = ParseImagePullSecrets(str)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
 // getName returns the name of newly created resource.
 func getName(params map[string]string) (string, error) {
 	name, found := params["name"]
@@ -804,6 +818,14 @@ func updatePodPorts(params map[string]string, podSpec *v1.PodSpec) (err error) {
 	return nil
 }
 
+// updatePodImagePullSecrets updates PodSpec.ImagePullSecrets with passed parameters.
+func updatePodImagePullSecrets(imagePullSecrets []v1.LocalObjectReference, podSpec *v1.PodSpec) (err error) {
+	if len(imagePullSecrets) > 0 {
+		podSpec.ImagePullSecrets = imagePullSecrets
+	}
+	return nil
+}
+
 type BasicPod struct{}
 
 func (BasicPod) ParamNames() []GeneratorParam {
@@ -825,6 +847,7 @@ func (BasicPod) ParamNames() []GeneratorParam {
 		{"requests", false},
 		{"limits", false},
 		{"serviceaccount", false},
+		{"image-pull-secrets", false},
 	}
 }
 
@@ -850,6 +873,11 @@ func (BasicPod) Generate(genericParams map[string]interface{}) (runtime.Object, 
 	}
 
 	labels, err := getLabels(params, name)
+	if err != nil {
+		return nil, err
+	}
+
+	imagePullSecrets, err := getImagePullSecrets(params)
 	if err != nil {
 		return nil, err
 	}
@@ -909,6 +937,11 @@ func (BasicPod) Generate(genericParams map[string]interface{}) (runtime.Object, 
 	if err := updatePodPorts(params, &pod.Spec); err != nil {
 		return nil, err
 	}
+
+	if err := updatePodImagePullSecrets(imagePullSecrets, &pod.Spec); err != nil {
+		return nil, err
+	}
+
 	return &pod, nil
 }
 

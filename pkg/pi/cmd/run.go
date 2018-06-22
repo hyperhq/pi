@@ -125,6 +125,7 @@ func addRunFlags(cmd *cobra.Command) {
 	//cmd.Flags().String("service-overrides", "", i18n.T("An inline JSON override for the generated service object. If this is non-empty, it is used to override the generated object. Requires that the object supply a valid apiVersion field.  Only used if --expose is true."))
 	//cmd.Flags().Bool("quiet", false, "If true, suppress prompt messages.")
 	//cmd.Flags().String("schedule", "", i18n.T("A schedule in the Cron format the job should be run with."))
+	cmd.Flags().StringP("image-pull-secrets", "", "", i18n.T("The secret for the private docker registry, comma separated."))
 }
 
 func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *cobra.Command, args []string, argsLenAtDash int) error {
@@ -237,6 +238,7 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	}
 
 	params["env"] = cmdutil.GetFlagStringArray(cmd, "env")
+	params["image-pull-secrets"] = cmdutil.GetFlagString(cmd, "image-pull-secrets")
 
 	podClient := clientset.Core()
 	podName := params["name"].(string)
