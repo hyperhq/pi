@@ -24,6 +24,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 )
@@ -200,6 +201,23 @@ func ParseLabels(labelSpec interface{}) (map[string]string, error) {
 		labels[labelSpec[0]] = labelSpec[1]
 	}
 	return labels, nil
+}
+
+// ParseImagePullSecrets turns a string representation of a label set into a map[string]string
+func ParseImagePullSecrets(spec interface{}) ([]v1.LocalObjectReference, error) {
+	str, isString := spec.(string)
+	if !isString {
+		return nil, fmt.Errorf("expected string, found %v", spec)
+	}
+	if len(str) == 0 {
+		return nil, fmt.Errorf("no imagePullSecrets spec passed")
+	}
+	specs := strings.Split(str, ",")
+	imagePullSecrets := []v1.LocalObjectReference{}
+	for idx := range specs {
+		imagePullSecrets = append(imagePullSecrets, v1.LocalObjectReference{Name: specs[idx]})
+	}
+	return imagePullSecrets, nil
 }
 
 func GetBool(params map[string]string, key string, defValue bool) (bool, error) {
