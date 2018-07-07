@@ -62,7 +62,7 @@ var (
 		pi create -f examples/secret/secret-dockerconfigjson.yaml`))
 )
 
-func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
+func NewCmdCreate(f cmdutil.Factory, cmdIn io.Reader, out, errOut io.Writer) *cobra.Command {
 	var options CreateOptions
 
 	cmd := &cobra.Command{
@@ -98,7 +98,7 @@ func NewCmdCreate(f cmdutil.Factory, out, errOut io.Writer) *cobra.Command {
 	// create subcommands
 	cmd.AddCommand(NewCmdCreateSecret(f, out, errOut))
 	cmd.AddCommand(NewCmdCreateService(f, out, errOut))
-	cmd.AddCommand(NewCmdCreatePod(f, out, errOut))
+	cmd.AddCommand(NewCmdCreatePod(f, cmdIn, out, errOut))
 
 	// create volume, fip
 	cmd.AddCommand(NewCmdCreateVolume(f, out, errOut))

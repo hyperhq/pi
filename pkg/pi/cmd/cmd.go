@@ -178,10 +178,10 @@ __custom_func() {
 
 var (
 	bash_completion_flags = map[string]string{
-		//"namespace": "__pi_get_resource_namespace",
-		//"context":   "__pi_config_get_contexts",
-		//"cluster":   "__pi_config_get_clusters",
-		//"user":      "__pi_config_get_users",
+	//"namespace": "__pi_get_resource_namespace",
+	//"context":   "__pi_config_get_contexts",
+	//"cluster":   "__pi_config_get_clusters",
+	//"user":      "__pi_config_get_users",
 	}
 )
 
@@ -216,7 +216,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 		{
 			Message: "Basic Commands (Beginner):",
 			Commands: []*cobra.Command{
-				NewCmdCreate(f, out, err),
+				NewCmdCreate(f, in, out, err),
 			},
 		},
 		{

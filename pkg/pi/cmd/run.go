@@ -90,7 +90,7 @@ func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *co
 		},
 	}
 	//cmdutil.AddPrinterFlags(cmd)
-	addRunFlags(cmd)
+	AddRunFlags(cmd)
 	//cmdutil.AddApplyAnnotationFlags(cmd)
 	//cmdutil.AddRecordFlag(cmd)
 	//cmdutil.AddInclude3rdPartyFlags(cmd)
@@ -98,7 +98,7 @@ func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *co
 	return cmd
 }
 
-func addRunFlags(cmd *cobra.Command) {
+func AddRunFlags(cmd *cobra.Command) {
 	//cmdutil.AddDryRunFlag(cmd)
 	//cmd.Flags().String("generator", "", i18n.T("The name of the API generator to use, see http://kubernetes.io/docs/user-guide/pi-conventions/#generators for a list."))
 	cmd.Flags().String("image", "", i18n.T("The image for the container to run."))
