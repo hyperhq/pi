@@ -300,6 +300,27 @@ func getEnvs(genericParams map[string]interface{}) ([]v1.EnvVar, error) {
 	return envs, nil
 }
 
+// getVolumes returns volumes.
+func getVolumes(genericParams map[string]interface{}) ([]v1.Volume, []v1.VolumeMount, error) {
+	var volumes []v1.Volume
+	var volumeMounts []v1.VolumeMount
+
+	volumeStrings, found := genericParams["volume"]
+	if found {
+		if strArray, isArray := volumeStrings.([]string); isArray {
+			var err error
+			volumes, volumeMounts, err = parseVolumes(strArray)
+			if err != nil {
+				return nil, nil, err
+			}
+			delete(genericParams, "volume")
+		} else {
+			return nil, nil, fmt.Errorf("expected []string, found: %v", volumeStrings)
+		}
+	}
+	return volumes, volumeMounts, nil
+}
+
 type JobV1 struct{}
 
 func (JobV1) ParamNames() []GeneratorParam {
@@ -826,6 +847,28 @@ func updatePodImagePullSecrets(imagePullSecrets []v1.LocalObjectReference, podSp
 	return nil
 }
 
+// updatePodActiveDeadlineSeconds updates PodSpec.ActiveDeadlineSeconds with passed parameters.
+func updatePodActiveDeadlineSeconds(params map[string]string, podSpec *v1.PodSpec) (err error) {
+	if len(params["active-deadline-seconds"]) > 0 {
+		activeDeadlineSeconds, err := strconv.ParseInt(params["active-deadline-seconds"], 10, 64)
+		if err != nil {
+			return err
+		}
+		podSpec.ActiveDeadlineSeconds = &activeDeadlineSeconds
+	}
+	return nil
+}
+
+// updatePodVolumes updates PodSpec.Volumes and PodSpec.Containers.VolumeMounts with passed parameters.
+func updatePodVolumes(volumes []v1.Volume, volumeMounts []v1.VolumeMount, podSpec *v1.PodSpec) error {
+	if len(volumes) > 0 && len(volumeMounts) > 0 {
+		podSpec.Volumes = volumes
+		podSpec.Containers[0].VolumeMounts = volumeMounts
+	}
+
+	return nil
+}
+
 type BasicPod struct{}
 
 func (BasicPod) ParamNames() []GeneratorParam {
@@ -848,6 +891,9 @@ func (BasicPod) ParamNames() []GeneratorParam {
 		{"limits", false},
 		{"serviceaccount", false},
 		{"image-pull-secrets", false},
+		{"active-deadline-seconds", false},
+		{"size", false},
+		{"volume", false},
 	}
 }
 
@@ -858,6 +904,11 @@ func (BasicPod) Generate(genericParams map[string]interface{}) (runtime.Object, 
 	}
 
 	envs, err := getEnvs(genericParams)
+	if err != nil {
+		return nil, err
+	}
+
+	volumes, volumeMounts, err := getVolumes(genericParams)
 	if err != nil {
 		return nil, err
 	}
@@ -911,6 +962,9 @@ func (BasicPod) Generate(genericParams map[string]interface{}) (runtime.Object, 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: labels,
+			Annotations: map[string]string{
+				"sh_hyper_instancetype": params["size"],
+			},
 		},
 		Spec: v1.PodSpec{
 			ServiceAccountName: params["serviceaccount"],
@@ -938,7 +992,15 @@ func (BasicPod) Generate(genericParams map[string]interface{}) (runtime.Object, 
 		return nil, err
 	}
 
+	if err := updatePodActiveDeadlineSeconds(params, &pod.Spec); err != nil {
+		return nil, err
+	}
+
 	if err := updatePodImagePullSecrets(imagePullSecrets, &pod.Spec); err != nil {
+		return nil, err
+	}
+
+	if err := updatePodVolumes(volumes, volumeMounts, &pod.Spec); err != nil {
 		return nil, err
 	}
 
@@ -965,4 +1027,34 @@ func parseEnvs(envArray []string) ([]v1.EnvVar, error) {
 		envs = append(envs, envVar)
 	}
 	return envs, nil
+}
+
+// parseVolumes converts string into Volume and VolumeMount objects.
+func parseVolumes(volumeArray []string) ([]v1.Volume, []v1.VolumeMount, error) {
+	volumes := make([]v1.Volume, 0, len(volumeArray))
+	volumeMounts := make([]v1.VolumeMount, 0, len(volumeArray))
+
+	for _, str := range volumeArray {
+		pos := strings.Index(str, ":")
+		if pos == -1 {
+			return nil, nil, fmt.Errorf("invalid volume: %v", str)
+		}
+		name := str[:pos]
+		path := str[pos+1:]
+		if len(name) == 0 {
+			return nil, nil, fmt.Errorf("invalid volume: %v", str)
+		}
+		volumes = append(volumes, v1.Volume{
+			Name: name,
+			VolumeSource: v1.VolumeSource{
+				FlexVolume: &v1.FlexVolumeSource{
+					Options: map[string]string{
+						"volumeID": name,
+					},
+				},
+			},
+		})
+		volumeMounts = append(volumeMounts, v1.VolumeMount{Name: name, MountPath: path})
+	}
+	return volumes, volumeMounts, nil
 }

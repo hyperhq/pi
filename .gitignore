@@ -1,5 +1,7 @@
 .idea
 /kubectl
 /pi
+cmd/pi/pi
+cmd/pi/debug
 *.tar.gz
 *.zip
