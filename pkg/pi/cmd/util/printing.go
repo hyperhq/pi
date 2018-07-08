@@ -184,11 +184,11 @@ func ValidResourceTypeList(f ClientAccessFactory) string {
 	return templates.LongDesc(`Valid resource types include:
 
 			* pods (aka 'po')
+			* jobs
 			* secrets
 			* services (aka 'svc')
 			* volumes
 			* fips
-			* jobs
 	`)
 }
 
@@ -198,11 +198,11 @@ func ValidDeleteResourceTypeList(f ClientAccessFactory) string {
 	return templates.LongDesc(`Valid resource types include:
 
 			* pods (aka 'po')
+			* jobs
 			* secrets
 			* services (aka 'svc')
 			* volumes
 			* fips
-			* jobs
 	`)
 }
 
@@ -212,9 +212,9 @@ func ValidDescribeResourceTypeList(f ClientAccessFactory) string {
 	return templates.LongDesc(`Valid resource types include:
 
 			* pods (aka 'po')
+			* jobs
 			* secrets
 			* services (aka 'svc')
-			* jobs
 	`)
 }
 

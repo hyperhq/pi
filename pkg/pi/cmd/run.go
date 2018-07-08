@@ -103,7 +103,7 @@ func AddRunFlags(cmd *cobra.Command) {
 	cmd.Flags().String("generator", "", i18n.T("The name of the API generator to use, see http://kubernetes.io/docs/user-guide/pi-conventions/#generators for a list."))
 	cmd.Flags().String("image", "", i18n.T("The image for the container to run."))
 	cmd.MarkFlagRequired("image")
-	//cmd.Flags().String("image-pull-policy", "", i18n.T("The image pull policy for the container. If left empty, this value will not be specified by the client and defaulted by the server"))
+	cmd.Flags().String("image-pull-policy", "", i18n.T("The image pull policy for the container. If left empty, this value will not be specified by the client and defaulted by the server"))
 	//cmd.Flags().IntP("replicas", "r", 1, "Number of replicas to create for this container. Default is 1.")
 	cmd.Flags().Bool("rm", false, "If true, delete resources created in this command for attached containers.")
 	//cmd.Flags().String("overrides", "", i18n.T("An inline JSON override for the generated object. If this is non-empty, it is used to override the generated object. Requires that the object supply a valid apiVersion field."))
@@ -128,7 +128,7 @@ func AddRunFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP("image-pull-secrets", "", "", i18n.T("The secret for the private docker registry, comma separated."))
 	cmd.Flags().StringP("active-deadline-seconds", "", "", i18n.T("Optional duration in seconds the pod may be active on the node relative to StartTime before the system will actively try to mark it failed and kill associated containers. Value must be a positive integer."))
 	cmd.Flags().StringP("size", "", "s4", i18n.T("The size for the pod (e.g. s1, s2, s3, s4, m1, m2, m3, l1, l2, l3, l4, l5, l6)"))
-	cmd.Flags().StringArray("volume", []string{}, "Pod volumes to mount into the container's filesystem.")
+	cmd.Flags().StringArray("volume", []string{}, "Pod volumes to mount into the container's filesystem. format '<volname>:<path>'")
 }
 
 func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *cobra.Command, args []string, argsLenAtDash int) error {
@@ -164,9 +164,9 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 
 	remove := cmdutil.GetFlagBool(cmd, "rm")
 
-	//if err := verifyImagePullPolicy(cmd); err != nil {
-	//	return err
-	//}
+	if err := verifyImagePullPolicy(cmd); err != nil {
+		return err
+	}
 
 	clientset, err := f.ClientSet()
 	if err != nil {
@@ -414,7 +414,7 @@ func getRestartPolicy(cmd *cobra.Command, interactive bool) (api.RestartPolicy, 
 	case api.RestartPolicyNever:
 		return api.RestartPolicyNever, nil
 	}
-	return "", cmdutil.UsageErrorf(cmd, "invalid restart policy: %s")
+	return "", cmdutil.UsageErrorf(cmd, "invalid restart policy: %s", restart)
 }
 
 func verifyImagePullPolicy(cmd *cobra.Command) error {

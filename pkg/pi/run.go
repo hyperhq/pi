@@ -342,6 +342,13 @@ func (JobV1) ParamNames() []GeneratorParam {
 		{"limits", false},
 		{"restart", false},
 		{"serviceaccount", false},
+		{"size", false},
+		{"completions", false},
+		{"parallelism", false},
+		{"backoff-limit", false},
+		{"active-deadline-seconds", false},
+		{"image-pull-secrets", false},
+		{"volume", false},
 	}
 }
 
@@ -352,6 +359,11 @@ func (JobV1) Generate(genericParams map[string]interface{}) (runtime.Object, err
 	}
 
 	envs, err := getEnvs(genericParams)
+	if err != nil {
+		return nil, err
+	}
+
+	volumes, volumeMounts, err := getVolumes(genericParams)
 	if err != nil {
 		return nil, err
 	}
@@ -376,8 +388,20 @@ func (JobV1) Generate(genericParams map[string]interface{}) (runtime.Object, err
 		return nil, err
 	}
 
+	if err := updatePodVolumes(volumes, volumeMounts, podSpec); err != nil {
+		return nil, err
+	}
+
 	imagePullPolicy := v1.PullPolicy(params["image-pull-policy"])
 	if err = updatePodContainers(params, args, envs, imagePullPolicy, podSpec); err != nil {
+		return nil, err
+	}
+
+	imagePullSecrets, err := getImagePullSecrets(params)
+	if err != nil {
+		return nil, err
+	}
+	if err := updatePodImagePullSecrets(imagePullSecrets, podSpec); err != nil {
 		return nil, err
 	}
 
@@ -412,6 +436,43 @@ func (JobV1) Generate(genericParams map[string]interface{}) (runtime.Object, err
 		},
 	}
 
+	if _, ok := params["size"]; ok {
+		if job.ObjectMeta.Annotations == nil {
+			job.ObjectMeta.Annotations = map[string]string{}
+		}
+		job.ObjectMeta.Annotations["sh_hyper_instancetype"] = params["size"]
+	}
+	if params["completions"] != "" {
+		if i, err := strconv.ParseInt(params["completions"], 10, 32); err != nil {
+			return nil, fmt.Errorf("--completions should be a integer")
+		} else {
+			completions := int32(i)
+			job.Spec.Completions = &completions
+		}
+	}
+	if params["parallelism"] != "" {
+		if i, err := strconv.ParseInt(params["parallelism"], 10, 32); err != nil {
+			return nil, fmt.Errorf("--parallelism should be a integer")
+		} else {
+			parallelism := int32(i)
+			job.Spec.Parallelism = &parallelism
+		}
+	}
+	if params["backoff-limit"] != "" {
+		if i, err := strconv.ParseInt(params["backoff-limit"], 10, 32); err != nil {
+			return nil, fmt.Errorf("--parallelism should be a integer")
+		} else {
+			backoffLimit := int32(i)
+			job.Spec.BackoffLimit = &backoffLimit
+		}
+	}
+	if params["active-deadline-seconds"] != "" {
+		if i, err := strconv.ParseInt(params["active-deadline-seconds"], 10, 64); err != nil {
+			return nil, fmt.Errorf("--active-deadline-seconds should be a integer")
+		} else {
+			job.Spec.ActiveDeadlineSeconds = &i
+		}
+	}
 	return &job, nil
 }
 

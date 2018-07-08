@@ -103,6 +103,8 @@ func NewCmdCreate(f cmdutil.Factory, cmdIn io.Reader, out, errOut io.Writer) *co
 	// create volume, fip
 	cmd.AddCommand(NewCmdCreateVolume(f, out, errOut))
 	cmd.AddCommand(NewCmdCreateFip(f, out, errOut))
+
+	cmd.AddCommand(NewCmdCreateJob(f, out, errOut))
 	return cmd
 }
 
