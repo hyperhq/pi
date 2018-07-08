@@ -188,6 +188,7 @@ func ValidResourceTypeList(f ClientAccessFactory) string {
 			* services (aka 'svc')
 			* volumes
 			* fips
+			* jobs
 	`)
 }
 
@@ -201,6 +202,7 @@ func ValidDeleteResourceTypeList(f ClientAccessFactory) string {
 			* services (aka 'svc')
 			* volumes
 			* fips
+			* jobs
 	`)
 }
 
@@ -212,6 +214,7 @@ func ValidDescribeResourceTypeList(f ClientAccessFactory) string {
 			* pods (aka 'po')
 			* secrets
 			* services (aka 'svc')
+			* jobs
 	`)
 }
 

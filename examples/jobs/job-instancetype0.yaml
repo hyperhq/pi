@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job-multiple-nginx-instancetype0
+spec:
+  template:
+    metadata:
+      name: multiple-nginx-instancetype0
+    spec:
+      containers:
+      - name: nginx1
+        image: nginx
+      - name: nginx2
+        image: nginx
+      - name: nginx3
+        image: nginx
+        resources:
+            limits:
+                cpu: 0
+                memory: 0
+      - name: nginx4
+        image: nginx
+        resources:
+            limits:
+                cpu: 0
+                memory: 0

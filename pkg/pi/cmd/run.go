@@ -100,7 +100,7 @@ func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *co
 
 func AddRunFlags(cmd *cobra.Command) {
 	//cmdutil.AddDryRunFlag(cmd)
-	//cmd.Flags().String("generator", "", i18n.T("The name of the API generator to use, see http://kubernetes.io/docs/user-guide/pi-conventions/#generators for a list."))
+	cmd.Flags().String("generator", "", i18n.T("The name of the API generator to use, see http://kubernetes.io/docs/user-guide/pi-conventions/#generators for a list."))
 	cmd.Flags().String("image", "", i18n.T("The image for the container to run."))
 	cmd.MarkFlagRequired("image")
 	//cmd.Flags().String("image-pull-policy", "", i18n.T("The image pull policy for the container. If left empty, this value will not be specified by the client and defaulted by the server"))
@@ -173,8 +173,8 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 		return err
 	}
 
-	//generatorName := cmdutil.GetFlagString(cmd, "generator")
-	generatorName := cmdutil.RunPodV1GeneratorName
+	generatorName := cmdutil.GetFlagString(cmd, "generator")
+	//generatorName := cmdutil.RunPodV1GeneratorName
 
 	//schedule := cmdutil.GetFlagString(cmd, "schedule")
 	schedule := ""
@@ -204,6 +204,7 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 			} else {
 				generatorName = cmdutil.RunV1GeneratorName
 			}
+			generatorName = cmdutil.RunPodV1GeneratorName
 		case api.RestartPolicyOnFailure:
 			hasResource, err := cmdutil.HasResource(clientset.Discovery(), batchv1.SchemeGroupVersion.WithResource("jobs"))
 			if err != nil {
@@ -225,6 +226,14 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	}
 
 	generators := f.Generators("run")
+	if generatorName == cmdutil.JobV1GeneratorName {
+		generators = f.Generators("job")
+		if tty || interactive {
+			return fmt.Errorf("--tty and --stdin are not supported for job")
+		}
+	}
+
+	//fmt.Printf("generatorName:%v generators:%v\n", generatorName, generators)
 	generator, found := generators[generatorName]
 	if !found {
 		return cmdutil.UsageErrorf(cmd, "generator %q not found", generatorName)

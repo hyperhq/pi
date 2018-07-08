@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job-flexvol-invalid-yml
+  labels:
+    app: nginx
+spec:
+  template:
+    metadata:
+      name: test-flexvol-invalid-yml
+    spec:
+      containers:
+      - name: test-flexvol
+        image: nginx
+        volumeMounts:
+        - name: nginx-persistent-storage
+          mountPath: /var/lib/nginx
+      volumes:
+      - name: nginx-persistent-storage
+        flexVolume:
+          options:
+            volumeID: "invalid-vol"

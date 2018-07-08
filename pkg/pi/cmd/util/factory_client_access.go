@@ -548,7 +548,12 @@ func DefaultGenerators(cmdName string) map[string]pi.Generator {
 		generator = map[string]pi.Generator{
 			RunPodV1GeneratorName: pi.BasicPod{},
 		}
+	case "job":
+		generator = map[string]pi.Generator{
+			JobV1GeneratorName: pi.JobV1{},
+		}
 	}
+
 	return generator
 }
 

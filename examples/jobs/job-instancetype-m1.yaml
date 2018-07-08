@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job-yaml-instancetype-m1
+spec:
+  template:
+    metadata:
+      name: test-yaml-instancetype-m1
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+      - name: alpine
+        image: alpine
+        resources:
+            limits:
+                memory: 1024Mi
+            requests:
+                memory: 1024Mi

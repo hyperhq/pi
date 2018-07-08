@@ -39,6 +39,7 @@ type VolumeResponse struct {
 	Size      int       `json:"size"`
 	Zone      string    `json:"zone"`
 	Pod       string    `json:"pod"`
+	Job       string    `json:"job"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
