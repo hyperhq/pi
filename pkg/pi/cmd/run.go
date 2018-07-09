@@ -90,7 +90,7 @@ func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *co
 		},
 	}
 	//cmdutil.AddPrinterFlags(cmd)
-	addRunFlags(cmd)
+	AddRunFlags(cmd)
 	//cmdutil.AddApplyAnnotationFlags(cmd)
 	//cmdutil.AddRecordFlag(cmd)
 	//cmdutil.AddInclude3rdPartyFlags(cmd)
@@ -98,7 +98,7 @@ func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *co
 	return cmd
 }
 
-func addRunFlags(cmd *cobra.Command) {
+func AddRunFlags(cmd *cobra.Command) {
 	//cmdutil.AddDryRunFlag(cmd)
 	//cmd.Flags().String("generator", "", i18n.T("The name of the API generator to use, see http://kubernetes.io/docs/user-guide/pi-conventions/#generators for a list."))
 	cmd.Flags().String("image", "", i18n.T("The image for the container to run."))
@@ -126,6 +126,9 @@ func addRunFlags(cmd *cobra.Command) {
 	//cmd.Flags().Bool("quiet", false, "If true, suppress prompt messages.")
 	//cmd.Flags().String("schedule", "", i18n.T("A schedule in the Cron format the job should be run with."))
 	cmd.Flags().StringP("image-pull-secrets", "", "", i18n.T("The secret for the private docker registry, comma separated."))
+	cmd.Flags().StringP("active-deadline-seconds", "", "", i18n.T("Optional duration in seconds the pod may be active on the node relative to StartTime before the system will actively try to mark it failed and kill associated containers. Value must be a positive integer."))
+	cmd.Flags().StringP("size", "", "s4", i18n.T("The size for the pod (e.g. s1, s2, s3, s4, m1, m2, m3, l1, l2, l3, l4, l5, l6)"))
+	cmd.Flags().StringArray("volume", []string{}, "Pod volumes to mount into the container's filesystem.")
 }
 
 func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *cobra.Command, args []string, argsLenAtDash int) error {
@@ -239,6 +242,9 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 
 	params["env"] = cmdutil.GetFlagStringArray(cmd, "env")
 	params["image-pull-secrets"] = cmdutil.GetFlagString(cmd, "image-pull-secrets")
+	params["active-deadline-seconds"] = cmdutil.GetFlagString(cmd, "active-deadline-seconds")
+	params["size"] = cmdutil.GetFlagString(cmd, "size")
+	params["volume"] = cmdutil.GetFlagStringArray(cmd, "volume")
 
 	podClient := clientset.Core()
 	podName := params["name"].(string)
