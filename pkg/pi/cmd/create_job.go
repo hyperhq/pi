@@ -49,7 +49,7 @@ var (
 func NewCmdCreateJob(f cmdutil.Factory, cmdOut, cmdErr io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "job NAME --image=image [--env=\"key=value\"]",
-		Short:   i18n.T("Run a pod with particular image."),
+		Short:   i18n.T("Run a job with particular image."),
 		Long:    createJobLong,
 		Example: createJobExample,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -80,7 +80,7 @@ func addCreateJobFlags(cmd *cobra.Command) {
 	//cmd.Flags().String("serviceaccount", "", "Service account to set in the pod spec")
 	//cmd.Flags().String("port", "", i18n.T("The port that this container exposes.  If --expose is true, this is also the port used by the service that is created."))
 	//cmd.Flags().Int("hostport", -1, "The host port mapping for the container port. To demonstrate a single-machine container.")
-	cmd.Flags().StringP("labels", "l", "", "Comma separated labels to apply to the pod(s). Will override previous values.")
+	cmd.Flags().StringP("labels", "l", "", "Comma separated labels to apply to the job(s). Will override previous values.")
 	//cmd.Flags().BoolP("stdin", "i", false, "Keep stdin open on the container(s) in the pod, even if nothing is attached.")
 	//cmd.Flags().BoolP("tty", "t", false, "Allocated a TTY for each container in the pod.")
 	//cmd.Flags().Bool("attach", false, "If true, wait for the Pod to start running, and then attach to the Pod as if 'pi attach ...' were called.  Default false, unless '-i/--stdin' is set, in which case the default is true. With '--restart=Never' the exit code of the container process is returned.")
