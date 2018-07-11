@@ -153,7 +153,7 @@ pi controls the resources on Pi platform.
 Find more information at https://docs.hyper.sh/pi.
 
 Basic Commands (Beginner):
-  create      Create a resource(support pod, service, secret, volume, fip)
+  create      Create a resource(support pod, j`ob, service, secret, volume, fip)
 
 Basic Commands (Intermediate):
   get         Display one or many resources
@@ -185,9 +185,9 @@ $ pi help create
 
 // For example
 $ pi create -h
-Create a resource(pod, service, secret, volume, fip).
+Create a resource(pod, j`ob, service, secret, volume, fip).
 
-JSON and YAML formats are accepted(pod, service, secret).
+JSON and YAML formats are accepted(pod, j`ob, service, secret).
 
 Examples:
   # Create a pod using the data in yaml.
@@ -272,7 +272,7 @@ Supported resources:
 
 ### create from file
 
-> Only pod, service, secret support create from yaml/json
+> Only pod, j`ob, service, secret support create from yaml/json
 
 create resource from yaml
 
@@ -365,7 +365,7 @@ FIP             NAME  CREATEDAT                  SERVICES
 ### get info
 
 get subcommand support `-o`(`--output`)
-- for pod, service, secret, output format could be one of: json|yaml|wide|name
+- for pod, j`ob, service, secret, output format could be one of: json|yaml|wide|name
 - for volume, output format could be one of: json|name
 - for fip, output format could be one of: json|ip
 
@@ -479,7 +479,7 @@ $ pi delete service --all
 service "my-cs" deleted
 service "my-lbs" deleted
 
-//delete multiple type resources (only support pod, service and secret)
+//delete multiple type resources (only support pod, j`ob, service and secret)
 $ pi delete pods/nginx-from-json secrets/my-secret
 pod "nginx-from-json" deleted
 secret "my-secret" deleted

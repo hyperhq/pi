@@ -44,9 +44,9 @@ type CreateOptions struct {
 
 var (
 	createLong = templates.LongDesc(i18n.T(`
-		Create a resource(pod, service, secret, volume, fip).
+		Create a resource(pod, job, service, secret, volume, fip).
 
-		JSON and YAML formats are accepted(pod, service, secret).`))
+		JSON and YAML formats are accepted(pod, job, service, secret).`))
 
 	createExample = templates.Examples(i18n.T(`
 		# Create a pod using the data in yaml.
@@ -54,6 +54,9 @@ var (
 
 		# Create multiple pods using the data in yaml.
 		pi create -f pod-test1.yaml -f pod-test2.yaml
+
+		# Create a job using the data in yaml.
+		pi create -f job-test1.yaml
 
 		# Create a service using the data in yaml.
 		pi create -f examples/service/service-nginx.yaml
@@ -67,7 +70,7 @@ func NewCmdCreate(f cmdutil.Factory, cmdIn io.Reader, out, errOut io.Writer) *co
 
 	cmd := &cobra.Command{
 		Use:     "create -f FILENAME",
-		Short:   i18n.T("Create a resource(support pod, service, secret, volume, fip)"),
+		Short:   i18n.T("Create a resource(support pod, job, service, secret, volume, fip)"),
 		Long:    createLong,
 		Example: createExample,
 		Run: func(cmd *cobra.Command, args []string) {
