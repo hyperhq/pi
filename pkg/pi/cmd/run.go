@@ -249,10 +249,16 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 		return err
 	}
 
+	params["limits"] = cmdutil.GetFlagString(cmd, "limits")
+	params["size"] = cmdutil.GetFlagString(cmd, "size")
+	if params["size"] != "" && params["limits"] != "" {
+		return cmdutil.UsageErrorf(cmd, "--size and --limits can not be used together")
+	}
+
 	params["env"] = cmdutil.GetFlagStringArray(cmd, "env")
 	params["image-pull-secrets"] = cmdutil.GetFlagString(cmd, "image-pull-secrets")
 	params["active-deadline-seconds"] = cmdutil.GetFlagString(cmd, "active-deadline-seconds")
-	params["size"] = cmdutil.GetFlagString(cmd, "size")
+
 	params["volume"] = cmdutil.GetFlagStringArray(cmd, "volume")
 
 	podClient := clientset.Core()
