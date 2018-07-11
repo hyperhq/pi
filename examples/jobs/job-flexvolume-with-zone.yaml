@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job-pod-and-volume-not-same-zone-yml
+spec:
+  template:
+    metadata:
+      name: pod-and-volume-not-same-zone-yml
+    spec:
+      containers:
+      - name: pod-and-volume-not-same-zone-yml
+        image: nginx
+        volumeMounts:
+        - name: nginx-persistent-storage
+          mountPath: /var/lib/nginx
+      volumes:
+      - name: nginx-persistent-storage
+        flexVolume:
+          options:
+            zone: gcp-us-central1-b
+            volumeID: vol1

@@ -108,11 +108,11 @@ func PrintVolumeResult(output string, isList bool, result []hyper.VolumeResponse
 	if output == "" {
 		data := [][]string{}
 		for _, vol := range result {
-			item := []string{vol.Name, vol.Zone, fmt.Sprint(vol.Size), vol.CreatedAt.Format("2006-01-02T15:04:05-07:00"), vol.Pod}
+			item := []string{vol.Name, vol.Zone, fmt.Sprint(vol.Size), vol.CreatedAt.Format("2006-01-02T15:04:05-07:00"), vol.Pod, vol.Job}
 			data = append(data, item)
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Zone", "Size(GB)", "CreatedAt", "Pod"})
+		table.SetHeader([]string{"Name", "Zone", "Size(GB)", "CreatedAt", "Pod", "Job"})
 
 		//set table style
 		table.SetBorder(false)

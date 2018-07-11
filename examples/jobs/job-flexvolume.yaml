@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job-yaml-flexvol
+spec:
+  template:
+    metadata:
+      name: test-yaml-flexvol
+    spec:
+      containers:
+      - name: alpine
+        image: alpine
+        volumeMounts:
+        - mountPath: /data
+          name: test-vol
+      volumes:
+      - name: test-vol
+        flexVolume:
+          options:
+            volumeID: test-vol

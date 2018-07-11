@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job-yml
+spec:
+  template:
+    metadata:
+      name: test-yml
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: alpine
+        image: alpine

@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job-active-deadline-seconds-timeout
+spec:
+  activeDeadlineSeconds: 15
+  template:
+    metadata:
+      name: busybox
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: busybox
+        image: busybox
+        command: ["bash","-c","'echo hello; sleep 20'"]
