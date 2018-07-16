@@ -1,0 +1,73 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "test-flexvolume-reach-max-count",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "volumes": [
+      {
+        "name": "vol-1",
+        "flexVolume": {
+          "driver": "",
+          "options": {
+            "volumeID": "vol-1"
+          }
+        }
+      },
+      {
+        "name": "vol-2",
+        "flexVolume": {
+          "driver": "",
+          "options": {
+            "volumeID": "vol-2"
+          }
+        }
+      },
+      {
+        "name": "vol-3",
+        "flexVolume": {
+          "driver": "",
+          "options": {
+            "volumeID": "vol-3"
+          }
+        }
+      },
+      {
+        "name": "vol-4",
+        "flexVolume": {
+          "driver": "",
+          "options": {
+            "volumeID": "vol-4"
+          }
+        }
+      }
+    ],
+    "containers": [
+      {
+        "name": "alpine",
+        "image": "alpine",
+        "resources": {},
+        "volumeMounts": [
+          {
+            "name": "vol-1",
+            "mountPath": "/vol-1"
+          },
+          {
+            "name": "vol-2",
+            "mountPath": "/vol-2"
+          },
+          {
+            "name": "vol-3",
+            "mountPath": "/vol-3"
+          },
+          {
+            "name": "vol-4",
+            "mountPath": "/vol-4"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-alpine-dockerhub-private-image-invalid-tag
+spec:
+  containers:
+  - name: alpine
+    image: xjimmyshcn/alpine:unknown
+    command: ["echo", "hello"]
+  restartPolicy: Never

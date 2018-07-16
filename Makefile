@@ -56,6 +56,9 @@ package:
 release:
 	./tools/release.sh owner=${OWNER} repo=${REPO} tag=${VERSION} os=${OSTYPE} arch=${OSARCH}
 
+release-latest:
+	./tools/release.sh owner=${OWNER} repo=${REPO} tag=latest os=${OSTYPE} arch=${OSARCH}
+
 # Cleans our project: deletes binaries
 clean:
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
