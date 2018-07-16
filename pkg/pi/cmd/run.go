@@ -119,7 +119,7 @@ func AddRunFlags(cmd *cobra.Command) {
 	//cmd.Flags().Bool("attach", false, "If true, wait for the Pod to start running, and then attach to the Pod as if 'pi attach ...' were called.  Default false, unless '-i/--stdin' is set, in which case the default is true. With '--restart=Never' the exit code of the container process is returned.")
 	//cmd.Flags().Bool("leave-stdin-open", false, "If the pod is started in interactive mode or with stdin, leave stdin open after the first attach completes. By default, stdin will be closed after the first attach completes.")
 	cmd.Flags().String("restart", "Always", i18n.T("The restart policy for this Pod.  Legal values [Always, OnFailure, Never]. if set to 'Never', a regular pod is created. Default 'Always'"))
-	//cmd.Flags().Bool("command", false, "If true and extra arguments are present, use them as the 'command' field in the container, rather than the 'args' field which is the default.")
+	cmd.Flags().Bool("command", false, "If true and extra arguments are present, use them as the 'command' field in the container, rather than the 'args' field which is the default.")
 	//cmd.Flags().String("requests", "", i18n.T("The resource requirement requests for this container.  For example, 'cpu=100m,memory=256Mi'.  Note that server side components may assign requests depending on the server configuration, such as limit ranges."))
 	cmd.Flags().String("limits", "", i18n.T("The resource requirement limits for this container.  For example, 'cpu=200m,memory=512Mi'.  Note that server side components may assign limits depending on the server configuration, such as limit ranges."))
 	//cmd.Flags().Bool("expose", false, "If true, a public, external service is created for the container(s) which are run")
@@ -254,10 +254,17 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	if len(args) > 1 {
 		params["args"] = args[1:]
 	}
-	command, err := getArgs(params)
-	if err != nil {
-		return err
+	//get command
+	command := []string{}
+	val, found := params["args"]
+	if found {
+		var isArray bool
+		command, isArray = val.([]string)
+		if !isArray {
+			return fmt.Errorf("expected []string, found: %v", val)
+		}
 	}
+	glog.V(4).Infof("command:%v", command)
 
 	params["limits"] = cmdutil.GetFlagString(cmd, "limits")
 	params["size"] = cmdutil.GetFlagString(cmd, "size")
@@ -324,8 +331,19 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 			return err
 		}
 
+		//get pod again
+		if pod.Status.Phase == api.PodRunning {
+			time.Sleep(time.Second * 1)
+			pod, err = podClient.Pods("default").Get(podName, metav1.GetOptions{})
+			if err != nil {
+				glog.Infof("get pod failed when wait for pod, error:%v", err)
+				return err
+			}
+		}
+
 		//show log when pod is exited
 		if pod.Status.Phase == api.PodSucceeded || pod.Status.Phase == api.PodFailed {
+			glog.V(4).Infof("get pod log")
 			opts := &AttachOptions{
 				StreamOptions: StreamOptions{
 					In:    cmdIn,
@@ -339,6 +357,7 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 			return logOpts(f, pod, opts)
 		}
 
+		glog.V(4).Infof("run exec")
 		options := &ExecOptions{
 			StreamOptions: StreamOptions{
 				In:        cmdIn,

@@ -231,9 +231,9 @@ func (o *DeleteOptions) Validate(cmd *cobra.Command) error {
 func (o *DeleteOptions) RunDelete() error {
 	shortOutput := o.Output == "name"
 	// By default use a reaper to delete all related resources.
-	//if o.Cascade {
-	//	return ReapResult(o.Result, o.f, o.Out, true, o.IgnoreNotFound, o.Timeout, o.GracePeriod, o.WaitForDeletion, shortOutput, o.Mapper, false)
-	//}
+	if o.Cascade {
+		return ReapResult(o.Result, o.f, o.Out, true, o.IgnoreNotFound, o.Timeout, o.GracePeriod, o.WaitForDeletion, shortOutput, o.Mapper, false)
+	}
 	return DeleteResult(o.Result, o.f, o.Out, o.IgnoreNotFound, o.GracePeriod, shortOutput, o.Mapper)
 }
 
