@@ -94,12 +94,14 @@ func NewCmdRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer) *co
 	//cmdutil.AddApplyAnnotationFlags(cmd)
 	//cmdutil.AddRecordFlag(cmd)
 	//cmdutil.AddInclude3rdPartyFlags(cmd)
-	//cmdutil.AddPodRunningTimeoutFlag(cmd, defaultPodAttachTimeout)
+
 	return cmd
 }
 
 func AddRunFlags(cmd *cobra.Command) {
 	//cmdutil.AddDryRunFlag(cmd)
+	cmdutil.AddPodRunningTimeoutFlag(cmd, defaultPodAttachTimeout)
+
 	cmd.Flags().String("generator", "", i18n.T("The name of the API generator to use, see http://kubernetes.io/docs/user-guide/pi-conventions/#generators for a list."))
 	cmd.Flags().String("image", "", i18n.T("The image for the container to run."))
 	cmd.MarkFlagRequired("image")
@@ -137,6 +139,11 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 		return cmdutil.UsageErrorf(cmd, "NAME is required for run")
 	}
 
+	timeout, err := cmdutil.GetPodRunningTimeoutFlag(cmd)
+	if err != nil {
+		return cmdutil.UsageErrorf(cmd, "%v", err)
+	}
+
 	// validate image name
 	imageName := cmdutil.GetFlagString(cmd, "image")
 	if imageName == "" {
@@ -163,6 +170,9 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	}
 
 	remove := cmdutil.GetFlagBool(cmd, "rm")
+	if !interactive && remove {
+		return cmdutil.UsageErrorf(cmd, "--rm should only be used for -i(--stdin=true)")
+	}
 
 	if err := verifyImagePullPolicy(cmd); err != nil {
 		return err
@@ -271,29 +281,64 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	}
 	runObjectMap[generatorName] = runObject
 
-	if len(command) > 0 {
-		pod, err := podClient.Pods("default").Get(podName, metav1.GetOptions{})
+	if remove {
+		defer deletePod(podName, podClient)
+	}
+
+	//wait for pod
+	if len(command) > 0 && interactive {
+		waitTimeout := time.After(timeout)
+		finish := make(chan bool)
+		count := 1
+		var pod *api.Pod
+		go func() {
+			for {
+				select {
+				case <-waitTimeout:
+					err = fmt.Errorf("wait for pod start timeout(%v seconds), please set --pod-running-timeout to the appropriate value", timeout.Seconds())
+					finish <- true
+					return
+				default:
+					pod, err = podClient.Pods("default").Get(podName, metav1.GetOptions{})
+					if err != nil {
+						glog.Infof("get pod failed when wait for pod, error:%v", err)
+						finish <- true
+						return
+					}
+					if pod.Status.Phase == api.PodPending {
+						glog.V(4).Infof("%v waiting for pod start", count)
+					} else {
+						glog.V(4).Infof("pod started:%v", string(pod.Status.Phase))
+						finish <- true
+						return
+					}
+					count++
+				}
+				time.Sleep(time.Second * 1)
+			}
+		}()
+		<-finish
+
 		if err != nil {
+			glog.V(4).Infof("wait for pod start failed, error:%v", err)
 			return err
 		}
 
-		if remove {
-			defer deletePod(pod.Name, podClient)
+		//show log when pod is exited
+		if pod.Status.Phase == api.PodSucceeded || pod.Status.Phase == api.PodFailed {
+			opts := &AttachOptions{
+				StreamOptions: StreamOptions{
+					In:    cmdIn,
+					Out:   cmdOut,
+					Err:   cmdErr,
+					Stdin: interactive,
+					TTY:   tty,
+				},
+				GetPodTimeout: timeout,
+			}
+			return logOpts(f, pod, opts)
 		}
 
-		if pod.Status.Phase == api.PodSucceeded || pod.Status.Phase == api.PodFailed {
-			return fmt.Errorf("cannot exec into a container in a completed pod; current phase is %s", pod.Status.Phase)
-		}
-		for i := 0; i <= 20; i++ {
-			if pod.Status.Phase == api.PodPending {
-				glog.V(4).Infof("%v/20 waiting for pod start", i)
-				time.Sleep(time.Duration(1 * time.Second))
-				pod, err = podClient.Pods("default").Get(podName, metav1.GetOptions{})
-			} else {
-				glog.V(4).Infof("pod started:%v", string(pod.Status.Phase))
-				break
-			}
-		}
 		options := &ExecOptions{
 			StreamOptions: StreamOptions{
 				In:        cmdIn,
