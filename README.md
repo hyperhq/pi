@@ -153,7 +153,7 @@ pi controls the resources on Pi platform.
 Find more information at https://docs.hyper.sh/pi.
 
 Basic Commands (Beginner):
-  create      Create a resource(support pod, j`ob, service, secret, volume, fip)
+  create      Create a resource(support pod, job, service, secret, volume, fip)
 
 Basic Commands (Intermediate):
   get         Display one or many resources
@@ -185,9 +185,9 @@ $ pi help create
 
 // For example
 $ pi create -h
-Create a resource(pod, j`ob, service, secret, volume, fip).
+Create a resource(pod, job, service, secret, volume, fip).
 
-JSON and YAML formats are accepted(pod, j`ob, service, secret).
+JSON and YAML formats are accepted(pod, job, service, secret).
 
 Examples:
   # Create a pod using the data in yaml.
@@ -204,6 +204,8 @@ Examples:
 
 Available Commands:
   fip         Create one or more fip(s) using specified subcommand
+  job         Run a job with particular image.
+  pod         Create and run a pod with particular image.
   secret      Create a secret using specified subcommand
   service     Create a service using specified subcommand
   volume      Create a volume using specified subcommand
@@ -267,12 +269,13 @@ Supported resources:
 - volume
 - fip
 - pod (support create from file)
+- job (support create from file)
 - servie (support create from file)
 - secret (support create from file)
 
 ### create from file
 
-> Only pod, j`ob, service, secret support create from yaml/json
+> Only pod, job, service, secret support create from yaml/json
 
 create resource from yaml
 
@@ -365,7 +368,7 @@ FIP             NAME  CREATEDAT                  SERVICES
 ### get info
 
 get subcommand support `-o`(`--output`)
-- for pod, j`ob, service, secret, output format could be one of: json|yaml|wide|name
+- for pod, job, service, secret, output format could be one of: json|yaml|wide|name
 - for volume, output format could be one of: json|name
 - for fip, output format could be one of: json|ip
 
@@ -479,7 +482,7 @@ $ pi delete service --all
 service "my-cs" deleted
 service "my-lbs" deleted
 
-//delete multiple type resources (only support pod, j`ob, service and secret)
+//delete multiple type resources (only support pod, job, service and secret)
 $ pi delete pods/nginx-from-json secrets/my-secret
 pod "nginx-from-json" deleted
 secret "my-secret" deleted
