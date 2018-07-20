@@ -556,6 +556,20 @@ nginx-data  gcp-us-central1-a  1         2018-04-27T15:24:31+00:00  nginx-with-v
 
 ## pod operation
 
+### pod create
+
+> create pod via command line
+
+```
+$ pi create pod busybox --image=busybox
+
+//specify pod size
+$ pi create pod busybox --image=busybox --size=s1
+
+//specify zone to run pod
+$ pi create pod busybox --image=busybox --zone=gcp-us-central1-b
+```
+
 ### pod exec
 
 > exec command in running pod

@@ -343,6 +343,7 @@ func (JobV1) ParamNames() []GeneratorParam {
 		{"restart", false},
 		{"serviceaccount", false},
 		{"size", false},
+		{"zone", false},
 		{"completions", false},
 		{"parallelism", false},
 		{"backoff-limit", false},
@@ -442,6 +443,14 @@ func (JobV1) Generate(genericParams map[string]interface{}) (runtime.Object, err
 		}
 		job.ObjectMeta.Annotations["sh_hyper_instancetype"] = params["size"]
 	}
+
+	if zone, ok := params["zone"]; ok && zone != "" {
+		if job.Spec.Template.Spec.NodeSelector == nil {
+			job.Spec.Template.Spec.NodeSelector = map[string]string{}
+		}
+		job.Spec.Template.Spec.NodeSelector["zone"] = params["zone"]
+	}
+
 	if params["completions"] != "" {
 		if i, err := strconv.ParseInt(params["completions"], 10, 32); err != nil {
 			return nil, fmt.Errorf("--completions should be a integer")
@@ -954,6 +963,7 @@ func (BasicPod) ParamNames() []GeneratorParam {
 		{"image-pull-secrets", false},
 		{"active-deadline-seconds", false},
 		{"size", false},
+		{"zone", false},
 		{"volume", false},
 	}
 }
@@ -1023,9 +1033,6 @@ func (BasicPod) Generate(genericParams map[string]interface{}) (runtime.Object, 
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: labels,
-			Annotations: map[string]string{
-				"sh_hyper_instancetype": params["size"],
-			},
 		},
 		Spec: v1.PodSpec{
 			ServiceAccountName: params["serviceaccount"],
@@ -1044,6 +1051,21 @@ func (BasicPod) Generate(genericParams map[string]interface{}) (runtime.Object, 
 			RestartPolicy: restartPolicy,
 		},
 	}
+
+	if _, ok := params["size"]; ok {
+		if pod.Annotations == nil {
+			pod.Annotations = map[string]string{}
+		}
+		pod.Annotations["sh_hyper_instancetype"] = params["size"]
+	}
+
+	if zone, ok := params["zone"]; ok && zone != "" {
+		if pod.Spec.NodeSelector == nil {
+			pod.Spec.NodeSelector = map[string]string{}
+		}
+		pod.Spec.NodeSelector["zone"] = params["zone"]
+	}
+
 	imagePullPolicy := v1.PullPolicy(params["image-pull-policy"])
 	if err = updatePodContainers(params, args, envs, imagePullPolicy, &pod.Spec); err != nil {
 		return nil, err
