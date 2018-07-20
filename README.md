@@ -139,6 +139,9 @@ $ pi --user=user2 --region=gcp-us-central1 info
 
 //use specified user and server
 $ pi --server=https://gcp-us-central1.hyper.sh:443 --user=user3 info
+
+//change default zone
+$ pi config set-default-zone user3 --region=gcp-us-central1 --zone=gcp-us-central1-b
 ```
 
 
