@@ -129,7 +129,8 @@ func AddRunFlags(cmd *cobra.Command) {
 	//cmd.Flags().String("schedule", "", i18n.T("A schedule in the Cron format the job should be run with."))
 	cmd.Flags().StringP("image-pull-secrets", "", "", i18n.T("The secret for the private docker registry, comma separated."))
 	cmd.Flags().StringP("active-deadline-seconds", "", "", i18n.T("Optional duration in seconds the pod may be active on the node relative to StartTime before the system will actively try to mark it failed and kill associated containers. Value must be a positive integer."))
-	cmd.Flags().StringP("size", "", "s4", i18n.T("The size for the pod (e.g. s1, s2, s3, s4, m1, m2, m3, l1, l2, l3, l4, l5, l6)"))
+	cmd.Flags().StringP("size", "", "s4", i18n.T("The size for the pod (e.g. s1, s2, s3, s4, m1, m2, m3, l1, l2, l3, l4, l5, l6), you can not use --limits together with --size"))
+	cmd.Flags().StringP("zone", "", "", i18n.T("zone to run pod, default zone will be used if not specified, use 'pi info' to view the zone info"))
 	cmd.Flags().StringArray("volume", []string{}, "Pod volumes to mount into the container's filesystem. format '<volname>:<path>'")
 }
 
@@ -271,6 +272,7 @@ func RunRun(f cmdutil.Factory, cmdIn io.Reader, cmdOut, cmdErr io.Writer, cmd *c
 	if params["size"] != "" && params["limits"] != "" {
 		return cmdutil.UsageErrorf(cmd, "--size and --limits can not be used together")
 	}
+	params["zone"] = cmdutil.GetFlagString(cmd, "zone")
 
 	params["env"] = cmdutil.GetFlagStringArray(cmd, "env")
 	params["image-pull-secrets"] = cmdutil.GetFlagString(cmd, "image-pull-secrets")

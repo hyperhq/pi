@@ -7,4 +7,4 @@ spec:
   - name: busybox
     image: busybox
   nodeSelector:
-    zone: gcp-us-central1-a
+    zone: gcp-us-central1-b

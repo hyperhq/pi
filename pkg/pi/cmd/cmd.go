@@ -178,10 +178,10 @@ __custom_func() {
 
 var (
 	bash_completion_flags = map[string]string{
-	//"namespace": "__pi_get_resource_namespace",
-	//"context":   "__pi_config_get_contexts",
-	//"cluster":   "__pi_config_get_clusters",
-	//"user":      "__pi_config_get_users",
+		//"namespace": "__pi_get_resource_namespace",
+		//"context":   "__pi_config_get_contexts",
+		//"cluster":   "__pi_config_get_clusters",
+		//"user":      "__pi_config_get_users",
 	}
 )
 
@@ -257,7 +257,7 @@ func NewPiCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cobra.Co
 
 	cmds.AddCommand(NewCmdOptions(out))
 	cmds.AddCommand(NewCmdInfo(f, out, err))
-	cmds.AddCommand(cmdconfig.NewCmdConfig(clientcmd.NewDefaultPathOptions(), out, err))
+	cmds.AddCommand(cmdconfig.NewCmdConfig(clientcmd.NewDefaultPathOptions(), out, err, f))
 	return cmds
 }
 
